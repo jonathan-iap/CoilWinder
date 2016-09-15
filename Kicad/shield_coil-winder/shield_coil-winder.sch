@@ -37,7 +37,7 @@ encoding utf-8
 Sheet 1 1
 Title "Shield Coil Winder - Arduino UNO "
 Date "2016-08-11"
-Rev "V 1.0.0"
+Rev "V 0.1"
 Comp "Autor : Jonathan IAPICCO"
 Comment1 ""
 Comment2 ""
