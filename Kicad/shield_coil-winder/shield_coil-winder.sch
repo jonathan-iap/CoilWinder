@@ -61,7 +61,7 @@ Text Label 10550 2900 0    60   ~ 0
 Text Label 10550 2700 0    60   ~ 0
 IT_3
 Text Label 10550 2100 0    60   ~ 0
-EN-B_8
+EN-A_8
 Text Label 10550 1800 0    60   ~ 0
 11(**/MOSI)
 Text Label 10550 1700 0    60   ~ 0
@@ -374,11 +374,11 @@ F 3 "" H 9550 4350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 5350 6000 0    60   ~ 0
-STEP-A_6
+STEP-B_6
 Text Label 5350 6100 0    60   ~ 0
-DIR-A_7
+DIR-B_7
 Text Label 10550 1900 0    60   ~ 0
-DIR-B_10
+DIR-A_10
 $Comp
 L CONN_01X02 P13
 U 1 1 57B9BECF
@@ -969,13 +969,13 @@ Wire Wire Line
 Wire Wire Line
 	9400 1800 8900 1800
 Text Label 5775 5200 0    60   ~ 0
-EN-A_5
+EN-B_5
 Text Label 10550 1200 0    60   ~ 0
 A5(SCL)
 Text Label 10550 1300 0    60   ~ 0
 A4(SDA)
 Text Label 5775 3950 0    60   ~ 0
-EN-B_8
+EN-A_8
 Wire Wire Line
 	7600 2500 8000 2500
 Text Label 8000 2500 2    60   ~ 0
@@ -989,21 +989,21 @@ A4
 Text Label 8900 3000 0    60   ~ 0
 A5
 Text Label 5350 4750 0    60   ~ 0
-STEP-B_9
+STEP-A_9
 Text Label 10550 2000 0    60   ~ 0
-STEP-B_9
+STEP-A_9
 Text Label 5350 4850 0    60   ~ 0
-DIR-B_10
+DIR-A_10
 Text Label 10550 2400 0    60   ~ 0
-STEP-A_6
+STEP-B_6
 Text Label 10550 2300 0    60   ~ 0
-DIR-A_7
+DIR-B_7
 NoConn ~ 10550 1700
 NoConn ~ 10550 1800
 Text Label 10550 2600 0    60   ~ 0
 SW-ENC_4
 Text Label 10550 2500 0    60   ~ 0
-EN-A_5
+EN-B_5
 $Comp
 L VCC #PWR027
 U 1 1 57F6CFB9
