@@ -1,43 +1,45 @@
 #ifndef Coil_H
 #define Coil_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include "Motor.h"
+#include "Configuration.h"
 
-
-class Coil : public Motor
+class Coil
 {
-  public:
+public:
+
+  Motor motorWinding, motorCarriage;
+
   Coil();
-  //Coil(Motor & _mA, Motor & _mB);
-  //Coil(Motor _mA, Motor _mB);
   ~Coil();
-  void init(float _coilLength, float _wireSize, int _coilTurns);
-  bool isFinished();
-  
-  unsigned long coilTurnsToSteps();
-  float pitchToSteps();
-  float reduction();
-  float lengthToSteps();
-  void go();
 
+  void begin();
+  void setWinding(float coilLength, float wireSize, int coilTurns);
+  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
+  float getValue();
+  void run();
 
-  private:
-  Motor & mA;
-  Motor & mB;
+private:
 
-  
-  float coilLength;;
-  float wireSize;
-  int coilTurns;
-  float pitchSteps;
-  float reductionRatio;
-  float stepsPerLayer;
+  // Coil length in mm.
+  float _coilLength;
+  // wire size in mm.
+  float _wireSize;
+  //coil turn in turn.
+  int _coilTurns;
 
-  unsigned long stepsEnd;
-  unsigned long stepsCounter;
-  unsigned long stepsLayerCounter;
+  unsigned long _accDelay = 2000;
+  unsigned long _maxSpeed = 600;
+  unsigned long _minSpeed = 1800;
 
+  // reduction ratio for motor.
+  float _ratio;
+  // steps for one layer.
+  unsigned long _stepsPerLayer;
+
+  // counter.
+  unsigned long _totalStepsCounter;
 };
 
 #endif

@@ -1,36 +1,28 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 class Motor
 {
-  public:;
+public:
+
   Motor();
-  Motor(int _dirPin, int _stepPin, int _enablePin, int _stepPerTr);
+  Motor(int dirPin, int stepPin, int enablePin, int stepPerTr);
+
   ~Motor();
-  void init();
-  bool timer(unsigned long _currentTime);
-  void oneStep();
-  bool acceleration(bool _acc, float _ratio);
-  float steppingTravel();
 
-  // fonctions
+  void begin();
+  void enable();
+  void disable();
+  void oneStep(int direction);
 
+private:
 
-  private:
-  int dirPin;
-  int stepPin;
-  int enablePin;
-  int stepsPerTr;
-
-  unsigned long delayMotor;// = 1800;
-  unsigned long previousMicrosMotor;// = 0
-  unsigned long previousMicrosAcc; // 0;
-  unsigned long accDelay;// = 2000;
-  unsigned long maxSpeed;// = 600;
-  unsigned long minSpeed;// = 1800;
-  bool acc;// = true;
+  int _dirPin;
+  int _stepPin;
+  int _enablePin;
+  int _stepsPerTr;
 
 };
 
