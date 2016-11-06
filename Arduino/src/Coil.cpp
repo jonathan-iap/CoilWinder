@@ -1,6 +1,4 @@
 #include "Coil.h"
-#include "Motor.h"
-#include "Configuration.h"
 
 /*_____ PRIVATE FONCTIONS _____ */
 
@@ -165,6 +163,8 @@ float Coil::getValue()
 
 void Coil::run()
 {
+  //lcd.print("test");
+
   unsigned long delayMotor_A = _minSpeed;
   unsigned long delayMotor_B = _minSpeed;
   unsigned long previousMicrosMotor_A = 0;
@@ -198,6 +198,7 @@ void Coil::run()
 	    {
 	      motorWinding.oneStep(CLOCK);
 	      _totalStepsCounter++;
+	      //lcd.print("");
 	    }
 	  if(timer(currentMicros, &previousMicrosMotor_B, delayMotor_B))
 	    {

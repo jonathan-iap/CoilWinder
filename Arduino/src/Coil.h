@@ -9,8 +9,6 @@ class Coil
 {
 public:
 
-  Motor motorWinding, motorCarriage;
-
   Coil();
   ~Coil();
 
@@ -18,9 +16,12 @@ public:
   void setWinding(float coilLength, float wireSize, int coilTurns);
   void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
   float getValue();
+
   void run();
 
 private:
+
+  Motor motorWinding, motorCarriage;
 
   // Coil length in mm.
   float _coilLength;
