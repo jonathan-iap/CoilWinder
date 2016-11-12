@@ -5,6 +5,7 @@
 #include "Motor.h"
 #include "Configuration.h"
 
+
 class Coil
 {
 public:
@@ -13,11 +14,12 @@ public:
   ~Coil();
 
   void begin();
-  void setWinding(float coilLength, float wireSize, int coilTurns);
+  void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
   void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
   float getValue();
 
   void run();
+  void oneLayer(float _coilLength, int _dir);
 
 private:
 
@@ -28,7 +30,7 @@ private:
   // wire size in mm.
   float _wireSize;
   //coil turn in turn.
-  int _coilTurns;
+  unsigned long _coilTurns;
 
   unsigned long _accDelay = 2000;
   unsigned long _maxSpeed = 600;
@@ -38,6 +40,7 @@ private:
   float _ratio;
   // steps for one layer.
   unsigned long _stepsPerLayer;
+  unsigned long _stepsTravel;
 
   // counter.
   unsigned long _totalStepsCounter;

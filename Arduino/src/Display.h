@@ -17,7 +17,7 @@ public:
   Display();
   ~Display();
 
-  const void home();
+  const void begin();
 
 private:
 

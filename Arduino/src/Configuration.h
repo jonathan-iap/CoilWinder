@@ -12,19 +12,28 @@
 #define C_CLOCK		LOW
 #define ENABLE		LOW
 #define DISABLE		HIGH
+enum
+{
+  FULL_STEPS		= 1,
+  HALF_STEPS		= 2,
+  QUARTER_STEPS		= 4,
+  EIGHTH_STEPS		= 8,
+  SIXTEENTH_STEPS	= 16
+};
 //#define DELAY_DRIVER  	20 // Active if is need by your stepper driver.
+
 
 /* Motor for winding */
 #define M1_DIR	10
 #define M1_STEP	9
 #define M1_EN	8
-#define M1_STEPS_PER_TR 200
+#define M1_STEPS_PER_TR (200 * EIGHTH_STEPS)
 
 /* Mode for carriage */
 #define M2_DIR	7
 #define M2_STEP	6
 #define M2_EN	5
-#define M2_STEPS_PER_TR 200
+#define M2_STEPS_PER_TR (200 * EIGHTH_STEPS)
 
 /* Acceleration step*/
 #define ACC	1

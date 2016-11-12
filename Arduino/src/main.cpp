@@ -10,13 +10,10 @@
 #include "Motor.h"
 #include "Coil.h"
 #include "Configuration.h"
-#include "Wire.h"
-#include "LiquidCrystal_I2C.h"
 #include "Display.h"
 
 /*-----( Declare Constants )-----*/
 /*-----( Declare objects )-----*/
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 Display display;
 Coil CoilWinding;
 
@@ -25,13 +22,12 @@ Coil CoilWinding;
 /* SETUP ---------------------------------------------------------------------*/
 void setup()
 {
-  lcd.begin(16,2);
+
   Serial.begin(115200);
   CoilWinding.begin();
+  display.begin();
 
   Serial.print("\n\nbegin\n\n");
-
-  display.home();
 
   delay(1000);
   pinMode(13, OUTPUT);
@@ -42,9 +38,16 @@ void setup()
 void loop()
 {
 
-  CoilWinding.setWinding(20,0.8,100);
+  CoilWinding.setWinding(10.0,0.06,1000);
   CoilWinding.run();
   delay(2000);
+
+  //  CoilWinding.oneLayer(10.0, CLOCK);
+  //  delay(2000);
+  //  CoilWinding.oneLayer(10.0, C_CLOCK);
+  //  delay(2000);
+
+
   //CoilWinding.run();
 }
 /* --(end main loop )-- */
