@@ -4,7 +4,7 @@
 Motor::Motor() : _dirPin(0),_stepPin(0),_enablePin(0),_stepsPerTr(0)
 {}
 
-Motor::Motor(int dirPin, int stepPin, int enablePin, int stepPerTr) :
+Motor::Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint8_t stepPerTr) :
       _dirPin (dirPin),
       _stepPin (stepPin),
       _enablePin (enablePin),
@@ -44,7 +44,7 @@ void Motor::disable()
  * _stepPin, pin of motor that you want drive.
  * return  : nothing.
  ******************************************************************************/
-void Motor::oneStep(int direction)
+void Motor::oneStep(bool direction)
 {
   if(digitalRead(_enablePin) != ENABLE)
     {

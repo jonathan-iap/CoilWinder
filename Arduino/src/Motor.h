@@ -8,21 +8,21 @@ class Motor
 public:
 
   Motor();
-  Motor(int dirPin, int stepPin, int enablePin, int stepPerTr);
+  Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint8_t stepPerTr);
 
   ~Motor();
 
   void begin();
   void enable();
   void disable();
-  void oneStep(int direction);
+  void oneStep(bool direction);
 
 private:
 
-  int _dirPin;
-  int _stepPin;
-  int _enablePin;
-  int _stepsPerTr;
+  uint8_t _dirPin;
+  uint8_t _stepPin;
+  uint8_t _enablePin;
+  uint8_t _stepsPerTr;
 
 };
 

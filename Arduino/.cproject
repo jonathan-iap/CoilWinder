@@ -26,11 +26,17 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Bridge/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/EEPROM/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Esplora/src"/>
@@ -47,6 +53,7 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Robot_Motor/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SD/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI1/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Scheduler/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Servo/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SoftwareSerial/src"/>
@@ -57,13 +64,14 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/USBHost/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/WiFi/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire1/src"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.922107295" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
 									<listOptionValue builtIn="false" value="PLATFORMIO=030100"/>
 									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
 									<listOptionValue builtIn="false" value="ARDUINO_AVR_UNO"/>
-									<listOptionValue builtIn="false" value="ARDUINO=10608"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10612"/>
 									<listOptionValue builtIn="false" value="__AVR_ATmega328P__"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.149990277" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -73,11 +81,17 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Bridge/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/EEPROM/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Esplora/src"/>
@@ -94,6 +108,7 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Robot_Motor/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SD/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI1/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Scheduler/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Servo/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SoftwareSerial/src"/>
@@ -104,13 +119,14 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/USBHost/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/WiFi/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire1/src"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1198905600" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
 									<listOptionValue builtIn="false" value="PLATFORMIO=030100"/>
 									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
 									<listOptionValue builtIn="false" value="ARDUINO_AVR_UNO"/>
-									<listOptionValue builtIn="false" value="ARDUINO=10608"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10612"/>
 									<listOptionValue builtIn="false" value="__AVR_ATmega328P__"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.762536863" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
@@ -120,11 +136,17 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/encoder"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Bridge/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/EEPROM/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Esplora/src"/>
@@ -141,6 +163,7 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Robot_Motor/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SD/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SPI1/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Scheduler/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Servo/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/SoftwareSerial/src"/>
@@ -151,13 +174,14 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/USBHost/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/WiFi/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire/src"/>
+									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/Wire1/src"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.884639970" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="F_CPU=16000000L"/>
 									<listOptionValue builtIn="false" value="PLATFORMIO=030100"/>
 									<listOptionValue builtIn="false" value="ARDUINO_ARCH_AVR"/>
 									<listOptionValue builtIn="false" value="ARDUINO_AVR_UNO"/>
-									<listOptionValue builtIn="false" value="ARDUINO=10608"/>
+									<listOptionValue builtIn="false" value="ARDUINO=10612"/>
 									<listOptionValue builtIn="false" value="__AVR_ATmega328P__"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.549319812" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>

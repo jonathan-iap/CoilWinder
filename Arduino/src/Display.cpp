@@ -4,28 +4,26 @@
  *  Created on: 5 nov. 2016
  *      Author: jo
  */
-
+#include "Configuration.h"
 #include "Display.h"
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
+extern LiquidCrystal_I2C lcd;
 
-/*_____ CONSTRUCTOR _____ */
-
-Display::Display()
-{}
-
-Display::~Display()
-{}
-
+Display::Display(){};
 
 const void Display::begin()
 {
-  lcd.begin(16,2);
+  lcd.begin(LCD_CHARS,LCD_LINES);
 
-  // ------- Quick 3 blinks of back-light  -------------
-  for(int i = 0; i< 3; i++)
+  lcd.createChar(IconLeft, left);
+  lcd.createChar(IconRight, right);
+  lcd.createChar(IconBack, back);
+  lcd.createChar(IconEnter, enter);
+
+  // Quick 3 blinks of back-light
+  for(uint8_t i = 0; i < 3; i++)
     {
       lcd.backlight();
       delay(100);
@@ -33,7 +31,4 @@ const void Display::begin()
       delay(100);
     }
   lcd.backlight();
-
-  lcd.setCursor(5,0);
-  lcd.print("Homing");
 }

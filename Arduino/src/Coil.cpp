@@ -8,10 +8,7 @@
  * _coilTurns, number of turns that must be winding.
  * return  : Return steps.
  ******************************************************************************/
-static unsigned long totalSteps(unsigned long coilTurns)
-{
-  return coilTurns * M1_STEPS_PER_TR;
-}
+#define totalSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
 
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
@@ -25,14 +22,11 @@ static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
 {
   unsigned long result;
 
-  if (ratio >= 1)
-    {
-      return result = ratio * delayMotor;
-    }
-  else
-    {
-      return result = delayMotor / ratio;
-    }
+  ratio >= 1 ? result = ratio * delayMotor : result = delayMotor / ratio;
+
+  return result;
+  //  if (ratio >= 1){ return result = ratio * delayMotor; }
+  //  else{ return result = delayMotor / ratio; }
 }
 
 /******************************************************************************
@@ -89,10 +83,9 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
 	}
     }
   // Deceleration.
-  // A supprimer
   else
     {
-      if(*delayMotor_x < limitSpeed )//&& *delayMotor_y < limitSpeed)
+      if(*delayMotor_x < limitSpeed )
 	{
 	  *delayMotor_x += ACC;
 	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
@@ -111,10 +104,6 @@ Coil::Coil() : motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
     _coilLength(0),
     _wireSize(0),
     _coilTurns(0),
-
-//    _accDelay (400),
-//    _maxSpeed (600),
-//    _minSpeed (1400),
 
     _accDelay (400),
     _maxSpeed (30),
@@ -158,14 +147,16 @@ void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
   float Vf = (1 / (float)_minSpeed);
   // 2. Duration of acceleration, in micros seconds.
   unsigned long T = (_minSpeed - _maxSpeed) * _accDelay;
-  // 3. Determine turns during acceleration.
+  // 3. Turns during acceleration.
   float stepsAcc = (Vf / 2) * T;
   // 4. Determine steps travel before start deceleration.
   _stepsTravel = _stepsPerLayer - stepsAcc;
 
+#ifdef DEBUG
   Serial.print("Total steps : ");
   Serial.println(totalSteps(_coilTurns));
   delay(1000);
+#endif
 }
 
 void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
@@ -189,7 +180,7 @@ void Coil::run()
   unsigned long previousMicrosAcc = 0;
 
 
-  int direction = CLOCK;
+  bool direction = CLOCK;
 
   unsigned long layerStepsCounter = 0;
   _totalStepsCounter = 0;
@@ -229,10 +220,13 @@ void Coil::run()
 	}
     }
 
+#ifdef DEBUG
   Serial.print("step Tr : ");
   Serial.println(_totalStepsCounter);
+#endif
 }
 
+// Not work, just travel carriage.
 void Coil::oneLayer(float _coilLength, int _dir)
 {
   unsigned long delayMotor_B = 600;
