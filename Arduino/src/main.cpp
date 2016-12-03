@@ -7,6 +7,7 @@
 
 // libraries ------------------------------------------------------------------
 #include "Arduino.h"
+#include "EEPROMAnything.h"
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 #include "Coil.h"
@@ -15,6 +16,7 @@
 #include "ClickEncoder.h"
 #include "TimerOne.h"
 #include "Menu.h"
+#include "Navigation.h"
 
 // Declare objects ------------------------------------------------------------
 
@@ -22,6 +24,7 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 Display display;
 Coil CoilWinding;
 Menu::Engine *engine;
+Navigation nav;
 ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
 void timerIsr(void)
 {
@@ -36,7 +39,8 @@ namespace State
     None      	= 0,
     Default   	= 1,
     Move	= 2,
-    Edit	= 3
+    Edit	= 3,
+    Back	= 4
   } SystemMode;
 };
 
@@ -65,7 +69,7 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
     {
       lcd.write(20); // space
     }
-
+  // Print label item
   lcd.print(engine->getLabel(mi));
 
   // mark items that have children
@@ -74,20 +78,14 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
       lcd.write(20);
       lcd.write((uint8_t)IconRight);
     }
-
-  lcd.print("      "); // clear characters after items.
+  // clear characters after items.
+  lcd.print("      ");
 }
 
 // CallBacks -------------------------------------------------------------------
-bool menuExit(const Menu::Action_t a)
-{
-  Encoder.setAccelerationEnabled(lastEncoderAccelerationState);
-  systemState = State::Default;
-  return true;
-}
-
 bool menuDummy(const Menu::Action_t a)
 {
+  // Do nothing;
   return true;
 }
 
@@ -95,7 +93,7 @@ bool menuBack(const Menu::Action_t a)
 {
   if (a == Menu::actionDisplay)
     {
-      engine->navigate(engine->getParent(engine->getParent()));
+      systemState = State::Back;
     }
   return true;
 }
@@ -114,22 +112,17 @@ bool menuEdit(const Menu::Action_t a)
 
 // Name, Label, Next, Previous, Parent, Child, Callback
 // Menu 0
-MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuExit);
+MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
 // Menu 1 -> 3
 MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize0, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, Menu::NullItem, menuDummy);
 MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, Menu::NullItem, menuDummy);
 // Sub-menu 1.1 -> 1.6
-MenuItem(miWireSize0, "1.Wire size", miCoilLength0, Menu::NullItem, miWinding, miSetWireSize0, menuEdit);
-MenuItem(miCoilLength0, "2.Coil length", miTurns0, miWireSize0, miWinding, miSetCoilLength0, menuEdit);
-MenuItem(miTurns0, "3.Turns", miStart0, miCoilLength0, miWinding, miSetTurns0, menuEdit);
+MenuItem(miWireSize0, "1.Wire size", miCoilLength0, Menu::NullItem, miWinding, Menu::NullItem, menuEdit);
+MenuItem(miCoilLength0, "2.Coil length", miTurns0, miWireSize0, miWinding, Menu::NullItem, menuEdit);
+MenuItem(miTurns0, "3.Turns", miStart0, miCoilLength0, miWinding, Menu::NullItem, menuEdit);
 MenuItem(miStart0, "4.Start", miBack0, miTurns0, miWinding, Menu::NullItem, menuDummy);
 MenuItem(miBack0, "Back \1", Menu::NullItem, miStart0, miWinding, Menu::NullItem, menuBack);
-// Sub-Menu 1.1.1 -> 1.1.4
-MenuItem(miSetWireSize0, "Wire size in mm", Menu::NullItem, Menu::NullItem, miWireSize0, Menu::NullItem, menuDummy);
-MenuItem(miSetCoilLength0, "Length of coil mm", Menu::NullItem, Menu::NullItem, miCoilLength0, Menu::NullItem, menuDummy);
-MenuItem(miSetTurns0, "Number of turns", Menu::NullItem, Menu::NullItem, miTurns0, Menu::NullItem, menuDummy);
-
 
 // ----------------------------------------------------------------------------
 
@@ -214,7 +207,6 @@ void loop()
 	  {
 	    // enter settings menu
 	    // disable acceleration, reset in menuExit()
-	    lastEncoderAccelerationState = Encoder.getAccelerationEnabled();
 	    Encoder.setAccelerationEnabled(false);
 
 	    engine->navigate(&miWinding);
@@ -253,29 +245,25 @@ void loop()
   // Display section.
   switch(systemState)
   {
+    // First use print software version
     case State::Default :
       {
-	if (systemState != previousSystemState)
-	  {
-	    previousSystemState = systemState;
-	    encLastAbsolute = -999;
-
-	    lcd.setCursor(0, 0);
-	    lcd.print("Coil Winder v1.0");
-	    lcd.setCursor(0,1);
-	    lcd.print("click to start");
-	  }
+	display.version();
 	break;
       }
 
     case State::Edit :
       {
-	if (encAbsolute != encLastAbsolute)
-	  {
-	    lcd.setCursor(5, 1);
-	    lcd.print(tmpValue);
-	  }
+	nav.setValue();
+	systemState = State::Move;
+	updateMenu = true;
 	break;
+      }
+    case State::Back :
+      {
+	systemState = State::Move;
+	engine->navigate(engine->getParent());
+	updateMenu = true;
       }
   }
 

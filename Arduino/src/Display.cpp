@@ -32,3 +32,11 @@ const void Display::begin()
     }
   lcd.backlight();
 }
+
+const void Display::version()
+{
+  lcd.setCursor(0, 0);
+  lcd.print("Coil Winder v1.0");
+  lcd.setCursor(0,1);
+  lcd.print("click to start");
+}

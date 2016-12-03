@@ -67,7 +67,7 @@ public :
 public:
   Display();
   const void begin();
-
+  const void version();
 
 private:
 
