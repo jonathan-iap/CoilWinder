@@ -14,6 +14,7 @@
 #define IconRight	2
 #define IconBack	3
 #define IconEnter	4
+#define IconValid	5
 
 class Display
 {
@@ -62,6 +63,17 @@ public :
       0b00100,
       0b00000
   };
+
+  uint8_t valid[8] = {
+       0b00000,
+       0b00000,
+       0b00001,
+       0b00010,
+       0b10100,
+       0b01000,
+       0b00000,
+       0b00000
+   };
 
   // Public functions -----------------------------------------------------------
 public:

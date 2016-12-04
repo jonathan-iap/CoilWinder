@@ -55,7 +55,7 @@ enum
 #define LEAD_SCREW_PITCH 0.8
 
 // Serial Debug option ---------------------------------------------------------
-//#define DEBUG // Uncomment to active serial debug.
+#define DEBUG // Uncomment to active serial debug.
 #define BAUDRATE 9600
 
 #endif /* CONFIGURATIONS_H */

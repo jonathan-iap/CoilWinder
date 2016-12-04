@@ -21,6 +21,7 @@ const void Display::begin()
   lcd.createChar(IconRight, right);
   lcd.createChar(IconBack, back);
   lcd.createChar(IconEnter, enter);
+  lcd.createChar(IconValid, valid);
 
   // Quick 3 blinks of back-light
   for(uint8_t i = 0; i < 3; i++)

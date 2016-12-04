@@ -6,6 +6,7 @@
  */
 
 // libraries ------------------------------------------------------------------
+#include <MenuSettings.h>
 #include "Arduino.h"
 #include "EEPROMAnything.h"
 #include "Wire.h"
@@ -16,7 +17,6 @@
 #include "ClickEncoder.h"
 #include "TimerOne.h"
 #include "Menu.h"
-#include "Navigation.h"
 
 // Declare objects ------------------------------------------------------------
 
@@ -24,7 +24,7 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 Display display;
 Coil CoilWinding;
 Menu::Engine *engine;
-Navigation nav;
+Setting setting;
 ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
 void timerIsr(void)
 {
@@ -44,6 +44,16 @@ namespace State
   } SystemMode;
 };
 
+typedef enum MemoryIndex_e
+{
+  WireSize	=1,
+  CoilLength	=2,
+  Turns		=3,
+  MaxSpeed	=4,
+  MinSpeed	=5,
+  AccDelay	=6
+}MemoryIndex;
+
 uint8_t systemState = State::Default;
 uint8_t previousSystemState = State::None;
 uint8_t menuItemsVisible = LCD_LINES;
@@ -60,15 +70,9 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
 {
   lcd.setCursor(0, pos);
 
-  // cursor
-  if (engine->currentItem == mi)
-    {
-      lcd.write((uint8_t)IconEnter);
-    }
-  else
-    {
-      lcd.write(20); // space
-    }
+  // Print icon before current item.
+  engine->currentItem == mi ? lcd.write((uint8_t)IconEnter) : lcd.write(20); ;
+
   // Print label item
   lcd.print(engine->getLabel(mi));
 
@@ -100,9 +104,8 @@ bool menuBack(const Menu::Action_t a)
 
 bool menuEdit(const Menu::Action_t a)
 {
-  if (a == Menu::actionDisplay)
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      lcd.clear();
       systemState = State::Edit;
     }
   return true;
@@ -156,6 +159,12 @@ void setup()
   Serial.print("\n\nbegin\n\n");
   delay(1000);
 #endif
+  //test***********************************
+  char test[] = "00.00";
+  lcd.setCursor(0,0);
+  lcd.print(sizeof(test));
+  setting.setValue(test, sizeof(test));
+  //***************************************
 }
 
 /* LOOP ----------------------------------------------------------------------*/
@@ -251,11 +260,14 @@ void loop()
 	display.version();
 	break;
       }
-
     case State::Edit :
       {
-	nav.setValue();
-	systemState = State::Move;
+	//	setting.setValue();
+	//	systemState = State::Move;
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print("Save ? ");
+	delay(1000);
 	updateMenu = true;
 	break;
       }
@@ -264,6 +276,7 @@ void loop()
 	systemState = State::Move;
 	engine->navigate(engine->getParent());
 	updateMenu = true;
+	break;
       }
   }
 
