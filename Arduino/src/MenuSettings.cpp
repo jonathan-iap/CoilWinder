@@ -18,14 +18,8 @@ extern ClickEncoder Encoder;
 
 const unsigned long delayTime = 150;
 
-const char s_valid[] = "Valid:";
-const char s_save[] = "Save?Y/N";
-
-#define s_valid_SIZE sizeof(s_valid)
-#define s_save_SIZE sizeof(s_save)
-
 // clamp value on a positive interval
-void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
+const void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
 {
   if(*_val > _max){ *_val = _max;}
   else if (*_val < _min){ *_val = _min;}
@@ -62,6 +56,7 @@ const bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned lon
   return false;
 }
 
+
 const void blinkValue(uint8_t _index, char value[], int _arraySize)
 {
   static bool basculeSet = true;
@@ -92,14 +87,15 @@ const void blinkValue(uint8_t _index, char value[], int _arraySize)
 Setting::Setting(){};
 Setting::~Setting(){};
 
-void Setting::setValue(char value[], int arraySize)
+float Setting::setValue(char value[], int arraySize, char valueName[])
 {
-
   lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(valueName);
   lcd.setCursor(0, LCD_LINES);
   lcd.print(value);
-  lcd.setCursor(LCD_CHARS-(s_valid_SIZE),LCD_LINES);
-  lcd.print(s_valid);
+  lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID),LCD_LINES);
+  lcd.print(MSG_VALID);
   lcd.write((byte)IconValid);
 
   bool run = true;
@@ -109,9 +105,6 @@ void Setting::setValue(char value[], int arraySize)
 
   while(run)
     {
-      //debug
-      start:
-
       unsigned long currentTime = millis();
 
       index += Encoder.getValue();
@@ -119,14 +112,6 @@ void Setting::setValue(char value[], int arraySize)
       clampValue(&index, 0, arraySize-1);
 
       index = ignoreChar(index, last, value, arraySize);
-
-      // debug
-      lcd.setCursor(0,0);
-      lcd.print(index);
-      lcd.print(" ");
-      //delay(200);
-      lcd.print(last);
-      lcd.print(" ");
 
       // Print old character to Fill the hole only if we move
       if(index>last || index<last ) // Forward , backward
@@ -149,27 +134,24 @@ void Setting::setValue(char value[], int arraySize)
 	  // If we want to exit the menu (click on the exit icon)
 	  if(index > arraySize)
 	    {
-	      lcd.setCursor(LCD_CHARS-9,0);
-	      lcd.print(atof(value));
-	      //debug
-	      goto start;
-	      run = false; // exit
+	      return atof(value);
 	    }
 	  // Else set the new value
 	  else
 	    {
 	      // Erase the exit icon to show we are in the edit mode
-	      lcd.setCursor(LCD_CHARS-(s_valid_SIZE), LCD_LINES);
-	      for(uint8_t i = 0; i<s_valid_SIZE; i++)
+	      lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
+	      for(uint8_t i = 0; i<SIZE_MSG_VALID; i++)
 		{
 		  lcd.print(' ');
 		}
 	      lcd.setCursor(LCD_CHARS-3, LCD_LINES);
 	      lcd.print("set");
 
+	      // Set Value
 	      int8_t count = value[index];
 	      unsigned long lastTimeSet;
-	      // Set Value
+
 	      while((buttonState = Encoder.getButton()) != ClickEncoder::Clicked)
 		{
 		  unsigned long currentTimeSet = millis();
@@ -186,13 +168,14 @@ void Setting::setValue(char value[], int arraySize)
 		    }
 		}
 	      // Refresh screen after set value
-	      lcd.setCursor(LCD_CHARS-(s_valid_SIZE), LCD_LINES);
-	      lcd.print(s_valid);
+	      lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
+	      lcd.print(MSG_VALID);
 	      lcd.write((byte)IconValid);
 	    }
 	}
       // return the cursor if we are at the end off lcd
       if(index>arraySize) index = arraySize-1;
     }
+  return false;
 }
 

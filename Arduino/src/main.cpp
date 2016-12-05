@@ -6,9 +6,7 @@
  */
 
 // libraries ------------------------------------------------------------------
-#include <MenuSettings.h>
 #include "Arduino.h"
-#include "EEPROMAnything.h"
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 #include "Coil.h"
@@ -17,11 +15,13 @@
 #include "ClickEncoder.h"
 #include "TimerOne.h"
 #include "Menu.h"
+#include "MenuSettings.h"
+#include "Save.h"
+
 
 // Declare objects ------------------------------------------------------------
-
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
-Display display;
+Display display(&lcd);
 Coil CoilWinding;
 Menu::Engine *engine;
 Setting setting;
@@ -43,16 +43,6 @@ namespace State
     Back	= 4
   } SystemMode;
 };
-
-typedef enum MemoryIndex_e
-{
-  WireSize	=1,
-  CoilLength	=2,
-  Turns		=3,
-  MaxSpeed	=4,
-  MinSpeed	=5,
-  AccDelay	=6
-}MemoryIndex;
 
 uint8_t systemState = State::Default;
 uint8_t previousSystemState = State::None;
@@ -106,7 +96,15 @@ bool menuEdit(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      systemState = State::Edit;
+      char testName[] = "valeur de test";
+      char test[] = "00.00";
+      float result;
+      result = setting.setValue(test, sizeof(test), testName);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(result);
+      delay(1000);
+      //systemState = State::Edit;
     }
   return true;
 }
@@ -139,6 +137,8 @@ void setup()
   Serial.begin(BAUDRATE);
 #endif
 
+  memoryInit();
+
   // Winding function
   CoilWinding.begin();
 
@@ -152,19 +152,13 @@ void setup()
   // Pin initialization
   pinMode(13, OUTPUT);
 
-  // Lcd screen
+  // Lcd initialization
   display.begin();
 
 #ifdef DEBUG
   Serial.print("\n\nbegin\n\n");
   delay(1000);
 #endif
-  //test***********************************
-  char test[] = "00.00";
-  lcd.setCursor(0,0);
-  lcd.print(sizeof(test));
-  setting.setValue(test, sizeof(test));
-  //***************************************
 }
 
 /* LOOP ----------------------------------------------------------------------*/
@@ -258,17 +252,6 @@ void loop()
     case State::Default :
       {
 	display.version();
-	break;
-      }
-    case State::Edit :
-      {
-	//	setting.setValue();
-	//	systemState = State::Move;
-	lcd.clear();
-	lcd.setCursor(0,0);
-	lcd.print("Save ? ");
-	delay(1000);
-	updateMenu = true;
 	break;
       }
     case State::Back :

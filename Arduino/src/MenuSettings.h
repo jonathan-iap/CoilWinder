@@ -15,7 +15,7 @@ public :
   Setting();
   ~Setting();
 
-  void setValue(char value[], int arraySize);
+  float setValue(char value[], int arraySize, char valueName[]);
 
 private:
 };
