@@ -21,15 +21,11 @@
 
 // Declare objects ------------------------------------------------------------
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
+ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
+Menu::Engine *engine;
 Display display(&lcd);
 Coil CoilWinding;
-Menu::Engine *engine;
-Setting setting;
-ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
-void timerIsr(void)
-{
-  Encoder.service();
-}
+Setting setting(&lcd, &Encoder);
 
 // Global Variables -----------------------------------------------------------
 namespace State
@@ -56,6 +52,11 @@ bool lastEncoderAccelerationState = true;
 
 
 // Functions ------------------------------------------------------------------
+void timerIsr(void)
+{
+  Encoder.service();
+}
+
 void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
 {
   lcd.setCursor(0, pos);
