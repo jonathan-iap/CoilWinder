@@ -29,8 +29,9 @@ void memoryInit()
   memAddress.addr_wireSize = EEPROM.getAddress(sizeof(char)*NUM_WIRE);
   memAddress.addr_coilLength = EEPROM.getAddress(sizeof(char)*NUM_COIL);
   memAddress.addr_Turns = EEPROM.getAddress(sizeof(char)*NUM_TURNS);
-  memAddress.addr_MaxSpeed = EEPROM.getAddress(sizeof(char)*6);
-  memAddress.addr_MinSpeed = EEPROM.getAddress(sizeof(char)*6);
-  memAddress.addr_DefaultSettings = EEPROM.getAddress(sizeof(char)*6);
+  // todo
+  memAddress.addr_MaxSpeed = EEPROM.getAddress(sizeof(char)*6);// not set properly !
+  memAddress.addr_MinSpeed = EEPROM.getAddress(sizeof(char)*6);// not set properly !
+  memAddress.addr_DefaultSettings = EEPROM.getAddress(sizeof(char)*6);// not set properly !
 
 }

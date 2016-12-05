@@ -8,6 +8,9 @@
 #ifndef SRC_MENUSETTINGS_H_
 #define SRC_MENUSETTINGS_H_
 
+#include "Arduino.h"
+#include "Function.h"
+
 class Setting
 {
 public :

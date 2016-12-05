@@ -4,7 +4,7 @@
 #include "Arduino.h"
 #include "Motor.h"
 #include "Configuration.h"
-
+#include "Function.h"
 
 class Coil
 {

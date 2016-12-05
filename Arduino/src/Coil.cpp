@@ -29,25 +29,6 @@ static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
   //  else{ return result = delayMotor / ratio; }
 }
 
-/******************************************************************************
- * brief   : Run action without delay.
- * details : timer() function need to be used in a while() loop and
- * often refresh. When time reach timer() return true.
- * currentTime, time to function "micros()". Refresh as often as possible !
- * oldTime, pointer to the variable who contain the old value of _currentTime.
- * this value is modified when time reach.
- * delay, delay before you do instructions.
- * return  : True when time reach.
- ******************************************************************************/
-static bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long delay)
-{
-  if (currentTime - *oldTime >= delay)
-    {
-      *oldTime = currentTime;
-      return true;
-    }
-  return false;
-}
 
 /******************************************************************************
  * brief   : Acceleration ramp.

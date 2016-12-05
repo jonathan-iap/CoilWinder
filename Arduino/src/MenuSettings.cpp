@@ -18,14 +18,6 @@ extern ClickEncoder Encoder;
 
 const unsigned long delayTime = 150;
 
-// clamp value on a positive interval
-const void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
-{
-  if(*_val > _max){ *_val = _max;}
-  else if (*_val < _min){ *_val = _min;}
-  else;
-}
-
 const uint8_t ignoreChar(uint8_t _index, uint8_t _last, char value[], int _arraySize)
 {
   if(_index > _arraySize-2)
@@ -44,16 +36,6 @@ const uint8_t ignoreChar(uint8_t _index, uint8_t _last, char value[], int _array
 	}
     }
   return _index;
-}
-
-const bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long delay)
-{
-  if (currentTime - *oldTime >= delay)
-    {
-      *oldTime = currentTime;
-      return true;
-    }
-  return false;
 }
 
 
