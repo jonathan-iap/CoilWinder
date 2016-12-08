@@ -40,3 +40,26 @@ bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long dela
     }
   return false;
 }
+
+
+/******************************************************************************
+ * brief   : Compare the content of two buffer.
+ * details : pBuffer1, buffer one is the reference
+ * pBuffer2, buffer to compare
+ * BufferLength, length of buffer one.
+ * return  : 0 if the two buffers are equals.
+ ******************************************************************************/
+uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
+{
+  while(BufferLength--)
+    {
+      if((*pBuffer1) != *pBuffer2)
+	{
+	  return BufferLength;
+	}
+      pBuffer1++;
+      pBuffer2++;
+    }
+
+  return 0;
+}

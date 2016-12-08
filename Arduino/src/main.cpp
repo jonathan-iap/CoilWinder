@@ -61,7 +61,7 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
 {
   lcd.setCursor(0, pos);
 
-  // Print icon before current item.
+  // Print icon before current item else blank.
   engine->currentItem == mi ? lcd.write((uint8_t)IconEnter) : lcd.write(20); ;
 
   // Print label item
@@ -137,8 +137,6 @@ void setup()
 #ifdef DEBUG
   Serial.begin(BAUDRATE);
 #endif
-
-  memoryInit();
 
   // Winding function
   CoilWinding.begin();
