@@ -32,7 +32,7 @@ private:
   ClickEncoder *_Encoder;
 
   uint8_t ignoreChar(uint8_t _index, uint8_t _last, char value[], int _arraySize);
-  void blinkValue(uint8_t _index, char value[], int _arraySize);
+  void blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank);
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

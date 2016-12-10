@@ -18,6 +18,7 @@
 #define IconBack	3
 #define IconEnter	4
 #define IconValid	5
+#define IconBlock	6
 
 #define MSG_WIRE_SIZE	"Wire size in mm"
 #define MSG_COIL_LENGTH	"Coil length in mm"
@@ -26,7 +27,7 @@
 #define MSG_MIN_SPEED	"MIN speed"
 #define MSG_ACC_DELAY	"Acc duration"
 
-#define MSG_VALID 	"Valid:"
+#define MSG_VALID 	"Enter:"
 #define SIZE_MSG_VALID 	sizeof(MSG_VALID)
 #define MSG_SAVE 	"Save?Y/N"
 #define SIZE_MSG_SAVE 	sizeof(MSG_SAVE)
@@ -90,6 +91,17 @@ public :
       0b00000,
       0b00000
   };
+
+  uint8_t block[8] = {
+        0b11111,
+	0b11111,
+	0b11111,
+	0b11111,
+	0b11111,
+	0b11111,
+	0b11111,
+	0b11111
+    };
 
   // Public functions -----------------------------------------------------------
 public:

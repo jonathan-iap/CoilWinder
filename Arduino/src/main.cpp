@@ -133,11 +133,6 @@ MenuItem(miBack0, "Back \1", Menu::NullItem, miStart0, miWinding, Menu::NullItem
 /* SETUP ---------------------------------------------------------------------*/
 void setup()
 {
-  // For debug
-#ifdef DEBUG
-  Serial.begin(BAUDRATE);
-#endif
-
   // Winding function
   CoilWinding.begin();
 
@@ -154,10 +149,33 @@ void setup()
   // Lcd initialization
   display.begin();
 
+  // Debug section
 #ifdef DEBUG
+  Serial.begin(BAUDRATE);
+
   Serial.print("\n\nbegin\n\n");
   delay(1000);
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("check set buffer");
+
+  Memory mem;
+  mem.init();
+
+  if( !mem.isSet() )
+    {
+      lcd.setCursor(0,1);
+      lcd.print("not set");
+    }
+  else
+    {
+      lcd.setCursor(0,1);
+      lcd.print("is set");
+    }
+  delay(1000);
 #endif
+
 }
 
 /* LOOP ----------------------------------------------------------------------*/

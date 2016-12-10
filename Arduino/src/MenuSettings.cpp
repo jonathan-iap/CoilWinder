@@ -6,7 +6,8 @@
  */
 #include "MenuSettings.h"
 
-const unsigned long delayTime = 150;
+const unsigned long delayTimeBlock = 250;
+const unsigned long delayTimeBlank = 150;
 
 Setting::Setting(LiquidCrystal_I2C *p_lcd, ClickEncoder *p_Encoder)
 {
@@ -51,9 +52,9 @@ float Setting::setValue(char value[], int arraySize, char valueName[])
 	}
 
       // Blinking of the selected character
-      if(timer(currentTime, &lastTime, delayTime))
+      if(timer(currentTime, &lastTime, delayTimeBlock))
 	{
-	  blinkValue(index, value, arraySize);
+	  blinkValue(index, value, arraySize, false);
 	}
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
@@ -90,9 +91,9 @@ float Setting::setValue(char value[], int arraySize, char valueName[])
 		  value[index] = count;
 
 		  // Blinking value
-		  if(timer(currentTimeSet, &lastTimeSet, delayTime))
+		  if(timer(currentTimeSet, &lastTimeSet, delayTimeBlank))
 		    {
-		      blinkValue(index,value, arraySize);
+		      blinkValue(index,value, arraySize, true);
 		    }
 		}
 	      // Refresh screen after set value
@@ -127,7 +128,7 @@ uint8_t Setting::ignoreChar(uint8_t _index, uint8_t _last, char value[], int _ar
   return _index;
 }
 
-void Setting::blinkValue(uint8_t _index, char value[], int _arraySize)
+void Setting::blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank)
 {
   static bool basculeSet = true;
 
@@ -147,7 +148,7 @@ void Setting::blinkValue(uint8_t _index, char value[], int _arraySize)
     }
   else{
       _lcd->setCursor(_index, LCD_LINES);
-      _lcd->print(" ");
+      _blank ? _lcd->print(" ") : _lcd->write((byte)IconBlock);
       basculeSet = true;
   }
 }

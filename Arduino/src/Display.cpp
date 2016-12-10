@@ -21,6 +21,7 @@ const void Display::begin()
   _lcd->createChar(IconBack, back);
   _lcd->createChar(IconEnter, enter);
   _lcd->createChar(IconValid, valid);
+  _lcd->createChar(IconBlock, block);
 
   // Quick 3 blinks of back-light
   for(uint8_t i = 0; i < 3; i++)
