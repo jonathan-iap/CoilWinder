@@ -10,6 +10,7 @@
 
 #include "Arduino.h"
 #include "Configuration.h"
+#include "Function.h"
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 
@@ -21,16 +22,16 @@
 #define IconBlock	6
 
 #define MSG_WIRE_SIZE	"Wire size in mm"
-#define MSG_COIL_LENGTH	"Coil length in mm"
+#define MSG_COIL_LENGTH	"Length in mm"
 #define MSG_TURNS	"Turns in tr"
 #define MSG_MAX_SPEED	"MAX speed"
 #define MSG_MIN_SPEED	"MIN speed"
 #define MSG_ACC_DELAY	"Acc duration"
 
 #define MSG_VALID 	"Enter:"
-#define SIZE_MSG_VALID 	sizeof(MSG_VALID)
+#define SIZE_MSG_VALID 	COUNTOF(MSG_VALID)
 #define MSG_SAVE 	"Save?Y/N"
-#define SIZE_MSG_SAVE 	sizeof(MSG_SAVE)
+#define SIZE_MSG_SAVE 	COUNTOF(MSG_SAVE)
 
 class Display
 {

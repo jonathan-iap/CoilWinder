@@ -16,11 +16,11 @@ Setting::Setting(LiquidCrystal_I2C *p_lcd, ClickEncoder *p_Encoder)
 };
 Setting::~Setting(){};
 
-float Setting::setValue(char value[], int arraySize, char valueName[])
+float Setting::setValue(char value[], int arraySize, const char label[])
 {
   _lcd->clear();
   _lcd->setCursor(0, 0);
-  _lcd->print(valueName);
+  _lcd->print(label);
   _lcd->setCursor(0, LCD_LINES);
   _lcd->print(value);
   _lcd->setCursor(LCD_CHARS-(SIZE_MSG_VALID),LCD_LINES);

@@ -54,6 +54,14 @@ enum
 // M5 = 0.8 mm
 #define LEAD_SCREW_PITCH 0.8
 
+// Reset value -----------------------------------------------------------------
+#define INIT_WIRE	"0.00"
+#define INIT_COIL	"000.00"
+#define INIT_TURNS	"00000"
+#define INIT_MAXSPEED	"0600"
+#define INIT_MINSPEED	"1800"
+#define INIT_ACC_DELAY	"2000"
+
 // Serial Debug option ---------------------------------------------------------
 #define DEBUG // Uncomment to active serial debug.
 #define BAUDRATE 9600

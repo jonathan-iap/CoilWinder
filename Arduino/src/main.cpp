@@ -26,6 +26,8 @@ Menu::Engine *engine;
 Display display(&lcd);
 Coil CoilWinding;
 Setting setting(&lcd, &Encoder);
+Memory memory;
+
 
 // Global Variables -----------------------------------------------------------
 namespace State
@@ -40,6 +42,13 @@ namespace State
   } SystemMode;
 };
 
+float WireSize;
+float CoilLength;
+float Turns;
+float MaxSpeed;
+float MinSpeed;
+float AccDelay;
+
 uint8_t systemState = State::Default;
 uint8_t previousSystemState = State::None;
 uint8_t menuItemsVisible = LCD_LINES;
@@ -47,9 +56,9 @@ int16_t encMovement;
 int16_t encAbsolute;
 int16_t encLastAbsolute = -1;
 int16_t tmpValue = 0;
+
 bool updateMenu = false;
 bool lastEncoderAccelerationState = true;
-
 
 // Functions ------------------------------------------------------------------
 void timerIsr(void)
@@ -93,22 +102,69 @@ bool menuBack(const Menu::Action_t a)
   return true;
 }
 
-bool menuEdit(const Menu::Action_t a)
+bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      char testName[] = "valeur de test";
-      char test[] = "00.00";
+      char test[BUFFSIZE_WIRE]={0};
       float result;
-      result = setting.setValue(test, sizeof(test), testName);
+      memory.read(test, id_WIRESIZE);
+      result = setting.setValue(test, BUFFSIZE_WIRE, MSG_WIRE_SIZE);
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print(result);
       delay(1000);
-      //systemState = State::Edit;
     }
   return true;
 }
+
+bool editLength(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      char test[BUFFSIZE_COIL]={0};
+      float result;
+      memory.read(test, id_COILLENGTH);
+      result = setting.setValue(test, BUFFSIZE_COIL, MSG_COIL_LENGTH);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(result);
+      delay(1000);
+    }
+  return true;
+}
+
+bool editTurns(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      char test[BUFFSIZE_TURNS]={0};
+      float result;
+      memory.read(test, id_TURNS);
+      result = setting.setValue(test, BUFFSIZE_TURNS, MSG_TURNS);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(result);
+      delay(1000);
+    }
+  return true;
+}
+
+bool menuReset(const Menu::Action_t a)
+{
+  if (a == Menu::actionDisplay)
+    {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("EEprom memory");
+      lcd.setCursor(0,0);
+      lcd.print("Reset");
+      memory.reset();
+      delay(1000);
+    }
+  return true;
+}
+
 
 // Framework for menu ---------------------------------------------------------
 
@@ -116,15 +172,19 @@ bool menuEdit(const Menu::Action_t a)
 // Menu 0
 MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
 // Menu 1 -> 3
-MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize0, menuDummy);
+MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, Menu::NullItem, menuDummy);
-MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, Menu::NullItem, menuDummy);
+MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miReset, menuDummy);
 // Sub-menu 1.1 -> 1.6
-MenuItem(miWireSize0, "1.Wire size", miCoilLength0, Menu::NullItem, miWinding, Menu::NullItem, menuEdit);
-MenuItem(miCoilLength0, "2.Coil length", miTurns0, miWireSize0, miWinding, Menu::NullItem, menuEdit);
-MenuItem(miTurns0, "3.Turns", miStart0, miCoilLength0, miWinding, Menu::NullItem, menuEdit);
-MenuItem(miStart0, "4.Start", miBack0, miTurns0, miWinding, Menu::NullItem, menuDummy);
-MenuItem(miBack0, "Back \1", Menu::NullItem, miStart0, miWinding, Menu::NullItem, menuBack);
+MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
+MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
+MenuItem(miTurns, "3.Turns", miStart, miCoilLength, miWinding, Menu::NullItem, editTurns);
+MenuItem(miStart, "4.Start", miBack1, miTurns, miWinding, Menu::NullItem, menuDummy);
+MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
+// Sub-menu 2.1 -> 2.?
+// Sub-menu 3.1 -> 3.?
+MenuItem(miReset, "Reset EEprom", miBack2, Menu::NullItem, miSettings, Menu::NullItem, menuReset);
+MenuItem(miBack2, "Back \2", Menu::NullItem, miReset, miSettings, Menu::NullItem, menuBack);
 
 // ----------------------------------------------------------------------------
 
@@ -156,14 +216,19 @@ void setup()
   Serial.print("\n\nbegin\n\n");
   delay(1000);
 
+  Serial.print("update value : ");
+  Serial.print("WireSize : "); Serial.println(WireSize);
+  Serial.print("CoilLength: "); Serial.println(CoilLength);
+  Serial.print("Turns : ");   Serial.println(Turns);
+  Serial.print("MinSpeed : ");   Serial.println(MinSpeed);
+
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("check set buffer");
 
-  Memory mem;
-  mem.init();
+  memory.init();
 
-  if( !mem.isSet() )
+  if( !memory.isSet() )
     {
       lcd.setCursor(0,1);
       lcd.print("not set");
@@ -174,8 +239,13 @@ void setup()
       lcd.print("is set");
     }
   delay(1000);
-#endif
 
+  Serial.print("update value : ");
+  Serial.print("WireSize : "); Serial.println(WireSize);
+  Serial.print("CoilLength: "); Serial.println(CoilLength);
+  Serial.print("Turns : ");   Serial.println(Turns);
+  Serial.print("MinSpeed : ");   Serial.println(MinSpeed);
+#endif
 }
 
 /* LOOP ----------------------------------------------------------------------*/

@@ -24,7 +24,7 @@ public :
   Setting(LiquidCrystal_I2C *p_lcd, ClickEncoder *p_Encoder);
   ~Setting();
 
-  float setValue(char value[], int arraySize, char valueName[]);
+  float setValue(char value[], int arraySize, const char label[]);
 
 private:
 
