@@ -42,13 +42,6 @@ namespace State
   } SystemMode;
 };
 
-float WireSize;
-float CoilLength;
-float Turns;
-float MaxSpeed;
-float MinSpeed;
-float AccDelay;
-
 uint8_t systemState = State::Default;
 uint8_t previousSystemState = State::None;
 uint8_t menuItemsVisible = LCD_LINES;
@@ -157,7 +150,7 @@ bool menuReset(const Menu::Action_t a)
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("EEprom memory");
-      lcd.setCursor(0,0);
+      lcd.setCursor(0,1);
       lcd.print("Reset");
       memory.reset();
       delay(1000);
@@ -193,6 +186,17 @@ MenuItem(miBack2, "Back \2", Menu::NullItem, miReset, miSettings, Menu::NullItem
 /* SETUP ---------------------------------------------------------------------*/
 void setup()
 {
+  // Debug section
+#ifdef DEBUG
+  Serial.begin(BAUDRATE);
+
+  Serial.print("\n\nbegin\n\n");
+  delay(1000);
+#endif
+
+  // Eeprom memory
+  memory.init();
+
   // Winding function
   CoilWinding.begin();
 
@@ -208,49 +212,29 @@ void setup()
 
   // Lcd initialization
   display.begin();
-
-  // Debug section
-#ifdef DEBUG
-  Serial.begin(BAUDRATE);
-
-  Serial.print("\n\nbegin\n\n");
-  delay(1000);
-
-  Serial.print("update value : ");
-  Serial.print("WireSize : "); Serial.println(WireSize);
-  Serial.print("CoilLength: "); Serial.println(CoilLength);
-  Serial.print("Turns : ");   Serial.println(Turns);
-  Serial.print("MinSpeed : ");   Serial.println(MinSpeed);
-
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("check set buffer");
-
-  memory.init();
-
-  if( !memory.isSet() )
-    {
-      lcd.setCursor(0,1);
-      lcd.print("not set");
-    }
-  else
-    {
-      lcd.setCursor(0,1);
-      lcd.print("is set");
-    }
-  delay(1000);
-
-  Serial.print("update value : ");
-  Serial.print("WireSize : "); Serial.println(WireSize);
-  Serial.print("CoilLength: "); Serial.println(CoilLength);
-  Serial.print("Turns : ");   Serial.println(Turns);
-  Serial.print("MinSpeed : ");   Serial.println(MinSpeed);
-#endif
 }
 
 /* LOOP ----------------------------------------------------------------------*/
 void loop()
 {
+  // Display section.
+  switch(systemState)
+  {
+    // First use print software version
+    case State::Default :
+      {
+	display.version();
+	break;
+      }
+    case State::Back :
+      {
+	systemState = State::Move;
+	engine->navigate(engine->getParent());
+	updateMenu = true;
+	break;
+      }
+  }
+
   // handle encoder
   encMovement = Encoder.getValue();
   if (encMovement)
@@ -296,9 +280,6 @@ void loop()
 	else
 	  {
 	    // enter settings menu
-	    // disable acceleration, reset in menuExit()
-	    Encoder.setAccelerationEnabled(false);
-
 	    engine->navigate(&miWinding);
 
 	    systemState = State::Move;
@@ -319,6 +300,7 @@ void loop()
       }
   }
 
+  // update LCD
   if (updateMenu)
     {
       updateMenu = false;
@@ -331,25 +313,6 @@ void loop()
       // render the menu
       engine->render(renderMenuItem, menuItemsVisible);
     }
-
-  // Display section.
-  switch(systemState)
-  {
-    // First use print software version
-    case State::Default :
-      {
-	display.version();
-	break;
-      }
-    case State::Back :
-      {
-	systemState = State::Move;
-	engine->navigate(engine->getParent());
-	updateMenu = true;
-	break;
-      }
-  }
-
 }
 
 /* ( THE END ) */

@@ -26,12 +26,12 @@
 #define BUFFSIZE_ACC_DELAY	(COUNTOF(INIT_ACC_DELAY))
 #define BUFFSIZE_DEFAULT 	(COUNTOF(MSG_IS_SET))
 
-extern float WireSize;
-extern float CoilLength;
-extern float Turns;
-extern float MaxSpeed;
-extern float MinSpeed;
-extern float AccDelay;
+#define id_WIRESIZE	1
+#define id_COILLENGTH	2
+#define id_TURNS	3
+#define id_MAX_SPEED	4
+#define id_MIN_SPEED	5
+#define id_ACC_DELAY	6
 
 class Memory
 {
@@ -43,11 +43,24 @@ public :
   void init();
   void save(char buffer[], const uint8_t id);
   void read(char buffer[], const uint8_t id);
-  void updateValue();
   void reset();
   bool isSet();
 
+protected :
+  float WireSize;
+  float CoilLength;
+  float Turns;
+  float MaxSpeed;
+  float MinSpeed;
+  float AccDelay;
 
+  // Init buffers
+  char _buff_WireSize[BUFFSIZE_WIRE] 		= {0};
+  char _buff_CoilLength[BUFFSIZE_COIL] 		= {0};
+  char _buff_Turns[BUFFSIZE_TURNS] 		= {0};
+  char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED] 	= {0};
+  char _buff_MinSpeed[BUFFSIZE_MIN_SPEED] 	= {0};
+  char _buff_AccDelay[BUFFSIZE_ACC_DELAY] 	= {0};
 
 private :
   uint8_t _addr_WireSize;
@@ -58,13 +71,12 @@ private :
   uint8_t _addr_AccDelay;
   uint8_t _addr_DefaultSettings;
 
-  char _value[];
-
-  void convertDataToFloat(const uint8_t addr, const uint8_t bufferSize, float *usingData);
+  void writeFloatToData(float Data, char buffer[], const uint8_t bufferSize);
 
   // for debug
-  void ReadCharArray();
-
+  void ReadAddresses();
+  void ReadFloatValue();
+  void ReadArrayValue();
 };
 
 

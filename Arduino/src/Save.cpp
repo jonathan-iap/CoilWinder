@@ -8,6 +8,12 @@
 #include "Save.h"
 
 Memory::Memory() :
+WireSize(0),
+CoilLength(0),
+Turns(0),
+MaxSpeed(0),
+MinSpeed(0),
+AccDelay(0),
 _addr_WireSize(0),
 _addr_CoilLength(0),
 _addr_Turns(0),
@@ -32,23 +38,45 @@ void Memory::init()
 
   _addr_DefaultSettings = EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
 
-  updateValue();
-
 #ifdef DEBUG
   Serial.println("---------------------------------");
   Serial.println("Reading a char array, before :");
   Serial.println("---------------------------------");
-  ReadCharArray();
+  ReadAddresses();
+  Serial.println(".................................");
+  ReadFloatValue();
+  Serial.println(".................................");
+  ReadArrayValue();
+  Serial.println("---------------------------------");
 #endif
-
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
+
+  // Read the eeprom memory and set buffers with values saved
+  read(_buff_WireSize,id_WIRESIZE);
+  read(_buff_CoilLength, id_COILLENGTH);
+  read(_buff_Turns, id_TURNS);
+  read(_buff_MaxSpeed,id_MAX_SPEED);
+  read(_buff_MinSpeed, id_MIN_SPEED);
+  read(_buff_AccDelay, id_ACC_DELAY);
+  // Convert value within array in a double value.
+  WireSize 	= atof(_buff_WireSize);
+  CoilLength 	= atof(_buff_CoilLength);
+  Turns 	= atof(_buff_Turns);
+  MaxSpeed 	= atof(_buff_MaxSpeed);
+  MinSpeed 	= atof(_buff_MinSpeed);
+  AccDelay 	= atof(_buff_AccDelay);
 
 #ifdef DEBUG
   Serial.println("---------------------------------");
   Serial.println("Reading a char array, after : ");
   Serial.println("---------------------------------");
-  ReadCharArray();
+  ReadAddresses();
+  Serial.println(".................................");
+  ReadFloatValue();
+  Serial.println(".................................");
+  ReadArrayValue();
+  Serial.println("---------------------------------");
 #endif
 }
 
@@ -126,16 +154,6 @@ void Memory::read(char buffer[], const uint8_t id)
   }
 }
 
-void Memory::updateValue()
-{
-  convertDataToFloat(_addr_WireSize, BUFFSIZE_WIRE, &WireSize);
-  convertDataToFloat(_addr_CoilLength, BUFFSIZE_COIL, &CoilLength);
-  convertDataToFloat(_addr_Turns, BUFFSIZE_TURNS, &Turns);
-  convertDataToFloat(_addr_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed);
-  convertDataToFloat(_addr_MinSpeed, BUFFSIZE_MIN_SPEED, &MinSpeed);
-  convertDataToFloat(_addr_AccDelay, BUFFSIZE_ACC_DELAY, &AccDelay);
-}
-
 void Memory::reset()
 {
   EEPROM.writeBlock<char>(_addr_WireSize, INIT_WIRE, BUFFSIZE_WIRE);
@@ -161,61 +179,48 @@ bool Memory::isSet()
 }
 
 /* PRIVATE -------------------------------------------------------------------*/
-
-// Read eeprom, convert and store value in float
-void Memory::convertDataToFloat(const uint8_t addr, const uint8_t bufferSize, float *usingData)
+// convert and format float to data
+void Memory::writeFloatToData(float data, char buffer[], const uint8_t bufferSize)
 {
-  char set[bufferSize];
+  dtostrf(data, (bufferSize-1), 2, buffer);
 
-  EEPROM.readBlock<char>(addr, set, bufferSize);
-
-  *usingData = atof(set);
+  for(uint8_t i=0;i<bufferSize;i++)
+    {
+      buffer[i] == ' ' ? buffer[i] = '0' : false;
+    }
 }
 
-// Debug : Test reading and updating a string (char array) to EEPROM
-void Memory::ReadCharArray() {
-  char wire[BUFFSIZE_WIRE], coil[BUFFSIZE_COIL], turns[BUFFSIZE_TURNS],
-  max[BUFFSIZE_MAX_SPEED], min[BUFFSIZE_MIN_SPEED], acc[BUFFSIZE_ACC_DELAY], set[BUFFSIZE_DEFAULT];
-
-  EEPROM.readBlock<char>(_addr_WireSize, wire, BUFFSIZE_WIRE);
-  EEPROM.readBlock<char>(_addr_CoilLength, coil, BUFFSIZE_COIL);
-  EEPROM.readBlock<char>(_addr_Turns, turns, BUFFSIZE_TURNS);
-  EEPROM.readBlock<char>(_addr_MaxSpeed, max, BUFFSIZE_MAX_SPEED);
-  EEPROM.readBlock<char>(_addr_MinSpeed, min, BUFFSIZE_MIN_SPEED);
-  EEPROM.readBlock<char>(_addr_AccDelay, acc, BUFFSIZE_ACC_DELAY);
-
-  EEPROM.readBlock<char>(_addr_DefaultSettings, set, BUFFSIZE_DEFAULT);
-
-  Serial.print("adress: ");
-  Serial.print(_addr_WireSize);
-  Serial.print("   buffer : ");
-  Serial.println(wire);
-  Serial.print("adress: ");
-  Serial.print(_addr_CoilLength);
-  Serial.print("   buffer : ");
-  Serial.println(coil);
-  Serial.print("adress: ");
-  Serial.print(_addr_Turns);
-  Serial.print("   buffer : ");
-  Serial.println(turns);
-  Serial.print("adress: ");
-  Serial.print(_addr_MaxSpeed);
-  Serial.print("   buffer : ");
-  Serial.println(max);
-  Serial.print("adress: ");
-  Serial.print(_addr_MaxSpeed);
-  Serial.print("   buffer : ");
-  Serial.println(min);
-  Serial.print("adress: ");
-  Serial.print(_addr_AccDelay);
-  Serial.print("   buffer : ");
-  Serial.println(acc);
-  Serial.print("adress: ");
-  Serial.print(_addr_DefaultSettings);
-  Serial.print("   buffer : ");
-  Serial.println(set);
-
+void Memory::ReadAddresses()
+{
+  Serial.print("adress wire: "); Serial.println(_addr_WireSize);
+  Serial.print("adress coil: "); Serial.println(_addr_CoilLength);
+  Serial.print("adress turns: "); Serial.println(_addr_Turns);
+  Serial.print("adress max: "); Serial.println(_addr_MaxSpeed);
+  Serial.print("adress min: "); Serial.println(_addr_MinSpeed);
+  Serial.print("adress acc: "); Serial.println(_addr_AccDelay);
+  Serial.print("adress default: "); Serial.println(_addr_DefaultSettings);
 }
 
+void Memory::ReadFloatValue()
+{
+  Serial.print("float wire: "); Serial.println(WireSize);
+  Serial.print("float coil: "); Serial.println(CoilLength);
+  Serial.print("float turns: "); Serial.println(Turns);
+  Serial.print("float max: "); Serial.println(MaxSpeed);
+  Serial.print("float min: "); Serial.println(MinSpeed);
+  Serial.print("float acc: "); Serial.println(AccDelay);
+}
 
+void Memory::ReadArrayValue()
+{
+  char _buff_DefaultSettings[BUFFSIZE_DEFAULT] = {0};
 
+  Serial.print("array wire: "); Serial.println(_buff_WireSize);
+  Serial.print("array coil: "); Serial.println(_buff_CoilLength);
+  Serial.print("array turns: "); Serial.println(_buff_Turns);
+  Serial.print("array max: "); Serial.println(_buff_MaxSpeed);
+  Serial.print("array min: "); Serial.println(_buff_MinSpeed);
+  Serial.print("array acc: "); Serial.println(_buff_AccDelay);
+  EEPROM.readBlock<char>(_addr_DefaultSettings, _buff_DefaultSettings, BUFFSIZE_DEFAULT);
+  Serial.print("array default: "); Serial.println(_buff_DefaultSettings);
+}

@@ -12,13 +12,6 @@
 
 #include "Arduino.h"
 
-#define id_WIRESIZE	1
-#define id_COILLENGTH	2
-#define id_TURNS	3
-#define id_MAX_SPEED	4
-#define id_MIN_SPEED	5
-#define id_ACC_DELAY	6
-
 /******************************************************************************
  * brief   : Macros to get simply the size of a buffer.
  * details : __BUFFER__ , buffer of which we wants to know the size
