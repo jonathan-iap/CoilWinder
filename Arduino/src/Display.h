@@ -109,6 +109,7 @@ public:
   Display(LiquidCrystal_I2C *p_lcd);
   const void begin();
   const void version();
+  void getValue();
 
 private:
   LiquidCrystal_I2C *_lcd;

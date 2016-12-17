@@ -47,31 +47,31 @@ public :
   bool isSet();
 
 protected :
-  float WireSize;
-  float CoilLength;
-  float Turns;
-  float MaxSpeed;
-  float MinSpeed;
-  float AccDelay;
+  static double WireSize;
+  static double CoilLength;
+  static double Turns;
+  static double MaxSpeed;
+  static double MinSpeed;
+  static double AccDelay;
 
   // Init buffers
-  char _buff_WireSize[BUFFSIZE_WIRE] 		= {0};
-  char _buff_CoilLength[BUFFSIZE_COIL] 		= {0};
-  char _buff_Turns[BUFFSIZE_TURNS] 		= {0};
-  char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED] 	= {0};
-  char _buff_MinSpeed[BUFFSIZE_MIN_SPEED] 	= {0};
-  char _buff_AccDelay[BUFFSIZE_ACC_DELAY] 	= {0};
+  static char _buff_WireSize[BUFFSIZE_WIRE];
+  static char _buff_CoilLength[BUFFSIZE_COIL];
+  static char _buff_Turns[BUFFSIZE_TURNS];
+  static char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED];
+  static char _buff_MinSpeed[BUFFSIZE_MIN_SPEED];
+  static char _buff_AccDelay[BUFFSIZE_ACC_DELAY];
 
 private :
-  uint8_t _addr_WireSize;
-  uint8_t _addr_CoilLength;
-  uint8_t _addr_Turns;
-  uint8_t _addr_MaxSpeed;
-  uint8_t _addr_MinSpeed;
-  uint8_t _addr_AccDelay;
-  uint8_t _addr_DefaultSettings;
+  const uint8_t _addr_WireSize;
+  const uint8_t _addr_CoilLength;
+  const uint8_t _addr_Turns;
+  const uint8_t _addr_MaxSpeed;
+  const uint8_t _addr_MinSpeed;
+  const uint8_t _addr_AccDelay;
+  const uint8_t _addr_DefaultSettings;
 
-  void writeFloatToData(float Data, char buffer[], const uint8_t bufferSize);
+  void writeFloatToData(double Data, char buffer[], const uint8_t bufferSize);
 
   // for debug
   void ReadAddresses();

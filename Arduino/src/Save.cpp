@@ -7,20 +7,28 @@
 
 #include "Save.h"
 
-Memory::Memory() :
-WireSize(0),
-CoilLength(0),
-Turns(0),
-MaxSpeed(0),
-MinSpeed(0),
-AccDelay(0),
-_addr_WireSize(0),
-_addr_CoilLength(0),
-_addr_Turns(0),
-_addr_MaxSpeed(0),
-_addr_MinSpeed(0),
-_addr_AccDelay(0),
-_addr_DefaultSettings(0)
+// Init static variable
+double Memory::WireSize 	= 0;
+double Memory::CoilLength 	= 0;
+double Memory::Turns 		= 0;
+double Memory::MaxSpeed 	= 0;
+double Memory::MinSpeed 	= 0;
+double Memory::AccDelay 	= 0;
+
+char Memory::_buff_WireSize[] 	= {0};
+char Memory::_buff_CoilLength[]	= {0};
+char Memory::_buff_Turns[]	= {0};
+char Memory::_buff_MaxSpeed[] 	= {0};
+char Memory::_buff_MinSpeed[] 	= {0};
+char Memory::_buff_AccDelay[] 	= {0};
+
+Memory::Memory() :_addr_WireSize(EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE)),
+    _addr_CoilLength(EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL)),
+    _addr_Turns(EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS)),
+    _addr_MaxSpeed(EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED)),
+    _addr_MinSpeed(EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED)),
+    _addr_AccDelay(EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY)),
+    _addr_DefaultSettings(EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT))
 {};
 Memory::~Memory(){};
 
@@ -29,16 +37,8 @@ void Memory::init()
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
   EEPROM.setMemPool(MEN_BASE, EEPROMSizeUno);
-  _addr_WireSize 	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
-  _addr_CoilLength 	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
-  _addr_Turns 		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
-  _addr_MaxSpeed 	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
-  _addr_MinSpeed 	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
-  _addr_AccDelay 	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
 
-  _addr_DefaultSettings = EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
-
-#ifdef DEBUG
+#ifdef DEBUGOFF
   Serial.println("---------------------------------");
   Serial.println("Reading a char array, before :");
   Serial.println("---------------------------------");
@@ -180,7 +180,7 @@ bool Memory::isSet()
 
 /* PRIVATE -------------------------------------------------------------------*/
 // convert and format float to data
-void Memory::writeFloatToData(float data, char buffer[], const uint8_t bufferSize)
+void Memory::writeFloatToData(double data, char buffer[], const uint8_t bufferSize)
 {
   dtostrf(data, (bufferSize-1), 2, buffer);
 

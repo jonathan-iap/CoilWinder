@@ -99,14 +99,7 @@ bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      char test[BUFFSIZE_WIRE]={0};
-      float result;
-      memory.read(test, id_WIRESIZE);
-      result = setting.setValue(test, BUFFSIZE_WIRE, MSG_WIRE_SIZE);
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(result);
-      delay(1000);
+      setting.getId(id_WIRESIZE);
     }
   return true;
 }
@@ -115,14 +108,7 @@ bool editLength(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      char test[BUFFSIZE_COIL]={0};
-      float result;
-      memory.read(test, id_COILLENGTH);
-      result = setting.setValue(test, BUFFSIZE_COIL, MSG_COIL_LENGTH);
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(result);
-      delay(1000);
+      setting.getId(id_COILLENGTH);
     }
   return true;
 }
@@ -131,14 +117,7 @@ bool editTurns(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      char test[BUFFSIZE_TURNS]={0};
-      float result;
-      memory.read(test, id_TURNS);
-      result = setting.setValue(test, BUFFSIZE_TURNS, MSG_TURNS);
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(result);
-      delay(1000);
+      setting.getId(id_TURNS);
     }
   return true;
 }
