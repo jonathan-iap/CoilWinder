@@ -9,27 +9,24 @@
 #define SRC_MENUSETTINGS_H_
 
 #include "Arduino.h"
-#include "string.h"
 #include "Configuration.h"
 #include "Display.h"
-#include "Wire.h"
-#include "LiquidCrystal_I2C.h"
 #include "ClickEncoder.h"
 #include "Function.h"
 #include "Save.h"
 
-class Setting: public Memory
+class Setting: public Memory, virtual public Display
 {
 public :
 
-  Setting(LiquidCrystal_I2C *p_lcd, ClickEncoder *p_Encoder);
+  Setting(ClickEncoder *p_Encoder);
   ~Setting();
 
   void getId(const uint8_t id);
 
 private:
 
-  LiquidCrystal_I2C *_lcd;
+  //LiquidCrystal_I2C *_lcd;
   ClickEncoder *_Encoder;
 
   uint8_t _idValue;
@@ -40,8 +37,9 @@ private:
 
   void affectValues();
   float engine();
-  uint8_t ignoreChar(uint8_t _index, uint8_t _last, char value[], int _arraySize);
-  void blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank);
+  void selectCharacter(int8_t *index, int8_t *last);
+  int8_t ignoreChar(int8_t index, int8_t last, char value[], int arraySize);
+  void editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState);
   void setValue();
 
 };

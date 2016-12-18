@@ -94,25 +94,44 @@ public :
   };
 
   uint8_t block[8] = {
-        0b11111,
-	0b11111,
-	0b11111,
-	0b11111,
-	0b11111,
-	0b11111,
-	0b11111,
-	0b11111
-    };
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111
+  };
 
   // Public functions -----------------------------------------------------------
 public:
-  Display(LiquidCrystal_I2C *p_lcd);
+  Display();
+  ~Display();
+
   const void begin();
   const void version();
-  void getValue();
+  const void clear();
+  void blank(uint8_t size);
+  void blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank);
+
+  //Temporaries
+  const void reset();
+
+  // Render menu item
+  void renderIconOn(uint8_t pos, bool currentItem);
+  void renderItem(const char item[]);
+  void renderIconChild();
+
+protected :
+  // MenuSetting
+  void enginePrintHome(char label[], char arrayValue[]);
+  int8_t enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, char arrayValue[]);
+  void enginePrintEditMode(bool setMode);
 
 private:
-  LiquidCrystal_I2C *_lcd;
+  //LiquidCrystal_I2C *_lcd;
+
 };
 
 #endif /* SRC_DISPLAY_H_ */

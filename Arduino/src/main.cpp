@@ -7,8 +7,6 @@
 
 // libraries ------------------------------------------------------------------
 #include "Arduino.h"
-#include "Wire.h"
-#include "LiquidCrystal_I2C.h"
 #include "Coil.h"
 #include "Configuration.h"
 #include "Display.h"
@@ -20,12 +18,11 @@
 
 
 // Declare objects ------------------------------------------------------------
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
 Menu::Engine *engine;
-Display display(&lcd);
+Display display;
 Coil CoilWinding;
-Setting setting(&lcd, &Encoder);
+Setting setting(&Encoder);
 Memory memory;
 
 
@@ -61,22 +58,16 @@ void timerIsr(void)
 
 void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
 {
-  lcd.setCursor(0, pos);
-
+  bool current = false;
   // Print icon before current item else blank.
-  engine->currentItem == mi ? lcd.write((uint8_t)IconEnter) : lcd.write(20); ;
+  engine->currentItem == mi ? current = true : current = false;
+  display.renderIconOn(pos, current);
 
   // Print label item
-  lcd.print(engine->getLabel(mi));
+  display.renderItem(engine->getLabel(mi));
 
   // mark items that have children
-  if (engine->getChild(mi) != &Menu::NullItem)
-    {
-      lcd.write(20);
-      lcd.write((uint8_t)IconRight);
-    }
-  // clear characters after items.
-  lcd.print("      ");
+  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
 }
 
 // CallBacks -------------------------------------------------------------------
@@ -126,11 +117,7 @@ bool menuReset(const Menu::Action_t a)
 {
   if (a == Menu::actionDisplay)
     {
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("EEprom memory");
-      lcd.setCursor(0,1);
-      lcd.print("Reset");
+      display.reset();
       memory.reset();
       delay(1000);
     }
@@ -173,6 +160,9 @@ void setup()
   delay(1000);
 #endif
 
+  // Lcd initialization
+  display.begin();
+
   // Eeprom memory
   memory.init();
 
@@ -188,9 +178,6 @@ void setup()
 
   // Pin initialization
   pinMode(13, OUTPUT);
-
-  // Lcd initialization
-  display.begin();
 }
 
 /* LOOP ----------------------------------------------------------------------*/
@@ -287,7 +274,7 @@ void loop()
       if (!encMovement)
 	{
 	  // clear menu on child/parent navigation
-	  lcd.clear();
+	  display.clear();
 	}
       // render the menu
       engine->render(renderMenuItem, menuItemsVisible);
