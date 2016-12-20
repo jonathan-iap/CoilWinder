@@ -9,8 +9,8 @@
 
 LiquidCrystal_I2C _lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 
-Display::Display(){};
-Display::~Display(){};
+Display::Display(){}
+Display::~Display(){}
 
 const void Display::begin()
 {
@@ -53,7 +53,7 @@ void Display::blank(uint8_t size)
 }
 
 // blink value on current cursor
-void Display::blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank)
+void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset)
 {
   static bool basculeSet = true;
 
@@ -61,18 +61,18 @@ void Display::blinkValue(uint8_t _index, char value[], int _arraySize, bool _bla
     {
       if(_index > _arraySize)
 	{
-	  _lcd.setCursor(_index, LCD_LINES);
+	  _lcd.setCursor((_index+offset), LCD_LINES);
 	  _lcd.write((byte)IconValid);
 	}
       else
 	{
-	  _lcd.setCursor(_index, LCD_LINES);
+	  _lcd.setCursor((_index+offset), LCD_LINES);
 	  _lcd.print(value[_index]);
 	}
       basculeSet = false;
     }
   else{
-      _lcd.setCursor(_index, LCD_LINES);
+      _lcd.setCursor((_index+offset), LCD_LINES);
       _blank ? _lcd.print(" ") : _lcd.write((byte)IconBlock);
       basculeSet = true;
   }
@@ -119,15 +119,15 @@ void Display::enginePrintHome(char label[], char arrayValue[])
   _lcd.write((byte)IconValid);
 }
 
-int8_t Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, char arrayValue[])
+void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
+				  const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
     {
-      _lcd.setCursor(last, LCD_LINES);
-      (index<last && index == buffSize-2) ? _lcd.write((byte)IconValid) : _lcd.print(arrayValue[last]);
+      _lcd.setCursor((last + offset), LCD_LINES);
+      (index<last && index == buffSize-2) ?
+	  _lcd.write((byte)IconValid) : _lcd.print(arrayValue[last]);
     }
-  // Determine the direction of the next movement.
-  return last = index;
 }
 
 void Display::enginePrintEditMode(bool setMode)
@@ -147,4 +147,15 @@ void Display::enginePrintEditMode(bool setMode)
       _lcd.print(MSG_VALID);
       _lcd.write((byte)IconValid);
     }
+}
+
+void Display::enginePrintSave(double value)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print("Save in eeprom ?");
+  _lcd.setCursor(0,LCD_LINES);
+  _lcd.print(value);
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
+  _lcd.print(MSG_CHOICE);
 }

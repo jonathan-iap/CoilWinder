@@ -79,5 +79,6 @@ private :
   void ReadArrayValue();
 };
 
+extern Memory memory;
 
 #endif /* SRC_SAVE_H_ */

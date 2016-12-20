@@ -23,7 +23,6 @@ Menu::Engine *engine;
 Display display;
 Coil CoilWinding;
 Setting setting(&Encoder);
-Memory memory;
 
 
 // Global Variables -----------------------------------------------------------

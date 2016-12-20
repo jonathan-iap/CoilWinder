@@ -15,7 +15,7 @@
 #include "Function.h"
 #include "Save.h"
 
-class Setting: public Memory, virtual public Display
+class Setting: public Memory, public Display
 {
 public :
 
@@ -37,10 +37,11 @@ private:
 
   void affectValues();
   float engine();
-  void selectCharacter(int8_t *index, int8_t *last);
-  int8_t ignoreChar(int8_t index, int8_t last, char value[], int arraySize);
+  void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,uint8_t buffSize, uint8_t offset);
+  int8_t ignoreChar(int8_t index, int8_t last, const char value[], int arraySize);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState);
   void setValue();
+  void saveValue(double value);
 
 };
 

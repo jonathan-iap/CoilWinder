@@ -114,19 +114,10 @@ float Setting::engine()
   bool run = true;
   int8_t last = 0;
   int8_t index = 0;
-  unsigned long lastTime;
 
   while(run)
     {
-      unsigned long currentTime = millis();
-
-      selectCharacter(&index, &last);
-
-      // Blinking of the selected character
-      if(timer(currentTime, &lastTime, delayTimeBlock))
-	{
-	  blinkValue(index, p_arrayValue, _buffSize, false);
-	}
+      selectCharacter(&index, &last, p_arrayValue, _buffSize, 0);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
@@ -135,13 +126,13 @@ float Setting::engine()
 	  if(index > _buffSize)
 	    {
 	      setValue();
-	      run = false;
+	      saveValue(*p_floatingValue);
+	      run = EXIT;
 	    }
 	  // Else set the new value
 	  else
 	    {
 	      editValue(p_arrayValue, _buffSize, index, buttonState);
-
 	    }
 	}
       // return the cursor if we are at the end off lcd
@@ -151,21 +142,35 @@ float Setting::engine()
 }
 
 // Move cursor on character to edit
-void Setting::selectCharacter(int8_t *index, int8_t *last)
+void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue[],
+			      uint8_t buffSize, uint8_t offset)
 {
+  static unsigned long lastTime;
+  unsigned long currentTime = millis();
+
   *index += _Encoder->getValue();
 
-  clampValue(index, 0, _buffSize-1);
+  clampValue(index, 0, buffSize-1);
 
-  *index = ignoreChar(*index, *last, p_arrayValue, _buffSize);
+  *index = ignoreChar(*index, *last, arrayValue, buffSize);
 
-  *last = enginePrintFillChar(*last, *index, _buffSize, p_arrayValue);
+  enginePrintFillChar(*last, *index, buffSize, arrayValue, offset);
+
+  // Blinking of the selected character
+  if(timer(currentTime, &lastTime, delayTimeBlock))
+    {
+      blinkValue(*index, arrayValue, buffSize, false, offset);
+    }
+
+  // To determine the direction of the next movement.
+  *last = *index;
 }
 
 // Jump to the next index for ignore char.
-int8_t Setting::ignoreChar(int8_t index, int8_t last, char value[], int arraySize)
+int8_t Setting::ignoreChar(int8_t index, int8_t last, const char value[],
+			   int arraySize)
 {
-  if(index > arraySize-2)
+  if(index > 3 && index > arraySize-2)
     {
       index = LCD_CHARS-1;
     }
@@ -183,7 +188,8 @@ int8_t Setting::ignoreChar(int8_t index, int8_t last, char value[], int arraySiz
   return index;
 }
 
-void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState)
+void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
+			ClickEncoder::Button buttonState)
 {
   // Erase the exit icon to show we are in the edit mode
   enginePrintEditMode(true);
@@ -204,7 +210,7 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index, Click
       // Blinking value
       if(timer(currentTimeSet, &lastTimeSet, delayTimeBlank))
 	{
-	  blinkValue(index, arrayValue, buffSize, true);
+	  blinkValue(index, arrayValue, buffSize, true, 0);
 	}
     }
   // Refresh screen after set value
@@ -216,3 +222,37 @@ void Setting::setValue()
 {
   *p_floatingValue = atof(p_arrayValue);
 }
+
+void Setting::saveValue(double value)
+{
+  int8_t currentIndex, lastIndex;
+  bool run = true;
+
+  enginePrintSave(value);
+
+  while(run)
+    {
+      selectCharacter(&currentIndex, &lastIndex, MSG_CHOICE, (SIZE_MSG_CHOICE-1),
+		      (LCD_CHARS-SIZE_MSG_CHOICE+1));
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+//	  Serial.print("Index value");
+//	  Serial.println(currentIndex);
+//	  delay(1000);
+	  if(currentIndex == 0)
+	    {
+//	      Serial.println("Save pass");
+//	      Serial.print("p_arrayValue : ");
+//	      Serial.println(p_arrayValue);
+//	      Serial.print("idvalue : ");
+//	      Serial.println(_idValue);
+//	      delay(2000);
+	      memory.save(p_arrayValue, _idValue);
+	    }
+	  run = EXIT;
+	}
+    }
+}
+

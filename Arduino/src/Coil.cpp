@@ -97,9 +97,7 @@ Coil::Coil() : motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
     _totalStepsCounter(0)
 {}
 
-Coil::~Coil(){
-
-}
+Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
 

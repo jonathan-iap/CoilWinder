@@ -82,11 +82,22 @@ void Memory::init()
 
 void Memory::save(char buffer[], const uint8_t id)
 {
+  //ReadAddresses();
+  //char test[BUFFSIZE_WIRE]={0};
   switch (id)
   {
     case id_WIRESIZE :
       {
 	EEPROM.updateBlock<char>(_addr_WireSize, buffer, BUFFSIZE_WIRE);
+//	Serial.println("Save pass");
+//	Serial.print("Value : ");
+//	Serial.println(buffer);
+//	Serial.print("id : ");
+//	Serial.println(id);
+//	EEPROM.readBlock<char>(_addr_WireSize, test, BUFFSIZE_WIRE);
+//	Serial.print("adress wire: "); Serial.println(_addr_WireSize);
+//	Serial.print("read wire eeprom: "); Serial.println(test);
+//	delay(2000);
 	break;
       }
     case id_COILLENGTH :
@@ -224,3 +235,5 @@ void Memory::ReadArrayValue()
   EEPROM.readBlock<char>(_addr_DefaultSettings, _buff_DefaultSettings, BUFFSIZE_DEFAULT);
   Serial.print("array default: "); Serial.println(_buff_DefaultSettings);
 }
+
+Memory memory;

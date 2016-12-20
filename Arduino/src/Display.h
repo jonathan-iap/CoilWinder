@@ -30,8 +30,8 @@
 
 #define MSG_VALID 	"Enter:"
 #define SIZE_MSG_VALID 	COUNTOF(MSG_VALID)
-#define MSG_SAVE 	"Save?Y/N"
-#define SIZE_MSG_SAVE 	COUNTOF(MSG_SAVE)
+#define MSG_CHOICE 	"Y/N"
+#define SIZE_MSG_CHOICE	COUNTOF(MSG_CHOICE)
 
 class Display
 {
@@ -113,7 +113,7 @@ public:
   const void version();
   const void clear();
   void blank(uint8_t size);
-  void blinkValue(uint8_t _index, char value[], int _arraySize, bool _blank);
+  void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
 
   //Temporaries
   const void reset();
@@ -126,11 +126,11 @@ public:
 protected :
   // MenuSetting
   void enginePrintHome(char label[], char arrayValue[]);
-  int8_t enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, char arrayValue[]);
+  void enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   void enginePrintEditMode(bool setMode);
+  void enginePrintSave(double value);
 
 private:
-  //LiquidCrystal_I2C *_lcd;
 
 };
 

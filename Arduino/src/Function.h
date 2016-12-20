@@ -18,7 +18,7 @@
  * return  : size of buffer
  ******************************************************************************/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
-
+#define EXIT false
 
 void clampValue(int8_t *_val, uint8_t _min, uint8_t _max);
 bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long delay);
