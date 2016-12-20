@@ -23,6 +23,7 @@ public :
   ~Setting();
 
   void getId(const uint8_t id);
+  void resetAction(bool razValues);
 
 private:
 
@@ -42,7 +43,6 @@ private:
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState);
   void setValue();
   void saveValue(double value);
-
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

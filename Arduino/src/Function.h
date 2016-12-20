@@ -12,12 +12,9 @@
 
 #include "Arduino.h"
 
-/******************************************************************************
- * brief   : Macros to get simply the size of a buffer.
- * details : __BUFFER__ , buffer of which we wants to know the size
- * return  : size of buffer
- ******************************************************************************/
+//Macros to get simply the size of a buffer.
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+
 #define EXIT false
 
 void clampValue(int8_t *_val, uint8_t _min, uint8_t _max);

@@ -114,15 +114,21 @@ bool editTurns(const Menu::Action_t a)
 
 bool menuReset(const Menu::Action_t a)
 {
-  if (a == Menu::actionDisplay)
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      display.reset();
-      memory.reset();
-      delay(1000);
+      setting.resetAction(false);
     }
   return true;
 }
 
+bool menuRAZ(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.resetAction(true);
+    }
+  return true;
+}
 
 // Framework for menu ---------------------------------------------------------
 
@@ -132,7 +138,7 @@ MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, 
 // Menu 1 -> 3
 MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, Menu::NullItem, menuDummy);
-MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miReset, menuDummy);
+MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miResetVal, menuDummy);
 // Sub-menu 1.1 -> 1.6
 MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
 MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
@@ -141,8 +147,9 @@ MenuItem(miStart, "4.Start", miBack1, miTurns, miWinding, Menu::NullItem, menuDu
 MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
 // Sub-menu 2.1 -> 2.?
 // Sub-menu 3.1 -> 3.?
-MenuItem(miReset, "Reset EEprom", miBack2, Menu::NullItem, miSettings, Menu::NullItem, menuReset);
-MenuItem(miBack2, "Back \2", Menu::NullItem, miReset, miSettings, Menu::NullItem, menuBack);
+MenuItem(miResetVal, "RAZ all Values", miResetEEp, Menu::NullItem, miSettings, Menu::NullItem, menuRAZ);
+MenuItem(miResetEEp, "Reset EEprom", miBack2, miResetVal, miSettings, Menu::NullItem, menuReset);
+MenuItem(miBack2, "Back \2", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
 
 // ----------------------------------------------------------------------------
 

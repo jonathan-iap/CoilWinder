@@ -52,20 +52,8 @@ void Memory::init()
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
 
-  // Read the eeprom memory and set buffers with values saved
-  read(_buff_WireSize,id_WIRESIZE);
-  read(_buff_CoilLength, id_COILLENGTH);
-  read(_buff_Turns, id_TURNS);
-  read(_buff_MaxSpeed,id_MAX_SPEED);
-  read(_buff_MinSpeed, id_MIN_SPEED);
-  read(_buff_AccDelay, id_ACC_DELAY);
-  // Convert value within array in a double value.
-  WireSize 	= atof(_buff_WireSize);
-  CoilLength 	= atof(_buff_CoilLength);
-  Turns 	= atof(_buff_Turns);
-  MaxSpeed 	= atof(_buff_MaxSpeed);
-  MinSpeed 	= atof(_buff_MinSpeed);
-  AccDelay 	= atof(_buff_AccDelay);
+  // Read and set all data saved in eeprom memory.
+  readAll();
 
 #ifdef DEBUG
   Serial.println("---------------------------------");
@@ -89,15 +77,15 @@ void Memory::save(char buffer[], const uint8_t id)
     case id_WIRESIZE :
       {
 	EEPROM.updateBlock<char>(_addr_WireSize, buffer, BUFFSIZE_WIRE);
-//	Serial.println("Save pass");
-//	Serial.print("Value : ");
-//	Serial.println(buffer);
-//	Serial.print("id : ");
-//	Serial.println(id);
-//	EEPROM.readBlock<char>(_addr_WireSize, test, BUFFSIZE_WIRE);
-//	Serial.print("adress wire: "); Serial.println(_addr_WireSize);
-//	Serial.print("read wire eeprom: "); Serial.println(test);
-//	delay(2000);
+	//	Serial.println("Save pass");
+	//	Serial.print("Value : ");
+	//	Serial.println(buffer);
+	//	Serial.print("id : ");
+	//	Serial.println(id);
+	//	EEPROM.readBlock<char>(_addr_WireSize, test, BUFFSIZE_WIRE);
+	//	Serial.print("adress wire: "); Serial.println(_addr_WireSize);
+	//	Serial.print("read wire eeprom: "); Serial.println(test);
+	//	delay(2000);
 	break;
       }
     case id_COILLENGTH :
@@ -163,6 +151,24 @@ void Memory::read(char buffer[], const uint8_t id)
 	break;
       }
   }
+}
+
+void Memory::readAll()
+{
+  // Read the eeprom memory and set buffers with values saved
+  read(_buff_WireSize,id_WIRESIZE);
+  read(_buff_CoilLength, id_COILLENGTH);
+  read(_buff_Turns, id_TURNS);
+  read(_buff_MaxSpeed,id_MAX_SPEED);
+  read(_buff_MinSpeed, id_MIN_SPEED);
+  read(_buff_AccDelay, id_ACC_DELAY);
+  // Convert value within array in a double value.
+  WireSize 	= atof(_buff_WireSize);
+  CoilLength 	= atof(_buff_CoilLength);
+  Turns 	= atof(_buff_Turns);
+  MaxSpeed 	= atof(_buff_MaxSpeed);
+  MinSpeed 	= atof(_buff_MinSpeed);
+  AccDelay 	= atof(_buff_AccDelay);
 }
 
 void Memory::reset()

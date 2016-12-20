@@ -43,6 +43,7 @@ public :
   void init();
   void save(char buffer[], const uint8_t id);
   void read(char buffer[], const uint8_t id);
+  void readAll();
   void reset();
   bool isSet();
 

@@ -29,7 +29,35 @@ void Setting::getId(const uint8_t id)
   affectValues();
 }
 
+void Setting::resetAction(bool razValues)
+{
+  int8_t currentIndex = 0;
+  int8_t  lastIndex=0;
+  bool run = true;
 
+  enginePrintResetConfirm(razValues);
+
+  while(run)
+    {
+      selectCharacter(&currentIndex, &lastIndex, MSG_CHOICE, (SIZE_MSG_CHOICE-1),0);
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  if(currentIndex == 0 && !razValues) // if "yes"
+	    {
+	      memory.reset();
+	      loadBar();
+	    }
+	  else if(currentIndex == 0 && razValues)
+	    {
+	      memory.readAll();
+	      loadBar();
+	    }
+	  run = EXIT;
+	}
+    }
+}
 
 /* PRIVATE -------------------------------------------------------------------*/
 // Affect variable and pointer through the id
@@ -223,9 +251,11 @@ void Setting::setValue()
   *p_floatingValue = atof(p_arrayValue);
 }
 
+// Print current value and ask save? if yes save in eeprom memory.
 void Setting::saveValue(double value)
 {
-  int8_t currentIndex, lastIndex;
+  int8_t currentIndex = 0;
+  int8_t lastIndex = 0;
   bool run = true;
 
   enginePrintSave(value);
@@ -238,21 +268,12 @@ void Setting::saveValue(double value)
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-//	  Serial.print("Index value");
-//	  Serial.println(currentIndex);
-//	  delay(1000);
-	  if(currentIndex == 0)
+	  if(currentIndex == 0) // if "yes"
 	    {
-//	      Serial.println("Save pass");
-//	      Serial.print("p_arrayValue : ");
-//	      Serial.println(p_arrayValue);
-//	      Serial.print("idvalue : ");
-//	      Serial.println(_idValue);
-//	      delay(2000);
 	      memory.save(p_arrayValue, _idValue);
+	      loadBar();
 	    }
 	  run = EXIT;
 	}
     }
 }
-

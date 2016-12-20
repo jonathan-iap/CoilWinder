@@ -78,6 +78,17 @@ void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, boo
   }
 }
 
+void Display::loadBar()
+{
+  _lcd.setCursor(0, LCD_LINES);
+
+  for(uint8_t i = 0; i<LCD_CHARS; i++)
+    {
+      _lcd.write((byte)IconBlock);
+      delay(10);
+    }
+}
+
 
 // Temporaries
 const void Display::reset()
@@ -157,5 +168,14 @@ void Display::enginePrintSave(double value)
   _lcd.setCursor(0,LCD_LINES);
   _lcd.print(value);
   _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
+  _lcd.print(MSG_CHOICE);
+}
+
+void Display::enginePrintResetConfirm(bool razValues)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  razValues ? _lcd.print(MSG_RAZ) : _lcd.print(MSG_RESET);
+  _lcd.setCursor(0, LCD_LINES);
   _lcd.print(MSG_CHOICE);
 }
