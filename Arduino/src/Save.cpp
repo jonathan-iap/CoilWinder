@@ -38,54 +38,22 @@ void Memory::init()
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
   EEPROM.setMemPool(MEN_BASE, EEPROMSizeUno);
 
-#ifdef DEBUGOFF
-  Serial.println("---------------------------------");
-  Serial.println("Reading a char array, before :");
-  Serial.println("---------------------------------");
-  ReadAddresses();
-  Serial.println(".................................");
-  ReadFloatValue();
-  Serial.println(".................................");
-  ReadArrayValue();
-  Serial.println("---------------------------------");
-#endif
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
 
   // Read and set all data saved in eeprom memory.
   readAll();
-
-#ifdef DEBUG
-  Serial.println("---------------------------------");
-  Serial.println("Reading a char array, after : ");
-  Serial.println("---------------------------------");
-  ReadAddresses();
-  Serial.println(".................................");
-  ReadFloatValue();
-  Serial.println(".................................");
-  ReadArrayValue();
-  Serial.println("---------------------------------");
-#endif
 }
+
 
 void Memory::save(char buffer[], const uint8_t id)
 {
   //ReadAddresses();
-  //char test[BUFFSIZE_WIRE]={0};
   switch (id)
   {
     case id_WIRESIZE :
       {
 	EEPROM.updateBlock<char>(_addr_WireSize, buffer, BUFFSIZE_WIRE);
-	//	Serial.println("Save pass");
-	//	Serial.print("Value : ");
-	//	Serial.println(buffer);
-	//	Serial.print("id : ");
-	//	Serial.println(id);
-	//	EEPROM.readBlock<char>(_addr_WireSize, test, BUFFSIZE_WIRE);
-	//	Serial.print("adress wire: "); Serial.println(_addr_WireSize);
-	//	Serial.print("read wire eeprom: "); Serial.println(test);
-	//	delay(2000);
 	break;
       }
     case id_COILLENGTH :

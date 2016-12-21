@@ -12,7 +12,7 @@
 
 #include "Arduino.h"
 
-//Macros to get simply the size of a buffer.
+// Macros to get simply the size of buffer.
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 
 #define EXIT false

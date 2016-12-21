@@ -1,4 +1,4 @@
-#include "Coil.h"
+#include <Winding.h>
 
 /*_____ PRIVATE FONCTIONS _____ */
 

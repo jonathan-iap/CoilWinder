@@ -47,7 +47,7 @@ enum
 #define M2_STEPS_PER_TR (M2_initialStepPerTr * EIGHTH_STEPS)
 
 #define ACC	1	// Acceleration step increment.
-//#define DELAY_DRIVER  	20 // Active if is need by your stepper driver.
+//#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
 
 
 // Machine settings ------------------------------------------------------------

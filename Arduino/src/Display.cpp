@@ -47,13 +47,13 @@ const void Display::clear()
   _lcd.clear();
 }
 
-void Display::blank(uint8_t size)
+const void Display::blank(uint8_t size)
 {
   for(int i=0; i<size; i++) _lcd.print(" ");
 }
 
 // blink value on current cursor
-void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset)
+const void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset)
 {
   static bool basculeSet = true;
 
@@ -78,7 +78,7 @@ void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, boo
   }
 }
 
-void Display::loadBar()
+const void Display::loadBar()
 {
   _lcd.setCursor(0, LCD_LINES);
 
@@ -90,35 +90,27 @@ void Display::loadBar()
 }
 
 
-// Temporaries
-const void Display::reset()
-{
-  _lcd.clear();
-  _lcd.setCursor(0,0);
-  _lcd.print("EEprom memory");
-  _lcd.setCursor(0,1);
-  _lcd.print("Reset");
-}
 // Render menu item ------------------------------------------------------------
-void Display::renderIconOn(uint8_t pos, bool currentItem)
+const void Display::renderIconOn(uint8_t pos, bool currentItem)
 {
   _lcd.setCursor(0, pos);
   currentItem ? _lcd.write((uint8_t)IconEnter) : _lcd.write(20);
 }
 
-void Display::renderItem(const char item[])
+const void Display::renderItem(const char item[])
 {
   _lcd.print(item);
 }
 
-void Display::renderIconChild()
+const void Display::renderIconChild()
 {
   _lcd.write(20);
   _lcd.write((uint8_t)IconRight);
+  blank(7);
 }
 
 // Engine menu setting ----------------------------------------------------------
-void Display::enginePrintHome(char label[], char arrayValue[])
+const void Display::enginePrintHome(char label[], char arrayValue[])
 {
   _lcd.clear();
   _lcd.setCursor(0, 0);
@@ -130,7 +122,7 @@ void Display::enginePrintHome(char label[], char arrayValue[])
   _lcd.write((byte)IconValid);
 }
 
-void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
+const void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
 				  const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
@@ -141,7 +133,7 @@ void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
     }
 }
 
-void Display::enginePrintEditMode(bool setMode)
+const void Display::enginePrintEditMode(bool setMode)
 {
   _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
   if(setMode)
@@ -160,7 +152,7 @@ void Display::enginePrintEditMode(bool setMode)
     }
 }
 
-void Display::enginePrintSave(double value)
+const void Display::enginePrintSave(double value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
@@ -171,7 +163,7 @@ void Display::enginePrintSave(double value)
   _lcd.print(MSG_CHOICE);
 }
 
-void Display::enginePrintResetConfirm(bool razValues)
+const void Display::enginePrintResetConfirm(bool razValues)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);

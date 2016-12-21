@@ -1,5 +1,5 @@
-#ifndef Coil_H
-#define Coil_H
+#ifndef WINDING_H
+#define WINDING_H
 
 #include "Arduino.h"
 #include "Motor.h"

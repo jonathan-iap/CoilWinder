@@ -7,14 +7,13 @@
 
 // libraries ------------------------------------------------------------------
 #include "Arduino.h"
-#include "Coil.h"
 #include "Configuration.h"
 #include "Display.h"
 #include "ClickEncoder.h"
 #include "TimerOne.h"
-#include "Menu.h"
-#include "MenuSettings.h"
 #include "Save.h"
+#include "MenuStructure.h"
+#include "Winding.h"
 
 
 // Declare objects ------------------------------------------------------------
@@ -22,24 +21,11 @@ ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
 Menu::Engine *engine;
 Display display;
 Coil CoilWinding;
-Setting setting(&Encoder);
 
 
 // Global Variables -----------------------------------------------------------
-namespace State
-{
-  typedef enum SystemMode_e
-  {
-    None      	= 0,
-    Default   	= 1,
-    Move	= 2,
-    Edit	= 3,
-    Back	= 4
-  } SystemMode;
-};
-
-uint8_t systemState = State::Default;
-uint8_t previousSystemState = State::None;
+uint8_t systemState = state_DEFAULT;
+uint8_t previousSystemState = state_NONE;
 uint8_t menuItemsVisible = LCD_LINES;
 int16_t encMovement;
 int16_t encAbsolute;
@@ -68,91 +54,6 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
   // mark items that have children
   engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
 }
-
-// CallBacks -------------------------------------------------------------------
-bool menuDummy(const Menu::Action_t a)
-{
-  // Do nothing;
-  return true;
-}
-
-bool menuBack(const Menu::Action_t a)
-{
-  if (a == Menu::actionDisplay)
-    {
-      systemState = State::Back;
-    }
-  return true;
-}
-
-bool editWire(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.getId(id_WIRESIZE);
-    }
-  return true;
-}
-
-bool editLength(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.getId(id_COILLENGTH);
-    }
-  return true;
-}
-
-bool editTurns(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.getId(id_TURNS);
-    }
-  return true;
-}
-
-bool menuReset(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.resetAction(false);
-    }
-  return true;
-}
-
-bool menuRAZ(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.resetAction(true);
-    }
-  return true;
-}
-
-// Framework for menu ---------------------------------------------------------
-
-// Name, Label, Next, Previous, Parent, Child, Callback
-// Menu 0
-MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
-// Menu 1 -> 3
-MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
-MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, Menu::NullItem, menuDummy);
-MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miResetVal, menuDummy);
-// Sub-menu 1.1 -> 1.6
-MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
-MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
-MenuItem(miTurns, "3.Turns", miStart, miCoilLength, miWinding, Menu::NullItem, editTurns);
-MenuItem(miStart, "4.Start", miBack1, miTurns, miWinding, Menu::NullItem, menuDummy);
-MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
-// Sub-menu 2.1 -> 2.?
-// Sub-menu 3.1 -> 3.?
-MenuItem(miResetVal, "RAZ all Values", miResetEEp, Menu::NullItem, miSettings, Menu::NullItem, menuRAZ);
-MenuItem(miResetEEp, "Reset EEprom", miBack2, miResetVal, miSettings, Menu::NullItem, menuReset);
-MenuItem(miBack2, "Back \2", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
-
-// ----------------------------------------------------------------------------
-
 
 
 /* SETUP ---------------------------------------------------------------------*/
@@ -193,14 +94,14 @@ void loop()
   switch(systemState)
   {
     // First use print software version
-    case State::Default :
+    case state_DEFAULT :
       {
 	display.version();
 	break;
       }
-    case State::Back :
+    case state_BACK :
       {
-	systemState = State::Move;
+	systemState = state_MOVE;
 	engine->navigate(engine->getParent());
 	updateMenu = true;
 	break;
@@ -215,14 +116,14 @@ void loop()
 
       switch(systemState)
       {
-	case State::Move :
+	case state_MOVE :
 	  {
 	    engine->navigate((encMovement > 0) ? engine->getNext() : engine->getPrev());
 	    updateMenu = true;
 	    break;
 	  }
 
-	case State::Edit :
+	case state_EDIT :
 	  {
 	    (encMovement > 0) ? tmpValue++ : tmpValue--;
 	    updateMenu = true;
@@ -238,14 +139,14 @@ void loop()
     case ClickEncoder::Clicked:
       {
 	// Enter in item
-	if(systemState == State::Move)
+	if(systemState == state_MOVE)
 	  {
 	    engine->invoke();
 	    updateMenu = true;
 	  }
-	else if(systemState == State::Edit)
+	else if(systemState == state_EDIT)
 	  {
-	    systemState = State::Move;
+	    systemState = state_MOVE;
 	    engine->navigate(engine->getParent());
 	    updateMenu = true;
 	  }
@@ -254,7 +155,7 @@ void loop()
 	    // enter settings menu
 	    engine->navigate(&miWinding);
 
-	    systemState = State::Move;
+	    systemState = state_MOVE;
 	    previousSystemState = systemState;
 	    updateMenu = true;
 	  }
@@ -263,7 +164,7 @@ void loop()
     case ClickEncoder::DoubleClicked:
       {
 	// Back to previous item
-	if (systemState == State::Move)
+	if (systemState == state_MOVE)
 	  {
 	    engine->navigate(engine->getParent());
 	    updateMenu = true;

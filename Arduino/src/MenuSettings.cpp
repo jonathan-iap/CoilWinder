@@ -20,13 +20,7 @@ Setting::~Setting(){};
 void Setting::getId(const uint8_t id)
 {
   _idValue = id;
-
-#ifdef DEBUG
-  Serial.print("id : "); Serial.println(_idValue);
-  Serial.println("---------------------");
-#endif
-
-  affectValues();
+  idToValue();
 }
 
 void Setting::resetAction(bool razValues)
@@ -49,7 +43,7 @@ void Setting::resetAction(bool razValues)
 	      memory.reset();
 	      loadBar();
 	    }
-	  else if(currentIndex == 0 && razValues)
+	  else if(currentIndex == 0 && razValues) // if "yes"
 	    {
 	      memory.readAll();
 	      loadBar();
@@ -60,88 +54,61 @@ void Setting::resetAction(bool razValues)
 }
 
 /* PRIVATE -------------------------------------------------------------------*/
+void Setting::affectValues(const char label[], char arrayValue[],uint8_t buffSize ,double *value)
+{
+  strcpy(_label, label);
+  p_arrayValue = arrayValue;
+  _buffSize = buffSize;
+  p_floatingValue = value;
+}
+
 // Affect variable and pointer through the id
-void Setting::affectValues()
+void Setting::idToValue()
 {
   switch (_idValue)
   {
-#ifdef DEBUG
-    Serial.println("set value function : ");
-    Serial.println("---------------------");
-#endif
     case id_WIRESIZE :
       {
-	Serial.print("buffer origin : "); Serial.println(_buff_WireSize);
-
-	strcpy(_label, MSG_WIRE_SIZE);
-	p_arrayValue = _buff_WireSize;
-	p_floatingValue = &WireSize;
-	_buffSize = BUFFSIZE_WIRE;
+	affectValues(MSG_WIRE_SIZE, _buff_WireSize, BUFFSIZE_WIRE, &WireSize);
 	break;
       }
     case id_COILLENGTH :
       {
-	Serial.print("buffer origin : "); Serial.println(_buff_CoilLength);
-
-	strcpy(_label, MSG_COIL_LENGTH);
-	p_arrayValue = _buff_CoilLength;
-	p_floatingValue = &CoilLength;
-	_buffSize = BUFFSIZE_COIL;
+	affectValues(MSG_COIL_LENGTH, _buff_CoilLength, BUFFSIZE_COIL, &CoilLength);
 	break;
       }
     case id_TURNS :
       {
-	Serial.print("buffer origin : "); Serial.println(_buff_Turns);
-
-	strcpy(_label, MSG_TURNS);
-	p_arrayValue =_buff_Turns;
-	p_floatingValue = &Turns;
-	_buffSize = BUFFSIZE_TURNS;
+	affectValues(MSG_TURNS, _buff_Turns, BUFFSIZE_TURNS, &Turns);
 	break;
       }
     case id_MAX_SPEED :
       {
-	strcpy(_label, MSG_MAX_SPEED);
-	p_arrayValue =_buff_MaxSpeed;
-	p_floatingValue = &MaxSpeed;
-	_buffSize = BUFFSIZE_MAX_SPEED;
+	affectValues(MSG_MAX_SPEED, _buff_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed);
 	break;
       }
     case id_MIN_SPEED :
       {
-	strcpy(_label, MSG_MIN_SPEED);
-	p_arrayValue =_buff_MinSpeed;
-	p_floatingValue = &MinSpeed;
-	_buffSize = BUFFSIZE_MIN_SPEED;
+	affectValues(MSG_MIN_SPEED, _buff_MinSpeed, BUFFSIZE_MIN_SPEED, &MinSpeed);
 	break;
       }
     case id_ACC_DELAY :
       {
-	strcpy(_label, MSG_ACC_DELAY);
-	p_arrayValue =_buff_AccDelay;
-	p_floatingValue = &AccDelay;
-	_buffSize = BUFFSIZE_ACC_DELAY;
+	affectValues(MSG_ACC_DELAY, _buff_AccDelay, BUFFSIZE_ACC_DELAY, &AccDelay);
 	break;
       }
   }
-#ifdef DEBUG
-  Serial.print("label : "); Serial.println(_label);
-  Serial.print("array value : "); Serial.println(p_arrayValue);
-  Serial.print("value float : "); Serial.println(*p_floatingValue);
-  Serial.print("size : "); Serial.println(_buffSize);
-  Serial.println("---------------------");
-#endif
   engine();
 }
 
 // Navigate menu
 float Setting::engine()
 {
-  enginePrintHome(_label, p_arrayValue);
-
   bool run = true;
   int8_t last = 0;
   int8_t index = 0;
+
+  enginePrintHome(_label, p_arrayValue);
 
   while(run)
     {

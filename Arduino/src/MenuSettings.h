@@ -36,7 +36,8 @@ private:
   char *p_arrayValue;
   char _label[17]; // Minimum lcd screen 16 + 1 for null character
 
-  void affectValues();
+  void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,double *value);
+  void idToValue();
   float engine();
   void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,uint8_t buffSize, uint8_t offset);
   int8_t ignoreChar(int8_t index, int8_t last, const char value[], int arraySize);

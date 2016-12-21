@@ -27,15 +27,13 @@
 #define MSG_MAX_SPEED	"MAX speed"
 #define MSG_MIN_SPEED	"MIN speed"
 #define MSG_ACC_DELAY	"Acc duration"
+#define MSG_RESET 	"Reset EEprom ? "
+#define MSG_RAZ 	"Reset values ? "
 
 #define MSG_VALID 	"Enter:"
 #define SIZE_MSG_VALID 	COUNTOF(MSG_VALID)
 #define MSG_CHOICE 	"Y/N"
 #define SIZE_MSG_CHOICE	COUNTOF(MSG_CHOICE)
-#define MSG_RESET 	"Reset EEprom ? "
-#define SIZE_MSG_RESET 	COUNTOF(MSG_RESET)
-#define MSG_RAZ 	"Reset values ? "
-#define SIZE_MSG_RAZ 	COUNTOF(MSG_RAZ)
 
 class Display
 {
@@ -116,25 +114,22 @@ public:
   const void begin();
   const void version();
   const void clear();
-  void blank(uint8_t size);
-  void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
-  void loadBar();
-
-  //Temporaries
-  const void reset();
+  const void blank(uint8_t size);
+  const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
+  const void loadBar();
 
   // Render menu item
-  void renderIconOn(uint8_t pos, bool currentItem);
-  void renderItem(const char item[]);
-  void renderIconChild();
+  const void renderIconOn(uint8_t pos, bool currentItem);
+  const void renderItem(const char item[]);
+  const void renderIconChild();
 
 protected :
   // MenuSetting
-  void enginePrintHome(char label[], char arrayValue[]);
-  void enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
-  void enginePrintEditMode(bool setMode);
-  void enginePrintSave(double value);
-  void enginePrintResetConfirm(bool razValues);
+  const void enginePrintHome(char label[], char arrayValue[]);
+  const void enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
+  const void enginePrintEditMode(bool setMode);
+  const void enginePrintSave(double value);
+  const void enginePrintResetConfirm(bool razValues);
 
 private:
 
