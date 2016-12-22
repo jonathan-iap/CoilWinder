@@ -3,40 +3,189 @@
    History
    =======
    2016/OCT/13  - First version
-*/
+ */
 
-/*-----( Import needed libraries )-----*/
-#include <Arduino.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+// libraries ------------------------------------------------------------------
+#include "Arduino.h"
+#include "Configuration.h"
+#include "Display.h"
+#include "ClickEncoder.h"
+#include "TimerOne.h"
+#include "Save.h"
+#include "MenuStructure.h"
+#include "Winding.h"
 
-/*-----( Declare Constants )-----*/
-/*-----( Declare objects )-----*/
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 
-/*-----( Declare Variables )-----*/
+// Declare objects ------------------------------------------------------------
+ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
+Menu::Engine *engine;
+Display display;
+Coil CoilWinding;
+
+
+// Global Variables -----------------------------------------------------------
+uint8_t systemState = state_DEFAULT;
+uint8_t previousSystemState = state_NONE;
+uint8_t menuItemsVisible = LCD_LINES;
+int16_t encMovement;
+int16_t encAbsolute;
+int16_t encLastAbsolute = -1;
+int16_t tmpValue = 0;
+
+bool updateMenu = false;
+bool lastEncoderAccelerationState = true;
+
+// Functions ------------------------------------------------------------------
+void timerIsr(void)
+{
+  Encoder.service();
+}
+
+void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
+{
+  bool current = false;
+  // Print icon before current item else blank.
+  engine->currentItem == mi ? current = true : current = false;
+  display.renderIconOn(pos, current);
+
+  // Print label item
+  display.renderItem(engine->getLabel(mi));
+
+  // mark items that have children
+  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
+}
+
 
 /* SETUP ---------------------------------------------------------------------*/
 void setup()
 {
-  lcd.begin(16,2);
+  // Debug section
+#ifdef DEBUG
+  Serial.begin(BAUDRATE);
 
-// ------- Quick 3 blinks of backlight  -------------
-  for(int i = 0; i< 3; i++)
-  {
-    lcd.backlight();
-    delay(250);
-    lcd.noBacklight();
-    delay(250);
-  }
-  lcd.backlight();
+  Serial.print("\n\nbegin\n\n");
+  delay(1000);
+#endif
+
+  // Lcd initialization
+  display.begin();
+
+  // Eeprom memory
+  memory.init();
+
+  // Winding function
+  CoilWinding.begin();
+
+  // For rotary encoder
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(timerIsr);
+
+  // Menu begin
+  engine = new Menu::Engine(&Menu::NullItem);
+
+  // Pin initialization
+  pinMode(13, OUTPUT);
 }
-/*--(end setup )---*/
 
 /* LOOP ----------------------------------------------------------------------*/
 void loop()
 {
+  // Display section.
+  switch(systemState)
+  {
+    // First use print software version
+    case state_DEFAULT :
+      {
+	display.version();
+	break;
+      }
+    case state_BACK :
+      {
+	systemState = state_MOVE;
+	engine->navigate(engine->getParent());
+	updateMenu = true;
+	break;
+      }
+  }
+
+  // handle encoder
+  encMovement = Encoder.getValue();
+  if (encMovement)
+    {
+      encAbsolute += encMovement;
+
+      switch(systemState)
+      {
+	case state_MOVE :
+	  {
+	    engine->navigate((encMovement > 0) ? engine->getNext() : engine->getPrev());
+	    updateMenu = true;
+	    break;
+	  }
+
+	case state_EDIT :
+	  {
+	    (encMovement > 0) ? tmpValue++ : tmpValue--;
+	    updateMenu = true;
+	    break;
+	  }
+      }
+    }
+
+  // handle button
+  switch (Encoder.getButton())
+  {
+
+    case ClickEncoder::Clicked:
+      {
+	// Enter in item
+	if(systemState == state_MOVE)
+	  {
+	    engine->invoke();
+	    updateMenu = true;
+	  }
+	else if(systemState == state_EDIT)
+	  {
+	    systemState = state_MOVE;
+	    engine->navigate(engine->getParent());
+	    updateMenu = true;
+	  }
+	else
+	  {
+	    // enter settings menu
+	    engine->navigate(&miWinding);
+
+	    systemState = state_MOVE;
+	    previousSystemState = systemState;
+	    updateMenu = true;
+	  }
+	break;
+      }
+    case ClickEncoder::DoubleClicked:
+      {
+	// Back to previous item
+	if (systemState == state_MOVE)
+	  {
+	    engine->navigate(engine->getParent());
+	    updateMenu = true;
+	  }
+	break;
+      }
+  }
+
+  // update LCD
+  if (updateMenu)
+    {
+      updateMenu = false;
+
+      if (!encMovement)
+	{
+	  // clear menu on child/parent navigation
+	  display.clear();
+	}
+      // render the menu
+      engine->render(renderMenuItem, menuItemsVisible);
+    }
 }
-/* --(end main loop )-- */
 
 /* ( THE END ) */
