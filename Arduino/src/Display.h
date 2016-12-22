@@ -29,6 +29,7 @@
 #define MSG_ACC_DELAY	"Acc duration"
 #define MSG_RESET 	"Reset EEprom ? "
 #define MSG_RAZ 	"Reset values ? "
+#define MSG_MOVE	"Move carriage"
 
 #define MSG_VALID 	"Enter:"
 #define SIZE_MSG_VALID 	COUNTOF(MSG_VALID)

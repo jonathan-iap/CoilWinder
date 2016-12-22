@@ -13,8 +13,8 @@ Setting::Setting(ClickEncoder *p_Encoder) : _idValue(0),
     _buffSize(0), p_floatingValue(0), p_arrayValue(0)
 {
   _Encoder = p_Encoder;
-};
-Setting::~Setting(){};
+}
+Setting::~Setting(){}
 
 // get id of value that need set
 void Setting::getId(const uint8_t id)
@@ -98,11 +98,11 @@ void Setting::idToValue()
 	break;
       }
   }
-  engine();
+  engine(true);
 }
 
 // Navigate menu
-float Setting::engine()
+void Setting::engine(bool save)
 {
   bool run = true;
   int8_t last = 0;
@@ -121,7 +121,7 @@ float Setting::engine()
 	  if(index > _buffSize)
 	    {
 	      setValue();
-	      saveValue(*p_floatingValue);
+	      if(save) saveValue(*p_floatingValue);
 	      run = EXIT;
 	    }
 	  // Else set the new value
@@ -133,7 +133,6 @@ float Setting::engine()
       // return the cursor if we are at the end off lcd
       if(index>_buffSize) index = _buffSize-1;
     }
-  return false;
 }
 
 // Move cursor on character to edit
@@ -243,4 +242,12 @@ void Setting::saveValue(double value)
 	  run = EXIT;
 	}
     }
+}
+
+void Setting::moveValue()
+{
+  char arrayDistance[] = {"000.00"};
+  double distance = 0.00;
+  affectValues(MSG_MOVE, arrayDistance, 6, &distance);
+  engine(false);
 }

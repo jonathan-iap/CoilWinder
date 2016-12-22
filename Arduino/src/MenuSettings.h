@@ -14,8 +14,9 @@
 #include "ClickEncoder.h"
 #include "Function.h"
 #include "Save.h"
+#include "Winding.h"
 
-class Setting: public Memory, public Display
+class Setting: public Memory, public Display, public Coil
 {
 public :
 
@@ -24,10 +25,10 @@ public :
 
   void getId(const uint8_t id);
   void resetAction(bool razValues);
+  void moveValue();
 
 private:
 
-  //LiquidCrystal_I2C *_lcd;
   ClickEncoder *_Encoder;
 
   uint8_t _idValue;
@@ -38,7 +39,7 @@ private:
 
   void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,double *value);
   void idToValue();
-  float engine();
+  void engine(bool save);
   void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,uint8_t buffSize, uint8_t offset);
   int8_t ignoreChar(int8_t index, int8_t last, const char value[], int arraySize);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState);

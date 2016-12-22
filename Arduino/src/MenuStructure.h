@@ -10,6 +10,7 @@
 
 #include "MenuSettings.h"
 #include "Menu.h"
+#include "Winding.h"
 
 #define state_NONE 	0
 #define state_DEFAULT 	1
@@ -19,6 +20,7 @@
 
 extern ClickEncoder Encoder;
 extern Menu::Engine *engine;
+extern Coil CoilWinding;
 extern uint8_t systemState;
 
 Setting setting(&Encoder);
@@ -70,7 +72,7 @@ bool menuMovCarriage(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-
+      setting.moveValue();
     }
   return true;
 }

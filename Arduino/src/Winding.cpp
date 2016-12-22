@@ -1,4 +1,4 @@
-#include <Winding.h>
+#include "Winding.h"
 
 /*_____ PRIVATE FONCTIONS _____ */
 
@@ -79,22 +79,23 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
 
 /*_____ CONSTRUCTOR _____ */
 
-Coil::Coil() : motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
-    motorCarriage (M2_DIR, M2_STEP, M2_EN, M2_STEPS_PER_TR),
+Coil::Coil()
+: motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
+  motorCarriage (M2_DIR, M2_STEP, M2_EN, M2_STEPS_PER_TR),
 
-    _coilLength(0),
-    _wireSize(0),
-    _coilTurns(0),
+  _coilLength(0),
+  _wireSize(0),
+  _coilTurns(0),
 
-    _accDelay (400),
-    _maxSpeed (30),
-    _minSpeed (1400),
+  _accDelay (400),
+  _maxSpeed (30),
+  _minSpeed (1400),
 
-    _ratio(0),
-    _stepsPerLayer(0),
-    _stepsTravel(0),
+  _ratio(0),
+  _stepsPerLayer(0),
+  _stepsTravel(0),
 
-    _totalStepsCounter(0)
+  _totalStepsCounter(0)
 {}
 
 Coil::~Coil(){}
@@ -225,3 +226,48 @@ void Coil::oneLayer(float _coilLength, int _dir)
 	}
     }
 }
+
+//void Coil::move(bool carriage, bool coil)
+//{
+//  bool run = true;
+//  bool direction = CLOCK;
+//  int8_t value = 0;
+//  unsigned long delayMotor_B = 600;
+//  unsigned long previousMicrosMotor_B = 0;
+//
+//
+//  _Encoder->setAccelerationEnabled(_Encoder->getAccelerationEnabled());
+//
+//  while(run)
+//    {
+//      ClickEncoder::Button buttonState = _Encoder->getButton();
+//      if( buttonState == ClickEncoder::Clicked ){
+//	  run=false;}
+//
+//      value += _Encoder->getValue();
+//
+//      Serial.print("Encoder value : ");
+//      Serial.println(value);
+//
+//      value > 0 ? direction = CLOCK : direction = C_CLOCK;
+//
+//      while(value != 0)
+//	{
+//	  Serial.print("while value : ");
+//	  Serial.println(value);
+//	  unsigned long currentMicros = micros();
+//	  if(timer(currentMicros, &previousMicrosMotor_B, delayMotor_B))
+//	    {
+//	      motorCarriage.oneStep(direction);
+//	      value > 0 ? value-- : value++;
+//	    }
+//	}
+//    }
+//}
+
+
+
+
+
+
+

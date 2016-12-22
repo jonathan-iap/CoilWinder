@@ -20,6 +20,7 @@ public:
 
   void run();
   void oneLayer(float _coilLength, int _dir);
+  void move(bool carriage, bool coil);
 
 private:
 
