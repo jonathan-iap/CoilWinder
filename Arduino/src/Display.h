@@ -29,12 +29,14 @@
 #define MSG_ACC_DELAY	"Acc duration"
 #define MSG_RESET 	"Reset EEprom ? "
 #define MSG_RAZ 	"Reset values ? "
-#define MSG_MOVE	"Move carriage"
+#define MSG_MOVE	"Move in mm"
 
-#define MSG_VALID 	"Enter:"
-#define SIZE_MSG_VALID 	COUNTOF(MSG_VALID)
-#define MSG_CHOICE 	"Y/N"
-#define SIZE_MSG_CHOICE	COUNTOF(MSG_CHOICE)
+#define MSG_VALID 		"Enter:"
+#define SIZE_MSG_VALID 		COUNTOF(MSG_VALID)
+#define MSG_CHOICE 		"Y/N"
+#define SIZE_MSG_CHOICE		COUNTOF(MSG_CHOICE)
+#define MSG_DIRECTION 		"</>/N"
+#define SIZE_MSG_DIRECTION	COUNTOF(MSG_DIRECTION)
 
 class Display
 {
@@ -131,6 +133,7 @@ protected :
   const void enginePrintEditMode(bool setMode);
   const void enginePrintSave(double value);
   const void enginePrintResetConfirm(bool razValues);
+  const void enginePrintMoveDirection(double value);
 
 private:
 

@@ -11,9 +11,9 @@
 double Memory::WireSize 	= 0;
 double Memory::CoilLength 	= 0;
 double Memory::Turns 		= 0;
-double Memory::MaxSpeed 	= 0;
-double Memory::MinSpeed 	= 0;
-double Memory::AccDelay 	= 0;
+unsigned long Memory::MaxSpeed 	= 0;
+unsigned long Memory::MinSpeed 	= 0;
+unsigned long Memory::AccDelay 	= 0;
 
 char Memory::_buff_WireSize[] 	= {0};
 char Memory::_buff_CoilLength[]	= {0};

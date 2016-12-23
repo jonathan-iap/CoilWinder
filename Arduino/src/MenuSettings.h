@@ -41,7 +41,7 @@ private:
   void idToValue();
   void engine(bool save);
   void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,uint8_t buffSize, uint8_t offset);
-  int8_t ignoreChar(int8_t index, int8_t last, const char value[], int arraySize);
+  int8_t ignoreChar(int8_t index, int8_t last, const char value[], int arraySize, uint8_t offset);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index, ClickEncoder::Button buttonState);
   void setValue();
   void saveValue(double value);

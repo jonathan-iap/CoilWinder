@@ -146,7 +146,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
 
   clampValue(index, 0, buffSize-1);
 
-  *index = ignoreChar(*index, *last, arrayValue, buffSize);
+  *index = ignoreChar(*index, *last, arrayValue, buffSize, offset);
 
   enginePrintFillChar(*last, *index, buffSize, arrayValue, offset);
 
@@ -162,9 +162,9 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
 
 // Jump to the next index for ignore char.
 int8_t Setting::ignoreChar(int8_t index, int8_t last, const char value[],
-			   int arraySize)
+			   int arraySize, uint8_t offset)
 {
-  if(index > 3 && index > arraySize-2)
+  if(offset < 1 && index > arraySize-2)
     {
       index = LCD_CHARS-1;
     }
@@ -246,8 +246,38 @@ void Setting::saveValue(double value)
 
 void Setting::moveValue()
 {
-  char arrayDistance[] = {"000.00"};
+  char arrayDistance[] = {"00.00"};
   double distance = 0.00;
-  affectValues(MSG_MOVE, arrayDistance, 6, &distance);
+
+  affectValues(MSG_MOVE, arrayDistance, 5, &distance);
   engine(false);
+
+  int8_t currentIndex = 0;
+  int8_t lastIndex = 0;
+  bool run = true;
+  bool direction = CLOCK;
+
+  enginePrintMoveDirection(distance);
+
+  while(run)
+    {
+      selectCharacter(&currentIndex, &lastIndex, MSG_DIRECTION, (SIZE_MSG_DIRECTION-1),
+		      (LCD_CHARS-SIZE_MSG_DIRECTION+1));
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  if(currentIndex < 4)
+	    {
+	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
+
+	      getWinding(distance, LEAD_SCREW_PITCH, Turns);
+	      getSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      computing();
+	      unsigned long empty = 0;
+	      oneLayer(direction, true, false, &empty);
+	    }
+	  run = EXIT;
+	}
+    }
 }

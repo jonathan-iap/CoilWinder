@@ -14,22 +14,22 @@ public:
   ~Coil();
 
   void begin();
-  void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
-  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
-  float getValue();
+  void getWinding(double coilLength, double wireSize, unsigned long coilTurns);
+  void getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
+  void computing();
+  double getValue();
 
   void run();
-  void oneLayer(float _coilLength, int _dir);
-  void move(bool carriage, bool coil);
+  void oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter);
 
 private:
 
   Motor motorWinding, motorCarriage;
 
   // Coil length in mm.
-  float _coilLength;
+  double _coilLength;
   // wire size in mm.
-  float _wireSize;
+  double _wireSize;
   //coil turn in turn.
   unsigned long _coilTurns;
 
@@ -38,13 +38,11 @@ private:
   unsigned long _minSpeed = 1800;
 
   // reduction ratio for motor.
-  float _ratio;
+  double _ratio;
   // steps for one layer.
   unsigned long _stepsPerLayer;
   unsigned long _stepsTravel;
 
-  // counter.
-  unsigned long _totalStepsCounter;
 };
 
 #endif

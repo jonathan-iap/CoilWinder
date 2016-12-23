@@ -123,7 +123,7 @@ const void Display::enginePrintHome(char label[], char arrayValue[])
 }
 
 const void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
-				  const char arrayValue[], uint8_t offset)
+					const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
     {
@@ -152,6 +152,7 @@ const void Display::enginePrintEditMode(bool setMode)
     }
 }
 
+
 const void Display::enginePrintSave(double value)
 {
   _lcd.clear();
@@ -170,4 +171,15 @@ const void Display::enginePrintResetConfirm(bool razValues)
   razValues ? _lcd.print(MSG_RAZ) : _lcd.print(MSG_RESET);
   _lcd.setCursor(0, LCD_LINES);
   _lcd.print(MSG_CHOICE);
+}
+
+const void Display::enginePrintMoveDirection(double value)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print("Direction : ");
+  _lcd.setCursor(0,LCD_LINES);
+  _lcd.print(value); _lcd.print("mm");
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_DIRECTION+1), LCD_LINES);
+  _lcd.print(MSG_DIRECTION);
 }
