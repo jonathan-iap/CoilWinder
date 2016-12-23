@@ -276,6 +276,7 @@ void Setting::moveValue()
 	      computing();
 	      unsigned long empty = 0;
 	      oneLayer(direction, true, false, &empty);
+	      disableMotors();
 	    }
 	  run = EXIT;
 	}

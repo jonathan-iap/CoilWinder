@@ -21,6 +21,7 @@ public:
 
   void run();
   void oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter);
+  void disableMotors();
 
 private:
 

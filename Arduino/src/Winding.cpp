@@ -138,7 +138,7 @@ void Coil::computing()
   // 3. Turns during acceleration.
   double stepsAcc = (Vf / 2) * T;
   // 4. Determine steps travel before start deceleration.
-  _stepsTravel = _stepsPerLayer - stepsAcc;
+  _stepsTravel = _stepsPerLayer - (unsigned long)stepsAcc;
 
 #ifdef DEBUG
   Serial.print("pitchToStep : ");
@@ -170,15 +170,15 @@ void Coil::run()
   // Compute all values to make winding.
   computing();
 
-//  unsigned long delayMotor_A = _minSpeed;
-//  unsigned long delayMotor_B = _minSpeed;
-//  unsigned long previousMicrosMotor_A = 0;
-//  unsigned long previousMicrosMotor_B = 0;
-//  unsigned long previousMicrosAcc = 0;
-//
+  //  unsigned long delayMotor_A = _minSpeed;
+  //  unsigned long delayMotor_B = _minSpeed;
+  //  unsigned long previousMicrosMotor_A = 0;
+  //  unsigned long previousMicrosMotor_B = 0;
+  //  unsigned long previousMicrosAcc = 0;
+  //
   bool direction = CLOCK;
-//
-//  unsigned long layerStepsCounter = 0;
+  //
+  //  unsigned long layerStepsCounter = 0;
   unsigned long totalStepsCounter = 0;
 
   while(totalStepsCounter < totalSteps(_coilTurns))
@@ -229,6 +229,8 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 
   unsigned long layerStepsCounter = 0;
 
+  bool debug = true;
+
   Serial.println("------------------");
   Serial.print("stepsPerLayer : ");
   Serial.println(_stepsPerLayer );
@@ -245,9 +247,19 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	    {
 	      // Acceleration
 	      acceleration(true, &delayMotorWinding, _maxSpeed, _ratio, &delayMotorCarriage);
+	      if(delayMotorCarriage == _maxSpeed && debug)
+		{
+		  debug = false;
+		  Serial.print("acceleration step : "), Serial.println(layerStepsCounter);
+		}
 	    }
 	  else
 	    {
+	      if(delayMotorCarriage == _maxSpeed && !debug)
+		{
+		  debug = true;
+		  Serial.print("decceleration step : "), Serial.println(layerStepsCounter);
+		}
 	      // Deceleration
 	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
 	    }
@@ -264,4 +276,10 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	}
     }
   Serial.println(layerStepsCounter);
+}
+
+void Coil::disableMotors()
+{
+  motorWinding.disable();
+  motorCarriage.disable();
 }
