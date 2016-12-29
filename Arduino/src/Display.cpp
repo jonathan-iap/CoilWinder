@@ -24,7 +24,7 @@ const void Display::begin()
   _lcd.createChar(IconBlock, block);
 
   // Quick 3 blinks of back-light
-  for(uint8_t i = 0; i < 3; i++)
+  for(uint8_t i=3; i>0; i--)
     {
       _lcd.backlight();
       delay(100);
@@ -49,7 +49,7 @@ const void Display::clear()
 
 const void Display::blank(uint8_t size)
 {
-  for(int i=0; i<size; i++) _lcd.print(" ");
+  for(int i=size; i>0; i--) _lcd.print(" ");
 }
 
 // blink value on current cursor
@@ -82,7 +82,7 @@ const void Display::loadBar()
 {
   _lcd.setCursor(0, LCD_LINES);
 
-  for(uint8_t i = 0; i<LCD_CHARS; i++)
+  for(uint8_t i=LCD_CHARS; i>0; i--)
     {
       _lcd.write((byte)IconBlock);
       delay(10);
@@ -138,7 +138,7 @@ const void Display::enginePrintEditMode(bool setMode)
   _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
   if(setMode)
     {
-      for(uint8_t i = 0; i<SIZE_MSG_VALID; i++)
+      for(uint8_t i=SIZE_MSG_VALID; i>0; i--)
 	{
 	  _lcd.print(' ');
 	}

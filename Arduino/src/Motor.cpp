@@ -4,11 +4,11 @@
 Motor::Motor() : _dirPin(0),_stepPin(0),_enablePin(0),_stepsPerTr(0)
 {}
 
-Motor::Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint8_t stepPerTr) :
-      _dirPin (dirPin),
-      _stepPin (stepPin),
-      _enablePin (enablePin),
-      _stepsPerTr (stepPerTr)
+Motor::Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint8_t stepPerTr)
+: _dirPin (dirPin),
+  _stepPin (stepPin),
+  _enablePin (enablePin),
+  _stepsPerTr (stepPerTr)
 {}
 
 Motor::~Motor()

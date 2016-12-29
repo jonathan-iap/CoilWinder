@@ -40,46 +40,42 @@ public :
   Memory();
   ~Memory();
 
-  void init();
   void save(char buffer[], const uint8_t id);
   void read(char buffer[], const uint8_t id);
   void readAll();
   void reset();
   bool isSet();
 
-protected :
-  static double WireSize;
-  static double CoilLength;
-  static double Turns;
-  static double MaxSpeed;
-  static double MinSpeed;
-  static double AccDelay;
-
-  // Init buffers
-  static char _buff_WireSize[BUFFSIZE_WIRE];
-  static char _buff_CoilLength[BUFFSIZE_COIL];
-  static char _buff_Turns[BUFFSIZE_TURNS];
-  static char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED];
-  static char _buff_MinSpeed[BUFFSIZE_MIN_SPEED];
-  static char _buff_AccDelay[BUFFSIZE_ACC_DELAY];
-
-private :
-  const uint8_t _addr_WireSize;
-  const uint8_t _addr_CoilLength;
-  const uint8_t _addr_Turns;
-  const uint8_t _addr_MaxSpeed;
-  const uint8_t _addr_MinSpeed;
-  const uint8_t _addr_AccDelay;
-  const uint8_t _addr_DefaultSettings;
-
-  void writeFloatToData(double Data, char buffer[], const uint8_t bufferSize);
-
   // for debug
   void ReadAddresses();
   void ReadFloatValue();
   void ReadArrayValue();
-};
 
-extern Memory memory;
+protected :
+  double WireSize;
+  double CoilLength;
+  double Turns;
+  double MaxSpeed;
+  double MinSpeed;
+  double AccDelay;
+
+  char _buff_WireSize[BUFFSIZE_WIRE];
+  char _buff_CoilLength[BUFFSIZE_COIL];
+  char _buff_Turns[BUFFSIZE_TURNS];
+  char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED];
+  char _buff_MinSpeed[BUFFSIZE_MIN_SPEED];
+  char _buff_AccDelay[BUFFSIZE_ACC_DELAY];
+
+private :
+  uint8_t _addr_WireSize;
+  uint8_t _addr_CoilLength;
+  uint8_t _addr_Turns;
+  uint8_t _addr_MaxSpeed;
+  uint8_t _addr_MinSpeed;
+  uint8_t _addr_AccDelay;
+  uint8_t _addr_DefaultSettings;
+
+  void writeFloatToData(double Data, char buffer[], const uint8_t bufferSize);
+};
 
 #endif /* SRC_SAVE_H_ */

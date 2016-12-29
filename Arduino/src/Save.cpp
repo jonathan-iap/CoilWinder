@@ -7,36 +7,25 @@
 
 #include "Save.h"
 
-// Init static variable
-double Memory::WireSize 	= 0;
-double Memory::CoilLength 	= 0;
-double Memory::Turns 		= 0;
-double Memory::MaxSpeed 	= 0;
-double Memory::MinSpeed 	= 0;
-double Memory::AccDelay 	= 0;
-
-char Memory::_buff_WireSize[] 	= {0};
-char Memory::_buff_CoilLength[]	= {0};
-char Memory::_buff_Turns[]	= {0};
-char Memory::_buff_MaxSpeed[] 	= {0};
-char Memory::_buff_MinSpeed[] 	= {0};
-char Memory::_buff_AccDelay[] 	= {0};
-
-Memory::Memory() :_addr_WireSize(EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE)),
-    _addr_CoilLength(EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL)),
-    _addr_Turns(EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS)),
-    _addr_MaxSpeed(EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED)),
-    _addr_MinSpeed(EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED)),
-    _addr_AccDelay(EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY)),
-    _addr_DefaultSettings(EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT))
-{};
-Memory::~Memory(){};
-
-void Memory::init()
+Memory::Memory()
+: WireSize(0),
+  CoilLength(0),
+  Turns(0),
+  MaxSpeed(0),
+  MinSpeed(0),
+  AccDelay(0)
 {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
   EEPROM.setMemPool(MEN_BASE, EEPROMSizeUno);
+
+  _addr_WireSize=EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
+  _addr_CoilLength=EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
+  _addr_Turns=EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
+  _addr_MaxSpeed=EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
+  _addr_MinSpeed=EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
+  _addr_AccDelay=EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
+  _addr_DefaultSettings=EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
 
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
@@ -44,7 +33,7 @@ void Memory::init()
   // Read and set all data saved in eeprom memory.
   readAll();
 }
-
+Memory::~Memory(){}
 
 void Memory::save(char buffer[], const uint8_t id)
 {
@@ -169,7 +158,7 @@ void Memory::writeFloatToData(double data, char buffer[], const uint8_t bufferSi
 {
   dtostrf(data, (bufferSize-1), 2, buffer);
 
-  for(uint8_t i=0;i<bufferSize;i++)
+  for(uint8_t i=bufferSize; i>0; i--)
     {
       buffer[i] == ' ' ? buffer[i] = '0' : false;
     }
@@ -209,5 +198,3 @@ void Memory::ReadArrayValue()
   EEPROM.readBlock<char>(_addr_DefaultSettings, _buff_DefaultSettings, BUFFSIZE_DEFAULT);
   Serial.print("array default: "); Serial.println(_buff_DefaultSettings);
 }
-
-Memory memory;

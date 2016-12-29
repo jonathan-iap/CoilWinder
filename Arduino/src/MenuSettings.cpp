@@ -6,11 +6,11 @@
  */
 #include "MenuSettings.h"
 
-const unsigned long delayTimeBlock = 250;
-const unsigned long delayTimeBlank = 150;
-
-Setting::Setting(ClickEncoder *p_Encoder) : _idValue(0),
-    _buffSize(0), p_floatingValue(0), p_arrayValue(0)
+Setting::Setting(ClickEncoder *p_Encoder)
+: _idValue(0),
+  _buffSize(0),
+  p_floatingValue(0),
+  p_arrayValue(0)
 {
   _Encoder = p_Encoder;
 }
@@ -33,19 +33,19 @@ void Setting::resetAction(bool razValues)
 
   while(run)
     {
-      selectCharacter(&currentIndex, &lastIndex, MSG_CHOICE, (SIZE_MSG_CHOICE-1),0);
+      selectCharacter(&currentIndex, &lastIndex, MSG_CHOICE, (SIZE_MSG_CHOICE-1),0, false);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
 	  if(currentIndex == 0 && !razValues) // if "yes"
 	    {
-	      memory.reset();
+	      reset();
 	      loadBar();
 	    }
 	  else if(currentIndex == 0 && razValues) // if "yes"
 	    {
-	      memory.readAll();
+	      readAll();
 	      loadBar();
 	    }
 	  run = EXIT;
@@ -98,6 +98,7 @@ void Setting::idToValue()
 	break;
       }
   }
+  // Start navigation.
   engine(true);
 }
 
@@ -112,7 +113,7 @@ void Setting::engine(bool save)
 
   while(run)
     {
-      selectCharacter(&index, &last, p_arrayValue, _buffSize, 0);
+      selectCharacter(&index, &last, p_arrayValue, _buffSize, 0, true);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
@@ -137,7 +138,7 @@ void Setting::engine(bool save)
 
 // Move cursor on character to edit
 void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue[],
-			      uint8_t buffSize, uint8_t offset)
+			      uint8_t buffSize, uint8_t offset, bool cursoJumpEnd)
 {
   static unsigned long lastTime;
   unsigned long currentTime = millis();
@@ -146,7 +147,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
 
   clampValue(index, 0, buffSize-1);
 
-  *index = ignoreChar(*index, *last, arrayValue, buffSize, offset);
+  *index = ignoreChar(*index, *last, arrayValue, buffSize, cursoJumpEnd);
 
   enginePrintFillChar(*last, *index, buffSize, arrayValue, offset);
 
@@ -160,11 +161,11 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
   *last = *index;
 }
 
-// Jump to the next index for ignore char.
+// Jump to the next index to ignore char.
 int8_t Setting::ignoreChar(int8_t index, int8_t last, const char value[],
-			   int arraySize, uint8_t offset)
+			   int arraySize, bool jumpEnd)
 {
-  if(offset < 1 && index > arraySize-2)
+  if( jumpEnd && index > arraySize-2)
     {
       index = LCD_CHARS-1;
     }
@@ -229,14 +230,14 @@ void Setting::saveValue(double value)
   while(run)
     {
       selectCharacter(&currentIndex, &lastIndex, MSG_CHOICE, (SIZE_MSG_CHOICE-1),
-		      (LCD_CHARS-SIZE_MSG_CHOICE+1));
+		      (LCD_CHARS-SIZE_MSG_CHOICE+1), false);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
 	  if(currentIndex == 0) // if "yes"
 	    {
-	      memory.save(p_arrayValue, _idValue);
+	      save(p_arrayValue, _idValue);
 	      loadBar();
 	    }
 	  run = EXIT;
@@ -262,7 +263,7 @@ void Setting::moveValue()
   while(run)
     {
       selectCharacter(&currentIndex, &lastIndex, MSG_DIRECTION, (SIZE_MSG_DIRECTION-1),
-		      (LCD_CHARS-SIZE_MSG_DIRECTION+1));
+		      (LCD_CHARS-SIZE_MSG_DIRECTION+1), false);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )

@@ -11,7 +11,6 @@
 #include "Display.h"
 #include "ClickEncoder.h"
 #include "TimerOne.h"
-#include "Save.h"
 #include "MenuStructure.h"
 #include "Winding.h"
 
@@ -29,7 +28,6 @@ uint8_t previousSystemState = state_NONE;
 uint8_t menuItemsVisible = LCD_LINES;
 int16_t encMovement;
 int16_t encAbsolute;
-int16_t encLastAbsolute = -1;
 int16_t tmpValue = 0;
 
 bool updateMenu = false;
@@ -69,9 +67,6 @@ void setup()
 
   // Lcd initialization
   display.begin();
-
-  // Eeprom memory
-  memory.init();
 
   // Winding function
   CoilWinding.begin();
