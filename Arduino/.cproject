@@ -267,14 +267,6 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
-			<target name="void test(Display lcd);" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>void test(Display lcd);</buildCommand>
-				<buildArguments>-f -c eclipse</buildArguments>
-				<buildTarget/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
 		</buildTargets>
 	</storageModule>
 </cproject>

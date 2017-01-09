@@ -68,6 +68,33 @@ bool editTurns(const Menu::Action_t a)
   return true;
 }
 
+bool editMaxSpeed(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.getId(id_MAX_SPEED);
+    }
+  return true;
+}
+
+bool editMinSpeed(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.getId(id_MIN_SPEED);
+    }
+  return true;
+}
+
+bool editAccTime(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.getId(id_ACC_DELAY);
+    }
+  return true;
+}
+
 bool menuMovCarriage(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
@@ -112,7 +139,7 @@ MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, 
 // Menu 1 -> 3
 MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, miMovCarriage, menuDummy);
-MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miResetVal, menuDummy);
+MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miMaxSpeed, menuDummy);
 // Sub-menu 1.1 -> 1.6
 MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
 MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
@@ -124,7 +151,10 @@ MenuItem(miMovCarriage, "Move carriage", miMovCoil, Menu::NullItem, miMoves, Men
 MenuItem(miMovCoil, "Move coil", miBack2, miMovCarriage, miMoves, Menu::NullItem, menuMovCoil);
 MenuItem(miBack2, "Back \1", Menu::NullItem, miMovCoil, miMoves, Menu::NullItem, menuBack);
 // Sub-menu 3.1 -> 3.?
-MenuItem(miResetVal, "Raz all Values", miResetEEp, Menu::NullItem, miSettings, Menu::NullItem, menuRAZ);
+MenuItem(miMaxSpeed, "Max speed", miMinSpeed, Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);
+MenuItem(miMinSpeed, "Min speed", miAccTime, miMaxSpeed, miSettings, Menu::NullItem, editMinSpeed);
+MenuItem(miAccTime, "Acc time", miResetVal, miMinSpeed, miSettings, Menu::NullItem, editAccTime);
+MenuItem(miResetVal, "Raz all Values", miResetEEp, miAccTime, miSettings, Menu::NullItem, menuRAZ);
 MenuItem(miResetEEp, "Reset EEprom", miBack3, miResetVal, miSettings, Menu::NullItem, menuReset);
 MenuItem(miBack3, "Back \1", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
 

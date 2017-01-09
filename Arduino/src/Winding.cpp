@@ -22,7 +22,7 @@ static unsigned long ratioToDelay(double ratio, unsigned long delayMotor)
 {
   unsigned long result;
 
-  ratio >= 1 ? result = ratio * delayMotor : result = delayMotor / ratio;
+  ratio >= 1 ? (result = ratio * delayMotor) : (result = delayMotor / ratio);
 
   return result;
   //  if (ratio >= 1){ return result = ratio * delayMotor; }
@@ -110,7 +110,7 @@ void Coil::getWinding(double coilLength, double wireSize, unsigned long coilTurn
 {
   _coilLength = coilLength;
   _wireSize   = wireSize;
-  _coilTurns = coilTurns;
+  _coilTurns  = coilTurns;
 }
 
 void Coil::getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
@@ -123,7 +123,7 @@ void Coil::getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
 void Coil::computing()
 {
   /*____Calculation____*/
-  // Number of steps for carriage motor advance, when coil (winding motor) make one turn.
+  // Number of steps for "carriage motor" advance, depending wire size and lead screw.
   double pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
   // Reduction ratio due, between motors.
   _ratio = M1_STEPS_PER_TR / pitchToSteps;
@@ -132,15 +132,22 @@ void Coil::computing()
 
   // Determine when you need to start deceleration.
   // 1. Compute position at final speed, in step/us
-  double Vf = (1 / (double)_minSpeed);
+  double Vi = ((1 / (double)_minSpeed)/2);
+  double Vf = ((1 / (double)_maxSpeed)/2);
   // 2. Duration of acceleration, in micros seconds.
   unsigned long T = (_minSpeed - _maxSpeed) * _accDelay;
   // 3. Turns during acceleration.
-  double stepsAcc = (Vf / 2) * T;
+  double stepsAcc = (((Vi + Vf) / 2) * T);
   // 4. Determine steps travel before start deceleration.
   _stepsTravel = _stepsPerLayer - (unsigned long)stepsAcc;
 
 #ifdef DEBUG
+  Serial.print("MaxSpeed : ");
+  Serial.println(_maxSpeed);
+  Serial.print("MinSpeed : ");
+  Serial.println(_minSpeed);
+  Serial.print("AccDelay : ");
+  Serial.println(_accDelay);
   Serial.print("pitchToStep : ");
   Serial.println(pitchToSteps);
   Serial.print("_ratio : ");
@@ -229,13 +236,15 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 
   unsigned long layerStepsCounter = 0;
 
+#ifdef DEBUG
   bool debug = true;
 
   Serial.println("------------------");
   Serial.print("stepsPerLayer : ");
   Serial.println(_stepsPerLayer );
   Serial.println("------------------");
-  delay(1000);
+  unsigned long startMicros = micros();
+#endif
 
   while(layerStepsCounter < _stepsPerLayer)// && *p_totalStepsCounter < totalSteps(_coilTurns))
     {
@@ -249,8 +258,13 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	      acceleration(true, &delayMotorWinding, _maxSpeed, _ratio, &delayMotorCarriage);
 	      if(delayMotorCarriage == _maxSpeed && debug)
 		{
+		  unsigned long result = 0;
+		  unsigned long endMicros = micros();
+		  result = endMicros - startMicros;
 		  debug = false;
-		  Serial.print("acceleration step : "), Serial.println(layerStepsCounter);
+		  Serial.print("total step during acceleration : "), Serial.println(layerStepsCounter);
+		  Serial.print("Acc time : "), Serial.println(result);
+		  Serial.println("------------------");
 		}
 	    }
 	  else
@@ -259,9 +273,11 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 		{
 		  debug = true;
 		  Serial.print("decceleration step : "), Serial.println(layerStepsCounter);
+		  Serial.println("------------------");
 		}
 	      // Deceleration
 	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
+	      //Serial.print("delayMotor time : "), Serial.println(delayMotorCarriage);
 	    }
 	}
       if(M_winding && timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
@@ -275,7 +291,12 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	  layerStepsCounter++;
 	}
     }
-  Serial.println(layerStepsCounter);
+  Serial.println("total steps"), Serial.println(layerStepsCounter);
+}
+
+void Coil::stopMotion()
+{
+
 }
 
 void Coil::disableMotors()

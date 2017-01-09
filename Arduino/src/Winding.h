@@ -21,6 +21,7 @@ public:
 
   void run();
   void oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter);
+  void stopMotion();
   void disableMotors();
 
 private:
@@ -34,9 +35,9 @@ private:
   //coil turn in turn.
   unsigned long _coilTurns;
 
-  unsigned long _accDelay = 2000;
-  unsigned long _maxSpeed = 600;
-  unsigned long _minSpeed = 1800;
+  unsigned long _accDelay;
+  unsigned long _maxSpeed;
+  unsigned long _minSpeed;
 
   // reduction ratio for motor.
   double _ratio;
