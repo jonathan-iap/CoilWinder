@@ -20,10 +20,28 @@
 
 extern ClickEncoder Encoder;
 extern Menu::Engine *engine;
-extern Coil CoilWinding;
+extern Display display;
+
 extern uint8_t systemState;
 
+Coil CoilWinding;
 Setting setting(&Encoder);
+
+// Item rendering --------------------------------------------------------------
+void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
+{
+  bool current = false;
+  // Print icon before current item else blank.
+  engine->currentItem == mi ? current = true : current = false;
+  display.renderIconOn(pos, current);
+
+  // Print label item
+  display.renderItem(engine->getLabel(mi));
+
+  // mark items that have children
+  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
+}
+
 
 // CallBacks -------------------------------------------------------------------
 bool menuDummy(const Menu::Action_t a)

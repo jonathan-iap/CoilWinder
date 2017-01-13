@@ -12,14 +12,12 @@
 #include "ClickEncoder.h"
 #include "TimerOne.h"
 #include "MenuStructure.h"
-#include "Winding.h"
 
 
 // Declare objects ------------------------------------------------------------
 ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
 Menu::Engine *engine;
 Display display;
-Coil CoilWinding;
 
 
 // Global Variables -----------------------------------------------------------
@@ -33,24 +31,11 @@ int16_t tmpValue = 0;
 bool updateMenu = false;
 bool lastEncoderAccelerationState = true;
 
+
 // Functions ------------------------------------------------------------------
 void timerIsr(void)
 {
   Encoder.service();
-}
-
-void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
-{
-  bool current = false;
-  // Print icon before current item else blank.
-  engine->currentItem == mi ? current = true : current = false;
-  display.renderIconOn(pos, current);
-
-  // Print label item
-  display.renderItem(engine->getLabel(mi));
-
-  // mark items that have children
-  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
 }
 
 
@@ -67,9 +52,6 @@ void setup()
 
   // Lcd initialization
   display.begin();
-
-  // Winding function
-  CoilWinding.begin();
 
   // For rotary encoder
   Timer1.initialize(1000);

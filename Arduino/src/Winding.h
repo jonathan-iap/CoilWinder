@@ -13,7 +13,6 @@ public:
   Coil();
   ~Coil();
 
-  void begin();
   void getWinding(double coilLength, double wireSize, unsigned long coilTurns);
   void getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
   void computing();

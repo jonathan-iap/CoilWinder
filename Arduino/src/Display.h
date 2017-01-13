@@ -135,8 +135,6 @@ protected :
   const void enginePrintResetConfirm(bool razValues);
   const void enginePrintMoveDirection(double value);
 
-private:
-
 };
 
 #endif /* SRC_DISPLAY_H_ */

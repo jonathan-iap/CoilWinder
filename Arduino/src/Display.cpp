@@ -12,6 +12,7 @@ LiquidCrystal_I2C _lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 Display::Display(){}
 Display::~Display(){}
 
+// Initialize special characters and do a little start blink animation
 const void Display::begin()
 {
   _lcd.begin(LCD_CHARS,LCD_LINES);
@@ -34,6 +35,7 @@ const void Display::begin()
   _lcd.backlight();
 }
 
+// Current version
 const void Display::version()
 {
   _lcd.setCursor(0, 0);
@@ -47,6 +49,7 @@ const void Display::clear()
   _lcd.clear();
 }
 
+// Print variable size blank
 const void Display::blank(uint8_t size)
 {
   for(int i=size; i>0; i--) _lcd.print(" ");
@@ -71,13 +74,15 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
 	}
       basculeSet = false;
     }
-  else{
+  else
+    {
       _lcd.setCursor((_index+offset), LCD_LINES);
       _blank ? _lcd.print(" ") : _lcd.write((byte)IconBlock);
       basculeSet = true;
-  }
+    }
 }
 
+// Print an animation load bar
 const void Display::loadBar()
 {
   _lcd.setCursor(0, LCD_LINES);
