@@ -31,8 +31,8 @@
 #define MSG_RAZ 	"Reset values ? "
 #define MSG_MOVE	"Move in mm"
 
-#define MSG_VALID 		"Enter:"
-#define SIZE_MSG_VALID 		COUNTOF(MSG_VALID)
+#define MSG_NEXT 		"Next:"
+#define SIZE_MSG_NEXT 		COUNTOF(MSG_NEXT)
 #define MSG_CHOICE 		"Y/N"
 #define SIZE_MSG_CHOICE		COUNTOF(MSG_CHOICE)
 #define MSG_DIRECTION 		"</>/N"
@@ -84,17 +84,6 @@ public :
       0b11111,
       0b00110,
       0b00100,
-      0b00000
-  };
-
-  uint8_t valid[8] = {
-      0b00000,
-      0b00000,
-      0b00001,
-      0b00010,
-      0b10100,
-      0b01000,
-      0b00000,
       0b00000
   };
 

@@ -21,7 +21,6 @@ const void Display::begin()
   _lcd.createChar(IconRight, right);
   _lcd.createChar(IconBack, back);
   _lcd.createChar(IconEnter, enter);
-  _lcd.createChar(IconValid, valid);
   _lcd.createChar(IconBlock, block);
 
   // Quick 3 blinks of back-light
@@ -65,7 +64,7 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
       if(_index > _arraySize)
 	{
 	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.write((byte)IconValid);
+	  _lcd.write((byte)IconRight);
 	}
       else
 	{
@@ -122,9 +121,9 @@ const void Display::engineHome(char label[], char arrayValue[])
   _lcd.print(label);
   _lcd.setCursor(0, LCD_LINES);
   _lcd.print(arrayValue);
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID),LCD_LINES);
-  _lcd.print(MSG_VALID);
-  _lcd.write((byte)IconValid);
+  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_NEXT),LCD_LINES);
+  _lcd.print(MSG_NEXT);
+  _lcd.write((byte)IconRight);
 }
 
 const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
@@ -133,27 +132,28 @@ const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
   if(index>last || index<last ) // Forward , backward
     {
       _lcd.setCursor((last + offset), LCD_LINES);
+
       (index<last && index == buffSize-2) ?
-	  _lcd.write((byte)IconValid) : _lcd.print(arrayValue[last]);
+	  _lcd.write((byte)IconRight) : _lcd.print(arrayValue[last]);
     }
 }
 
 const void Display::engineEditMode(bool setMode)
 {
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
+  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_NEXT), LCD_LINES);
   if(setMode)
     {
-      for(uint8_t i=SIZE_MSG_VALID; i>0; i--)
+      for(uint8_t i=SIZE_MSG_NEXT; i>0; i--)
 	{
 	  _lcd.print(' ');
 	}
       _lcd.setCursor(LCD_CHARS-3, LCD_LINES);
-      _lcd.print("set");
+      _lcd.print("Edit");
     }
   else
     {
-      _lcd.print(MSG_VALID);
-      _lcd.write((byte)IconValid);
+      _lcd.print(MSG_NEXT);
+      _lcd.write((byte)IconRight);
     }
 }
 
