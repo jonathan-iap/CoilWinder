@@ -8,7 +8,7 @@
  * _coilTurns, number of turns that must be winding.
  * return  : Return steps.
  ******************************************************************************/
-#define totalSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
+#define stepsToTurn(coilTurns) coilTurns * M1_STEPS_PER_TR
 
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
@@ -18,7 +18,7 @@
  * delayMotor, delay on the motor who is the reference.
  * return  : delay value.
  ******************************************************************************/
-static unsigned long ratioToDelay(double ratio, unsigned long delayMotor)
+static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
 {
   unsigned long result;
 
@@ -41,7 +41,7 @@ static unsigned long ratioToDelay(double ratio, unsigned long delayMotor)
  * delayMotorB, delay that will be applied on carriage motor.
  ******************************************************************************/
 static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long limitSpeed,
-			 double ratio, unsigned long *delayMotorB)
+			 float ratio, unsigned long *delayMotorB)
 {
   // if ratio is >= 1
   unsigned long *delayMotor_x = delayMotorA;
@@ -102,7 +102,7 @@ Coil::Coil()
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-void Coil::getWinding(double coilLength, double wireSize, unsigned long coilTurns)
+void Coil::getWinding(float coilLength, float wireSize, unsigned long coilTurns)
 {
   _coilLength = coilLength;
   _wireSize   = wireSize;
@@ -120,26 +120,22 @@ void Coil::computing()
 {
   /*____Calculation____*/
   // Number of steps for "carriage motor" advance, depending wire size and lead screw.
-  double pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
+  float pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
   // Reduction ratio due, between motors.
   _ratio = M1_STEPS_PER_TR / pitchToSteps;
   // Steps for winding one layer.
   _stepsPerLayer = (M2_STEPS_PER_TR * _coilLength) / LEAD_SCREW_PITCH;
 
   // Determine when you need to start deceleration.
-  // 2. Duration of acceleration, in micros seconds.
+  // 1. Duration of acceleration, in micros seconds.
   float T = (_minSpeed - _maxSpeed) * _accDelay;
-  // 3. Turns during acceleration.
-  double stepsAcc = ((0.5 * (1.0/_accDelay) * (T*T))); //+ (T/(float)_minSpeed));
-  Serial.print("stepsAcc 1 : ");
-  Serial.println(stepsAcc);
+  // 2. Number of steps during acceleration..
+  float stepsAcc = ((0.5 * (1.0/_accDelay) * (T*T)));
+  // Convert into seconde.
   stepsAcc /= 1000000;
-  Serial.print("stepsAcc 2 : ");
-  Serial.println(stepsAcc);
+  // Add initial steps.
   stepsAcc += (T/_minSpeed);
-  Serial.print("stepsAcc 3 : ");
-  Serial.println(stepsAcc);
-  // 4. Determine steps travel before start deceleration.
+  // 3. Determine steps travel before start deceleration.
   _stepsTravel = _stepsPerLayer - (unsigned long)stepsAcc;
 
 #ifdef DEBUG
@@ -166,7 +162,7 @@ void Coil::computing()
 }
 
 
-double Coil::getValue()
+float Coil::getValue()
 {
   return _stepsPerLayer;
 }
@@ -179,7 +175,7 @@ void Coil::run()
   bool direction = CLOCK;
   unsigned long totalStepsCounter = 0;
 
-  while(totalStepsCounter < totalSteps(_coilTurns))
+  while(totalStepsCounter < stepsToTurn(_coilTurns))
     {
       oneLayer(direction, true, true, &totalStepsCounter);
 

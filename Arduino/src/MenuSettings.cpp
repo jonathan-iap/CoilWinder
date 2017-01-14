@@ -54,7 +54,7 @@ void Setting::resetAction(bool razValues)
 }
 
 /* PRIVATE -------------------------------------------------------------------*/
-void Setting::affectValues(const char label[], char arrayValue[],uint8_t buffSize ,double *value)
+void Setting::affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value)
 {
   strcpy(_label, label);
   p_arrayValue = arrayValue;
@@ -212,14 +212,14 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
   enginePrintEditMode(false);
 }
 
-// convert value of array on double.
+// convert value of array on float.
 void Setting::setValue()
 {
   *p_floatingValue = atof(p_arrayValue);
 }
 
 // Print current value and ask save? if yes save in eeprom memory.
-void Setting::saveValue(double value)
+void Setting::saveValue(float value)
 {
   int8_t currentIndex = 0;
   int8_t lastIndex = 0;
@@ -248,7 +248,7 @@ void Setting::saveValue(double value)
 void Setting::moveValue()
 {
   char arrayDistance[] = {"00.00"};
-  double distance = 0.00;
+  float distance = 0.00;
 
   affectValues(MSG_MOVE, arrayDistance, 5, &distance);
   engine(false);

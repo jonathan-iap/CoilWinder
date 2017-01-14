@@ -36,11 +36,11 @@ private:
 
   uint8_t _idValue;
   uint8_t _buffSize;
-  double *p_floatingValue;
+  float *p_floatingValue;
   char *p_arrayValue;
   char _label[17]; // Minimum lcd screen 16 + 1 for null character
 
-  void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,double *value);
+  void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value);
   void idToValue();
   void engine(bool save);
   void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,
@@ -50,7 +50,7 @@ private:
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 		 ClickEncoder::Button buttonState);
   void setValue();
-  void saveValue(double value);
+  void saveValue(float value);
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

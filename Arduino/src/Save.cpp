@@ -119,7 +119,7 @@ void Memory::readAll()
   read(_buff_MaxSpeed,id_MAX_SPEED);
   read(_buff_MinSpeed, id_MIN_SPEED);
   read(_buff_AccDelay, id_ACC_DELAY);
-  // Convert value within array in a double value.
+  // Convert value within array in a float value.
   WireSize 	= atof(_buff_WireSize);
   CoilLength 	= atof(_buff_CoilLength);
   Turns 	= atof(_buff_Turns);
@@ -154,7 +154,7 @@ bool Memory::isSet()
 
 /* PRIVATE -------------------------------------------------------------------*/
 // convert and format float to data
-void Memory::writeFloatToData(double data, char buffer[], const uint8_t bufferSize)
+void Memory::writeFloatToData(float data, char buffer[], const uint8_t bufferSize)
 {
   dtostrf(data, (bufferSize-1), 2, buffer);
 

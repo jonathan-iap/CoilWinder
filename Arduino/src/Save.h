@@ -52,12 +52,12 @@ public :
   void ReadArrayValue();
 
 protected :
-  double WireSize;
-  double CoilLength;
-  double Turns;
-  double MaxSpeed;
-  double MinSpeed;
-  double AccDelay;
+  float WireSize;
+  float CoilLength;
+  float Turns;
+  float MaxSpeed;
+  float MinSpeed;
+  float AccDelay;
 
   char _buff_WireSize[BUFFSIZE_WIRE];
   char _buff_CoilLength[BUFFSIZE_COIL];
@@ -75,7 +75,7 @@ private :
   uint8_t _addr_AccDelay;
   uint8_t _addr_DefaultSettings;
 
-  void writeFloatToData(double Data, char buffer[], const uint8_t bufferSize);
+  void writeFloatToData(float Data, char buffer[], const uint8_t bufferSize);
 };
 
 #endif /* SRC_SAVE_H_ */

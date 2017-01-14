@@ -131,9 +131,9 @@ protected :
   const void enginePrintHome(char label[], char arrayValue[]);
   const void enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   const void enginePrintEditMode(bool setMode);
-  const void enginePrintSave(double value);
+  const void enginePrintSave(float value);
   const void enginePrintResetConfirm(bool razValues);
-  const void enginePrintMoveDirection(double value);
+  const void enginePrintMoveDirection(float value);
 
 };
 

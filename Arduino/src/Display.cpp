@@ -158,7 +158,7 @@ const void Display::enginePrintEditMode(bool setMode)
 }
 
 
-const void Display::enginePrintSave(double value)
+const void Display::enginePrintSave(float value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
@@ -178,7 +178,7 @@ const void Display::enginePrintResetConfirm(bool razValues)
   _lcd.print(MSG_CHOICE);
 }
 
-const void Display::enginePrintMoveDirection(double value)
+const void Display::enginePrintMoveDirection(float value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
