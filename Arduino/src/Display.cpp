@@ -115,7 +115,7 @@ const void Display::renderIconChild()
 }
 
 // Engine menu setting ----------------------------------------------------------
-const void Display::enginePrintHome(char label[], char arrayValue[])
+const void Display::engineHome(char label[], char arrayValue[])
 {
   _lcd.clear();
   _lcd.setCursor(0, 0);
@@ -127,7 +127,7 @@ const void Display::enginePrintHome(char label[], char arrayValue[])
   _lcd.write((byte)IconValid);
 }
 
-const void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
+const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
 					const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
@@ -138,7 +138,7 @@ const void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffS
     }
 }
 
-const void Display::enginePrintEditMode(bool setMode)
+const void Display::engineEditMode(bool setMode)
 {
   _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
   if(setMode)
@@ -158,7 +158,7 @@ const void Display::enginePrintEditMode(bool setMode)
 }
 
 
-const void Display::enginePrintSave(float value)
+const void Display::engineSave(float value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
@@ -169,7 +169,7 @@ const void Display::enginePrintSave(float value)
   _lcd.print(MSG_CHOICE);
 }
 
-const void Display::enginePrintResetConfirm(bool razValues)
+const void Display::engineResetConfirm(bool razValues)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
@@ -178,7 +178,7 @@ const void Display::enginePrintResetConfirm(bool razValues)
   _lcd.print(MSG_CHOICE);
 }
 
-const void Display::enginePrintMoveDirection(float value)
+const void Display::engineMoveDirection(float value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);

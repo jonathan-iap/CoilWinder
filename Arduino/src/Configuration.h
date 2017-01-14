@@ -16,21 +16,22 @@
 #define ENC_PIN_A	3 // The order declaration(pin A, B) determine the direction.
 #define ENC_PIN_B	2 //
 #define ENC_PIN_SW	4 // Click switch
-#define ENC_STEP	2 // How many you increase value when you make one step
+#define ENC_STEP	2 // How many you increase value, when you make one step
 
 // Motors settings ------------------------------------------------------------
 #define CLOCK		HIGH
 #define C_CLOCK		LOW
 #define ENABLE		LOW
 #define DISABLE		HIGH
-enum
-{
-  FULL_STEPS		= 1,
-  HALF_STEPS		= 2,
-  QUARTER_STEPS		= 4,
-  EIGHTH_STEPS		= 8,
-  SIXTEENTH_STEPS	= 16
-};
+
+// Microsteps
+//-------------------------
+#define FULL_STEPS	1
+#define HALF_STEPS	2
+#define QUARTER_STEPS	4
+#define EIGHTH_STEPS	8
+#define SIXTEENTH_STEPS 16
+//-------------------------
 
 // Motor for winding
 #define M1_DIR	10
@@ -46,13 +47,20 @@ enum
 #define M2_initialStepPerTr 200
 #define M2_STEPS_PER_TR (M2_initialStepPerTr * EIGHTH_STEPS)
 
-#define ACC	1	// Acceleration step increment.
 //#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
 
 
 // Machine settings ------------------------------------------------------------
-// M5 = 0.8 mm
-#define LEAD_SCREW_PITCH 0.8
+
+// Pitch in mm
+//--------------
+#define  M3 0.5
+#define  M4 0.7
+#define  M5 0.8
+#define  M6 1
+//--------------
+
+#define LEAD_SCREW_PITCH M5 // replace by your own setup.
 
 // Reset value -----------------------------------------------------------------
 #define INIT_WIRE	"0.00"

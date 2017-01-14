@@ -58,7 +58,7 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
     {
       if(*delayMotor_x > limitSpeed)
 	{
-	  *delayMotor_x -= ACC;
+	  *delayMotor_x -= 1;
 	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
 
 	}
@@ -68,7 +68,7 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
     {
       if(*delayMotor_x < limitSpeed )
 	{
-	  *delayMotor_x += ACC;
+	  *delayMotor_x += 1;
 	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
 	}
     }

@@ -25,7 +25,7 @@ extern Display display;
 extern uint8_t systemState;
 
 Coil CoilWinding;
-Setting setting(&Encoder);
+Setting setting(&Encoder, &display);
 
 // Item rendering --------------------------------------------------------------
 void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)

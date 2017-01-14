@@ -6,13 +6,14 @@
  */
 #include "MenuSettings.h"
 
-Setting::Setting(ClickEncoder *p_Encoder)
+Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display)
 : _idValue(0),
   _buffSize(0),
   p_floatingValue(0),
   p_arrayValue(0)
 {
   _Encoder = p_Encoder;
+  _Display = p_Display;
 }
 Setting::~Setting(){}
 
@@ -29,7 +30,7 @@ void Setting::resetAction(bool razValues)
   int8_t  lastIndex=0;
   bool run = true;
 
-  enginePrintResetConfirm(razValues);
+  _Display->engineResetConfirm(razValues);
 
   while(run)
     {
@@ -41,12 +42,12 @@ void Setting::resetAction(bool razValues)
 	  if(currentIndex == 0 && !razValues) // if "yes"
 	    {
 	      reset();
-	      loadBar();
+	      _Display->loadBar();
 	    }
 	  else if(currentIndex == 0 && razValues) // if "yes"
 	    {
 	      readAll();
-	      loadBar();
+	      _Display->loadBar();
 	    }
 	  run = EXIT;
 	}
@@ -109,7 +110,7 @@ void Setting::engine(bool save)
   int8_t last = 0;
   int8_t index = 0;
 
-  enginePrintHome(_label, p_arrayValue);
+  _Display->engineHome(_label, p_arrayValue);
 
   while(run)
     {
@@ -149,12 +150,12 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
 
   *index = ignoreChar(*index, *last, arrayValue, buffSize, cursoJumpEnd);
 
-  enginePrintFillChar(*last, *index, buffSize, arrayValue, offset);
+  _Display->engineFillChar(*last, *index, buffSize, arrayValue, offset);
 
   // Blinking of the selected character
   if(timer(currentTime, &lastTime, delayTimeBlock))
     {
-      blinkValue(*index, arrayValue, buffSize, false, offset);
+      _Display->blinkValue(*index, arrayValue, buffSize, false, offset);
     }
 
   // To determine the direction of the next movement.
@@ -187,7 +188,7 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 			ClickEncoder::Button buttonState)
 {
   // Erase the exit icon to show we are in the edit mode
-  enginePrintEditMode(true);
+  _Display->engineEditMode(true);
 
   // Set Value
   int8_t count = arrayValue[index];
@@ -205,11 +206,11 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
       // Blinking value
       if(timer(currentTimeSet, &lastTimeSet, delayTimeBlank))
 	{
-	  blinkValue(index, arrayValue, buffSize, true, 0);
+	  _Display->blinkValue(index, arrayValue, buffSize, true, 0);
 	}
     }
   // Refresh screen after set value
-  enginePrintEditMode(false);
+  _Display->engineEditMode(false);
 }
 
 // convert value of array on float.
@@ -225,7 +226,7 @@ void Setting::saveValue(float value)
   int8_t lastIndex = 0;
   bool run = true;
 
-  enginePrintSave(value);
+  _Display->engineSave(value);
 
   while(run)
     {
@@ -238,7 +239,7 @@ void Setting::saveValue(float value)
 	  if(currentIndex == 0) // if "yes"
 	    {
 	      save(p_arrayValue, _idValue);
-	      loadBar();
+	      _Display->loadBar();
 	    }
 	  run = EXIT;
 	}
@@ -258,7 +259,7 @@ void Setting::moveValue()
   bool run = true;
   bool direction = CLOCK;
 
-  enginePrintMoveDirection(distance);
+  _Display->engineMoveDirection(distance);
 
   while(run)
     {

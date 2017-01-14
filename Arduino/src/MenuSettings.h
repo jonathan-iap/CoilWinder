@@ -19,11 +19,11 @@
 #define delayTimeBlock 250
 #define delayTimeBlank 150
 
-class Setting: public Memory, public Display, public Coil
+class Setting: public Memory, public Coil
 {
 public :
 
-  Setting(ClickEncoder *p_Encoder);
+  Setting(ClickEncoder *p_Encoder, Display *p_Display);
   ~Setting();
 
   void getId(const uint8_t id);
@@ -33,6 +33,7 @@ public :
 private:
 
   ClickEncoder *_Encoder;
+  Display *_Display;
 
   uint8_t _idValue;
   uint8_t _buffSize;

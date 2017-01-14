@@ -126,14 +126,13 @@ public:
   const void renderItem(const char item[]);
   const void renderIconChild();
 
-protected :
   // MenuSetting
-  const void enginePrintHome(char label[], char arrayValue[]);
-  const void enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
-  const void enginePrintEditMode(bool setMode);
-  const void enginePrintSave(float value);
-  const void enginePrintResetConfirm(bool razValues);
-  const void enginePrintMoveDirection(float value);
+  const void engineHome(char label[], char arrayValue[]);
+  const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
+  const void engineEditMode(bool setMode);
+  const void engineSave(float value);
+  const void engineResetConfirm(bool razValues);
+  const void engineMoveDirection(float value);
 
 };
 
