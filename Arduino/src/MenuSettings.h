@@ -16,8 +16,10 @@
 #include "Save.h"
 #include "Winding.h"
 
-#define delayTimeBlock 250
-#define delayTimeBlank 150
+#define SAVE		true
+#define NOT_SAVE	false
+#define delayTimeBlock 	250
+#define delayTimeBlank 	150
 
 class Setting: public Memory, public Coil
 {

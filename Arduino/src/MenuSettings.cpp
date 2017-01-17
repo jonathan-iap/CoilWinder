@@ -100,7 +100,7 @@ void Setting::idToValue()
       }
   }
   // Start navigation.
-  engine(true);
+  engine(SAVE);
 }
 
 // Navigate menu
@@ -252,7 +252,7 @@ void Setting::moveValue()
   float distance = 0.00;
 
   affectValues(MSG_MOVE, arrayDistance, 5, &distance);
-  engine(false);
+  engine(NOT_SAVE);
 
   int8_t currentIndex = 0;
   int8_t lastIndex = 0;
@@ -275,7 +275,7 @@ void Setting::moveValue()
 
 	      getWinding(distance, LEAD_SCREW_PITCH, Turns);
 	      getSpeed(AccDelay,MaxSpeed, MinSpeed);
-	      computing();
+	      computeAll();
 	      unsigned long empty = 0;
 	      oneLayer(direction, true, false, &empty);
 	      disableMotors();

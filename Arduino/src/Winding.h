@@ -15,7 +15,9 @@ public:
 
   void getWinding(float coilLength, float wireSize, unsigned long coilTurns);
   void getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
-  void computing();
+  void computeRatio();
+  void computeStepsTravel();
+  void computeAll();
   float getValue();
 
   void run();

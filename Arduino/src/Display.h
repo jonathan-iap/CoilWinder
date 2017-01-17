@@ -31,6 +31,8 @@
 #define MSG_RAZ 	"Reset values ? "
 #define MSG_MOVE	"Move in mm"
 
+#define MSG_EDIT		"Edit"
+#define SIZE_MSG_EDIT 		COUNTOF(MSG_EDIT)
 #define MSG_NEXT 		"Next:"
 #define SIZE_MSG_NEXT 		COUNTOF(MSG_NEXT)
 #define MSG_CHOICE 		"Y/N"

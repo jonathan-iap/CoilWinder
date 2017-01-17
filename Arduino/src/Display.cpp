@@ -147,8 +147,8 @@ const void Display::engineEditMode(bool setMode)
 	{
 	  _lcd.print(' ');
 	}
-      _lcd.setCursor(LCD_CHARS-3, LCD_LINES);
-      _lcd.print("Edit");
+      _lcd.setCursor((LCD_CHARS-SIZE_MSG_EDIT+1), LCD_LINES);
+      _lcd.print(MSG_EDIT);
     }
   else
     {

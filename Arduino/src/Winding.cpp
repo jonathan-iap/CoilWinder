@@ -12,7 +12,7 @@
 
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
- * details : If the ration is inferior to 1 we need to convert delay
+ * details : If the ratio is inferior to 1 we need to convert delay
  * to keep the good reduction ratio between motors in acceleration() function.
  * ratio, value of reduction "_ratio".
  * delayMotor, delay on the motor who is the reference.
@@ -25,8 +25,6 @@ static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
   ratio >= 1 ? (result = ratio * delayMotor) : (result = delayMotor / ratio);
 
   return result;
-  //  if (ratio >= 1){ return result = ratio * delayMotor; }
-  //  else{ return result = delayMotor / ratio; }
 }
 
 
@@ -116,9 +114,8 @@ void Coil::getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
   _minSpeed = minSpeed;
 }
 
-void Coil::computing()
+void Coil::computeRatio()
 {
-  /*____Calculation____*/
   // Number of steps for "carriage motor" advance, depending wire size and lead screw.
   float pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
   // Reduction ratio due, between motors.
@@ -126,10 +123,18 @@ void Coil::computing()
   // Steps for winding one layer.
   _stepsPerLayer = (M2_STEPS_PER_TR * _coilLength) / LEAD_SCREW_PITCH;
 
-  // Determine when you need to start deceleration.
+#ifdef DEBUGOFF
+  Serial.print("pitchToStep : ");
+  Serial.println(pitchToSteps);
+#endif
+}
+
+// Determine when you need to start deceleration.
+void Coil::computeStepsTravel()
+{
   // 1. Duration of acceleration, in micros seconds.
   float T = (_minSpeed - _maxSpeed) * _accDelay;
-  // 2. Number of steps during acceleration..
+  // 2. Number of steps during acceleration.
   float stepsAcc = ((0.5 * (1.0/_accDelay) * (T*T)));
   // Convert into seconde.
   stepsAcc /= 1000000;
@@ -138,23 +143,29 @@ void Coil::computing()
   // 3. Determine steps travel before start deceleration.
   _stepsTravel = _stepsPerLayer - (unsigned long)stepsAcc;
 
-#ifdef DEBUG
+#ifdef DEBUGOFF
+  Serial.print("T : ");
+  Serial.println(T);
+  Serial.print("stepsAcc : ");
+  Serial.println(stepsAcc);
+#endif
+}
+void Coil::computeAll()
+{
+  computeRatio();
+  computeStepsTravel();
+
+#ifdef DEBUGOFF
   Serial.print("MaxSpeed : ");
   Serial.println(_maxSpeed);
   Serial.print("MinSpeed : ");
   Serial.println(_minSpeed);
   Serial.print("AccDelay : ");
   Serial.println(_accDelay);
-  Serial.print("pitchToStep : ");
-  Serial.println(pitchToSteps);
   Serial.print("_ratio : ");
   Serial.println(_ratio);
   Serial.print("_stepPerLayer : ");
   Serial.println(_stepsPerLayer);
-  Serial.print("T : ");
-  Serial.println(T);
-  Serial.print("stepsAcc 4 : ");
-  Serial.println(stepsAcc);
   Serial.print("_stepsTravel : ");
   Serial.println(_stepsTravel);
   delay(1000);
@@ -170,7 +181,7 @@ float Coil::getValue()
 void Coil::run()
 {
   // Compute all values to make winding.
-  computing();
+  computeAll();
 
   bool direction = CLOCK;
   unsigned long totalStepsCounter = 0;
@@ -178,7 +189,7 @@ void Coil::run()
   while(totalStepsCounter < stepsToTurn(_coilTurns))
     {
       oneLayer(direction, true, true, &totalStepsCounter);
-
+      // Invert direction when one layer is finished
       direction = !direction;
     }
 
@@ -198,7 +209,7 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 
   unsigned long layerStepsCounter = 0;
 
-#ifdef DEBUG
+#ifdef DEBUGOFF
   bool debug = true;
 
   Serial.println("------------------");
@@ -218,6 +229,7 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	    {
 	      // Acceleration
 	      acceleration(true, &delayMotorWinding, _maxSpeed, _ratio, &delayMotorCarriage);
+#ifdef DEBUGOFF
 	      if(delayMotorCarriage == _maxSpeed && debug)
 		{
 		  unsigned long result = 0;
@@ -228,18 +240,22 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 		  Serial.print("Acc time : "), Serial.println(result);
 		  Serial.println("------------------");
 		}
+#endif
+
 	    }
 	  else
 	    {
+#ifdef DEBUGOFF
 	      if(delayMotorCarriage == _maxSpeed && !debug)
 		{
 		  debug = true;
 		  Serial.print("decceleration step : "), Serial.println(layerStepsCounter);
 		  Serial.println("------------------");
 		}
+#endif
+
 	      // Deceleration
 	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
-	      //Serial.print("delayMotor time : "), Serial.println(delayMotorCarriage);
 	    }
 	}
       if(M_winding && timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
