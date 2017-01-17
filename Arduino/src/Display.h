@@ -123,7 +123,7 @@ public:
   const void engineEditMode(bool setMode);
   const void engineSave(float value);
   const void engineResetConfirm(bool razValues);
-  const void engineMoveDirection(float value);
+  const void engineMoveDirection(float value, bool turns);
 
 };
 

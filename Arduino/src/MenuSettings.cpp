@@ -18,7 +18,7 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display)
 Setting::~Setting(){}
 
 // get id of value that need set
-void Setting::getId(const uint8_t id)
+void Setting::setId(const uint8_t id)
 {
   _idValue = id;
   idToValue();
@@ -122,7 +122,7 @@ void Setting::engine(bool save)
 	  // If we want to exit the menu (click on the exit icon)
 	  if(index > _buffSize)
 	    {
-	      setValue();
+	      getFloatingValue();
 	      if(save) saveValue(*p_floatingValue);
 	      run = EXIT;
 	    }
@@ -214,7 +214,7 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 }
 
 // convert value of array on float.
-void Setting::setValue()
+void Setting::getFloatingValue()
 {
   *p_floatingValue = atof(p_arrayValue);
 }
@@ -246,12 +246,12 @@ void Setting::saveValue(float value)
     }
 }
 
-void Setting::moveValue()
+void Setting::moveCarriage()
 {
-  char arrayDistance[] = {"00.00"};
-  float distance = 0.00;
+  char tmp_buffDistance[] = {"00.00"};
+  float tmp_distance = 0.00;
 
-  affectValues(MSG_MOVE, arrayDistance, 5, &distance);
+  affectValues(MSG_MOVE, tmp_buffDistance, 5, &tmp_distance);
   engine(NOT_SAVE);
 
   int8_t currentIndex = 0;
@@ -259,7 +259,8 @@ void Setting::moveValue()
   bool run = true;
   bool direction = CLOCK;
 
-  _Display->engineMoveDirection(distance);
+  // Print direction white "mm" unit value.
+  _Display->engineMoveDirection(tmp_distance, false);
 
   while(run)
     {
@@ -273,11 +274,51 @@ void Setting::moveValue()
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
-	      getWinding(distance, LEAD_SCREW_PITCH, Turns);
-	      getSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      setWinding(tmp_distance, LEAD_SCREW_PITCH, Turns);
+	      setSpeed(AccDelay,MaxSpeed, MinSpeed);
 	      computeAll();
 	      unsigned long empty = 0;
 	      oneLayer(direction, true, false, &empty);
+	      disableMotors();
+	    }
+	  run = EXIT;
+	}
+    }
+}
+
+void Setting::moveCoil()
+{
+  char tmp_buffTurns[] = {"0000"};
+  float tmp_turns = 0.00;
+
+  // Set number off turns we want move.
+  affectValues(MSG_TURNS, tmp_buffTurns, 5, &tmp_turns);
+  engine(NOT_SAVE);
+
+  int8_t currentIndex = 0;
+  int8_t lastIndex = 0;
+  bool run = true;
+  bool direction = CLOCK;
+
+  // Print direction white "Tr" unit value.
+  _Display->engineMoveDirection(tmp_turns, true);
+
+  while(run)
+    {
+      // Set direction or exit.
+      selectCharacter(&currentIndex, &lastIndex, MSG_DIRECTION, (SIZE_MSG_DIRECTION-1),
+		      (LCD_CHARS-SIZE_MSG_DIRECTION+1), false);
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  if(currentIndex < 4)
+	    {
+	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
+
+	      // set and start displacement.
+	      setSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      runOnlyCoil(direction, tmp_turns);
 	      disableMotors();
 	    }
 	  run = EXIT;

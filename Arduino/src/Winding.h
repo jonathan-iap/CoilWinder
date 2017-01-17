@@ -6,6 +6,9 @@
 #include "Configuration.h"
 #include "Function.h"
 
+#define ACCELERATION true
+#define DECELERATION false
+
 class Coil
 {
 public:
@@ -13,15 +16,16 @@ public:
   Coil();
   ~Coil();
 
-  void getWinding(float coilLength, float wireSize, unsigned long coilTurns);
-  void getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
+  void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
+  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
   void computeRatio();
-  void computeStepsTravel();
+  void computeStepsTravel(float totalSteps);
   void computeAll();
-  float getValue();
+  float getStepPerLayer();
 
   void run();
   void oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter);
+  void runOnlyCoil(bool dir, float turns);
   void stopMotion();
   void disableMotors();
 

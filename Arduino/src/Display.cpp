@@ -127,7 +127,7 @@ const void Display::engineHome(char label[], char arrayValue[])
 }
 
 const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
-					const char arrayValue[], uint8_t offset)
+				   const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
     {
@@ -178,13 +178,13 @@ const void Display::engineResetConfirm(bool razValues)
   _lcd.print(MSG_CHOICE);
 }
 
-const void Display::engineMoveDirection(float value)
+const void Display::engineMoveDirection(float value, bool turns)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
   _lcd.print("Direction : ");
   _lcd.setCursor(0,LCD_LINES);
-  _lcd.print(value); _lcd.print("mm");
+  turns ?(_lcd.print((uint16_t)value),_lcd.print("Tr")) : (_lcd.print(value), _lcd.print("mm"));
   _lcd.setCursor((LCD_CHARS-SIZE_MSG_DIRECTION+1), LCD_LINES);
   _lcd.print(MSG_DIRECTION);
 }

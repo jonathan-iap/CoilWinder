@@ -28,9 +28,10 @@ public :
   Setting(ClickEncoder *p_Encoder, Display *p_Display);
   ~Setting();
 
-  void getId(const uint8_t id);
+  void setId(const uint8_t id);
   void resetAction(bool razValues);
-  void moveValue();
+  void moveCarriage();
+  void moveCoil();
 
 private:
 
@@ -52,7 +53,7 @@ private:
 		    bool jumpEnd);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 		 ClickEncoder::Button buttonState);
-  void setValue();
+  void getFloatingValue();
   void saveValue(float value);
 };
 

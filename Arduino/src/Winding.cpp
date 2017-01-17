@@ -8,7 +8,7 @@
  * _coilTurns, number of turns that must be winding.
  * return  : Return steps.
  ******************************************************************************/
-#define stepsToTurn(coilTurns) coilTurns * M1_STEPS_PER_TR
+#define TurnToSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
 
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
@@ -58,7 +58,6 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
 	{
 	  *delayMotor_x -= 1;
 	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
-
 	}
     }
   // Deceleration.
@@ -72,7 +71,22 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
     }
 }
 
-
+static void accSingleMotor(bool acc, unsigned long *delayMotor, unsigned long limitSpeed)
+{
+  //Acceleration.
+  if(acc && (*delayMotor > limitSpeed))
+    {
+      *delayMotor -= 1;
+    }
+  // Deceleration.
+  else
+    {
+      if(*delayMotor < limitSpeed )
+	{
+	  *delayMotor += 1;
+	}
+    }
+}
 
 
 /*_____ CONSTRUCTOR _____ */
@@ -100,14 +114,14 @@ Coil::Coil()
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-void Coil::getWinding(float coilLength, float wireSize, unsigned long coilTurns)
+void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
 {
   _coilLength = coilLength;
   _wireSize   = wireSize;
   _coilTurns  = coilTurns;
 }
 
-void Coil::getSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
+void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
 {
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
@@ -130,7 +144,7 @@ void Coil::computeRatio()
 }
 
 // Determine when you need to start deceleration.
-void Coil::computeStepsTravel()
+void Coil::computeStepsTravel(float totalSteps)
 {
   // 1. Duration of acceleration, in micros seconds.
   float T = (_minSpeed - _maxSpeed) * _accDelay;
@@ -140,10 +154,11 @@ void Coil::computeStepsTravel()
   stepsAcc /= 1000000;
   // Add initial steps.
   stepsAcc += (T/_minSpeed);
-  // 3. Determine steps travel before start deceleration.
-  _stepsTravel = _stepsPerLayer - (unsigned long)stepsAcc;
 
-#ifdef DEBUGOFF
+  // 3. Determine steps travel before start deceleration.
+  _stepsTravel = totalSteps - (unsigned long)stepsAcc;
+
+#ifdef DEBUG
   Serial.print("T : ");
   Serial.println(T);
   Serial.print("stepsAcc : ");
@@ -153,7 +168,7 @@ void Coil::computeStepsTravel()
 void Coil::computeAll()
 {
   computeRatio();
-  computeStepsTravel();
+  computeStepsTravel(_stepsPerLayer);
 
 #ifdef DEBUGOFF
   Serial.print("MaxSpeed : ");
@@ -173,7 +188,7 @@ void Coil::computeAll()
 }
 
 
-float Coil::getValue()
+float Coil::getStepPerLayer()
 {
   return _stepsPerLayer;
 }
@@ -186,7 +201,7 @@ void Coil::run()
   bool direction = CLOCK;
   unsigned long totalStepsCounter = 0;
 
-  while(totalStepsCounter < stepsToTurn(_coilTurns))
+  while(totalStepsCounter < TurnToSteps(_coilTurns))
     {
       oneLayer(direction, true, true, &totalStepsCounter);
       // Invert direction when one layer is finished
@@ -241,7 +256,6 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 		  Serial.println("------------------");
 		}
 #endif
-
 	    }
 	  else
 	    {
@@ -270,6 +284,42 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	}
     }
   Serial.println("total steps"), Serial.println(layerStepsCounter);
+}
+
+void Coil::runOnlyCoil(bool dir, float turns)
+{
+  // Set steps when you start deceleration.
+  computeStepsTravel(TurnToSteps(turns));
+
+  unsigned long delayMotor = _minSpeed;
+  unsigned long lastMicrosMotor = 0;
+  unsigned long lastMicrosAcc = 0;
+
+  unsigned long stepsCounter = 0;
+
+  while( stepsCounter < TurnToSteps(turns))
+    {
+      unsigned long currentMicros = micros();
+
+      if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+	{
+	  if(stepsCounter < _stepsTravel)
+	    {
+	      // Acceleration
+	      accSingleMotor(ACCELERATION, &delayMotor, _maxSpeed);
+	    }
+	  else
+	    {
+	      // Deceleration
+	      accSingleMotor(DECELERATION, &delayMotor, _minSpeed);
+	    }
+	}
+      if(timer(currentMicros, &lastMicrosMotor, delayMotor))
+	{
+	  motorWinding.oneStep(CLOCK);
+	  stepsCounter += 1;
+	}
+    }
 }
 
 void Coil::stopMotion()
