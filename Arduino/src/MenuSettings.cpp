@@ -274,11 +274,8 @@ void Setting::moveCarriage()
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
-	      setWinding(tmp_distance, LEAD_SCREW_PITCH, Turns);
 	      setSpeed(AccDelay,MaxSpeed, MinSpeed);
-	      computeAll();
-	      unsigned long empty = 0;
-	      oneLayer(direction, true, false, &empty);
+	      runOnlyCarriage(direction, tmp_distance);
 	      disableMotors();
 	    }
 	  run = EXIT;
@@ -300,7 +297,7 @@ void Setting::moveCoil()
   bool run = true;
   bool direction = CLOCK;
 
-  // Print direction white "Tr" unit value.
+  // Print direction with "Tr" unit value.
   _Display->engineMoveDirection(tmp_turns, true);
 
   while(run)

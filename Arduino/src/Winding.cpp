@@ -71,7 +71,8 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
     }
 }
 
-static void accSingleMotor(bool acc, unsigned long *delayMotor, unsigned long limitSpeed)
+// For one motor only.
+static void acceleration(bool acc, unsigned long *delayMotor, unsigned long limitSpeed)
 {
   //Acceleration.
   if(acc && (*delayMotor > limitSpeed))
@@ -128,6 +129,11 @@ void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
   _minSpeed = minSpeed;
 }
 
+void Coil::computeStepPerLayer(float length)
+{
+  _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
+}
+
 void Coil::computeRatio()
 {
   // Number of steps for "carriage motor" advance, depending wire size and lead screw.
@@ -135,7 +141,7 @@ void Coil::computeRatio()
   // Reduction ratio due, between motors.
   _ratio = M1_STEPS_PER_TR / pitchToSteps;
   // Steps for winding one layer.
-  _stepsPerLayer = (M2_STEPS_PER_TR * _coilLength) / LEAD_SCREW_PITCH;
+  computeStepPerLayer(_coilLength);
 
 #ifdef DEBUGOFF
   Serial.print("pitchToStep : ");
@@ -158,7 +164,7 @@ void Coil::computeStepsTravel(float totalSteps)
   // 3. Determine steps travel before start deceleration.
   _stepsTravel = totalSteps - (unsigned long)stepsAcc;
 
-#ifdef DEBUG
+#ifdef DEBUGOFF
   Serial.print("T : ");
   Serial.println(T);
   Serial.print("stepsAcc : ");
@@ -286,6 +292,45 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
   Serial.println("total steps"), Serial.println(layerStepsCounter);
 }
 
+void Coil::runOnlyCarriage(bool dir, float distance)
+{
+  // Set "_stepsPerLayer". Is number of steps for this distance.
+  computeStepPerLayer(distance);
+  // Set steps when you start deceleration.
+  computeStepsTravel(_stepsPerLayer);
+
+  unsigned long delayMotor = _minSpeed;
+  unsigned long lastMicrosMotor = 0;
+  unsigned long lastMicrosAcc = 0;
+
+  unsigned long stepsCounter = 0;
+
+  while( stepsCounter < _stepsPerLayer )
+    {
+      unsigned long currentMicros = micros();
+
+      if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+	{
+	  if(stepsCounter < _stepsTravel)
+	    {
+	      // Acceleration
+	      acceleration(ACCELERATION, &delayMotor, _maxSpeed);
+	    }
+	  else
+	    {
+	      // Deceleration
+	      acceleration(DECELERATION, &delayMotor, _minSpeed);
+	    }
+	}
+
+      if(timer(currentMicros, &lastMicrosMotor, delayMotor))
+	{
+	  motorCarriage.oneStep(dir);
+	  stepsCounter += 1;
+	}
+    }
+}
+
 void Coil::runOnlyCoil(bool dir, float turns)
 {
   // Set steps when you start deceleration.
@@ -306,17 +351,18 @@ void Coil::runOnlyCoil(bool dir, float turns)
 	  if(stepsCounter < _stepsTravel)
 	    {
 	      // Acceleration
-	      accSingleMotor(ACCELERATION, &delayMotor, _maxSpeed);
+	      acceleration(ACCELERATION, &delayMotor, _maxSpeed);
 	    }
 	  else
 	    {
 	      // Deceleration
-	      accSingleMotor(DECELERATION, &delayMotor, _minSpeed);
+	      acceleration(DECELERATION, &delayMotor, _minSpeed);
 	    }
 	}
+
       if(timer(currentMicros, &lastMicrosMotor, delayMotor))
 	{
-	  motorWinding.oneStep(CLOCK);
+	  motorWinding.oneStep(!dir);
 	  stepsCounter += 1;
 	}
     }
