@@ -124,6 +124,7 @@ public:
   const void engineSave(float value);
   const void engineResetConfirm(bool razValues);
   const void engineMoveDirection(float value, bool turns);
+  const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns);
 
 };
 

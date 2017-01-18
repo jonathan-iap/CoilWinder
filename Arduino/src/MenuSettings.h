@@ -32,6 +32,7 @@ public :
   void resetAction(bool razValues);
   void moveCarriage();
   void moveCoil();
+  void runWinding();
 
 private:
 

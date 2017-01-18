@@ -39,11 +39,13 @@ void Setting::resetAction(bool razValues)
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
+	  // If we are in "razValue" menu.
 	  if(currentIndex == 0 && !razValues) // if "yes"
 	    {
 	      reset();
 	      _Display->loadBar();
 	    }
+	  // If we are in "reset" menu.
 	  else if(currentIndex == 0 && razValues) // if "yes"
 	    {
 	      readAll();
@@ -288,7 +290,7 @@ void Setting::moveCoil()
   char tmp_buffTurns[] = {"0000"};
   float tmp_turns = 0.00;
 
-  // Set number off turns we want move.
+  // Set number of turns, that we want to move.
   affectValues(MSG_TURNS, tmp_buffTurns, 5, &tmp_turns);
   engine(NOT_SAVE);
 
@@ -302,7 +304,7 @@ void Setting::moveCoil()
 
   while(run)
     {
-      // Set direction or exit.
+      // Set direction by clicking on "</>" or "N" to exit.
       selectCharacter(&currentIndex, &lastIndex, MSG_DIRECTION, (SIZE_MSG_DIRECTION-1),
 		      (LCD_CHARS-SIZE_MSG_DIRECTION+1), false);
 
@@ -321,4 +323,13 @@ void Setting::moveCoil()
 	  run = EXIT;
 	}
     }
+}
+
+void Setting::runWinding()
+{
+  _Display->engineWindingValue(CoilLength, WireSize, Turns);
+  setWinding(CoilLength, WireSize, Turns);
+  setSpeed(AccDelay,MaxSpeed, MinSpeed);
+  runMultiLayer();
+  disableMotors();
 }

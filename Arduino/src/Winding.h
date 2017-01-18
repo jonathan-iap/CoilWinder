@@ -18,18 +18,20 @@ public:
 
   void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
   void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
-  void computeStepPerLayer(float length);
-  void computeRatio();
-  void computeStepsTravel(float totalSteps);
-  void computeAll();
-  float getStepPerLayer();
 
-  void run();
-  void oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter);
+  void runMultiLayer();
+  void runOneLayer(bool dir, unsigned long *p_totalStepsCounter);
   void runOnlyCarriage(bool dir, float distance);
   void runOnlyCoil(bool dir, float turns);
   void stopMotion();
   void disableMotors();
+
+private:
+
+  void computeStepPerLayer(float length);
+  void computeRatio();
+  void computeStepsTravel(float totalSteps);
+  void computeAll();
 
 private:
 

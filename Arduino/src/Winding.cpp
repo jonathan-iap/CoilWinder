@@ -193,13 +193,7 @@ void Coil::computeAll()
 #endif
 }
 
-
-float Coil::getStepPerLayer()
-{
-  return _stepsPerLayer;
-}
-
-void Coil::run()
+void Coil::runMultiLayer()
 {
   // Compute all values to make winding.
   computeAll();
@@ -209,7 +203,7 @@ void Coil::run()
 
   while(totalStepsCounter < TurnToSteps(_coilTurns))
     {
-      oneLayer(direction, true, true, &totalStepsCounter);
+      runOneLayer(direction, &totalStepsCounter);
       // Invert direction when one layer is finished
       direction = !direction;
     }
@@ -220,7 +214,7 @@ void Coil::run()
 #endif
 }
 
-void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_totalStepsCounter)
+void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter)
 {
   unsigned long delayMotorWinding = _minSpeed;
   unsigned long delayMotorCarriage = _minSpeed;
@@ -240,7 +234,7 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
   unsigned long startMicros = micros();
 #endif
 
-  while(layerStepsCounter < _stepsPerLayer)
+  while((*p_totalStepsCounter< TurnToSteps(_coilTurns)) && (layerStepsCounter < _stepsPerLayer))
     {
       unsigned long currentMicros = micros();
 
@@ -278,18 +272,18 @@ void Coil::oneLayer(bool dir, bool M_carriage, bool M_winding, unsigned long *p_
 	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
 	    }
 	}
-      if(M_winding && timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
+      if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
 	{
-	  motorWinding.oneStep(CLOCK);
+	  motorWinding.oneStep(C_CLOCK);
 	  *p_totalStepsCounter += 1;
 	}
-      if(M_carriage && timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
+      if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
 	{
 	  motorCarriage.oneStep(dir);
 	  layerStepsCounter++;
 	}
     }
-  Serial.println("total steps"), Serial.println(layerStepsCounter);
+//  Serial.println("total steps"), Serial.println(layerStepsCounter);
 }
 
 void Coil::runOnlyCarriage(bool dir, float distance)

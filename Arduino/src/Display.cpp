@@ -188,3 +188,16 @@ const void Display::engineMoveDirection(float value, bool turns)
   _lcd.setCursor((LCD_CHARS-SIZE_MSG_DIRECTION+1), LCD_LINES);
   _lcd.print(MSG_DIRECTION);
 }
+
+const void Display::engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print("L:"), _lcd.print(coilLength);
+  _lcd.setCursor(LCD_CHARS-5,0);
+  _lcd.print("W:"), _lcd.print(wireSize);
+  _lcd.setCursor(0,1);
+  _lcd.print("Tr:"), _lcd.print(coilTurns);
+
+
+}
