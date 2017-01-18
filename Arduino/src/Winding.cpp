@@ -91,7 +91,7 @@ static void acceleration(bool acc, unsigned long *delayMotor, unsigned long limi
 
 /*_____ CONSTRUCTOR _____ */
 
-Coil::Coil()
+Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 : motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
   motorCarriage (M2_DIR, M2_STEP, M2_EN, M2_STEPS_PER_TR),
 
@@ -107,6 +107,8 @@ Coil::Coil()
   _stepsPerLayer(0),
   _stepsTravel(0)
 {
+  _Encoder = p_Encoder;
+  _Display = p_Display;
   motorCarriage.begin();
   motorWinding.begin();
 }
@@ -145,11 +147,6 @@ void Coil::computeRatio()
   _ratio = M1_STEPS_PER_TR / pitchToSteps;
   // Steps for winding one layer.
   computeStepPerLayer(_coilLength);
-
-#ifdef DEBUGOFF
-  Serial.print("pitchToStep : ");
-  Serial.println(pitchToSteps);
-#endif
 }
 
 
@@ -167,13 +164,6 @@ void Coil::computeStepsTravel(float totalSteps)
 
   // 3. Determine steps travel before start deceleration.
   _stepsTravel = totalSteps - (unsigned long)stepsAcc;
-
-#ifdef DEBUGOFF
-  Serial.print("T : ");
-  Serial.println(T);
-  Serial.print("stepsAcc : ");
-  Serial.println(stepsAcc);
-#endif
 }
 void Coil::computeAll()
 {

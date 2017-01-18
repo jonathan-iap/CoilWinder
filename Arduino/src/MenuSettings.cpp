@@ -6,7 +6,7 @@
  */
 #include "MenuSettings.h"
 
-Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display)
+Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
 : _idValue(0),
   _buffSize(0),
   p_floatingValue(0),
@@ -14,6 +14,7 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
+  _Coil = p_Coil;
 }
 Setting::~Setting(){}
 
@@ -276,9 +277,9 @@ void Setting::moveCarriage()
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
-	      setSpeed(AccDelay,MaxSpeed, MinSpeed);
-	      runOnlyCarriage(direction, tmp_distance);
-	      disableMotors();
+	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      _Coil->runOnlyCarriage(direction, tmp_distance);
+	      _Coil->disableMotors();
 	    }
 	  run = EXIT;
 	}
@@ -316,9 +317,9 @@ void Setting::moveCoil()
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
 	      // set and start displacement.
-	      setSpeed(AccDelay,MaxSpeed, MinSpeed);
-	      runOnlyCoil(direction, tmp_turns);
-	      disableMotors();
+	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      _Coil->runOnlyCoil(direction, tmp_turns);
+	      _Coil->disableMotors();
 	    }
 	  run = EXIT;
 	}
@@ -328,8 +329,8 @@ void Setting::moveCoil()
 void Setting::runWinding()
 {
   _Display->engineWindingValue(CoilLength, WireSize, Turns);
-  setWinding(CoilLength, WireSize, Turns);
-  setSpeed(AccDelay,MaxSpeed, MinSpeed);
-  runMultiLayer();
-  disableMotors();
+  _Coil->setWinding(CoilLength, WireSize, Turns);
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+  _Coil->runMultiLayer();
+  _Coil->disableMotors();
 }

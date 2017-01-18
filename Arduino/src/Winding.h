@@ -5,6 +5,8 @@
 #include "Motor.h"
 #include "Configuration.h"
 #include "Function.h"
+#include "Display.h"
+#include "ClickEncoder.h"
 
 #define ACCELERATION true
 #define DECELERATION false
@@ -13,7 +15,7 @@ class Coil
 {
 public:
 
-  Coil();
+  Coil(ClickEncoder *p_Encoder, Display *p_Display);
   ~Coil();
 
   void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
@@ -36,6 +38,9 @@ private:
   void homing(bool dir, unsigned long layerStepsCounter);
 
 private:
+
+  ClickEncoder *_Encoder;
+  Display *_Display;
 
   Motor motorWinding, motorCarriage;
 
