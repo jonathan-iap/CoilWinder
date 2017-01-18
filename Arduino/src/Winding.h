@@ -20,7 +20,7 @@ public:
   void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
 
   void runMultiLayer();
-  void runOneLayer(bool dir, unsigned long *p_totalStepsCounter);
+  void runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned long *p_layerStepsCounter);
   void runOnlyCarriage(bool dir, float distance);
   void runOnlyCoil(bool dir, float turns);
   void stopMotion();
@@ -32,6 +32,8 @@ private:
   void computeRatio();
   void computeStepsTravel(float totalSteps);
   void computeAll();
+
+  void homing(bool dir, unsigned long layerStepsCounter);
 
 private:
 

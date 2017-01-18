@@ -89,7 +89,6 @@ static void acceleration(bool acc, unsigned long *delayMotor, unsigned long limi
     }
 }
 
-
 /*_____ CONSTRUCTOR _____ */
 
 Coil::Coil()
@@ -112,6 +111,7 @@ Coil::Coil()
   motorWinding.begin();
 }
 
+
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
@@ -122,6 +122,7 @@ void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
   _coilTurns  = coilTurns;
 }
 
+
 void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
 {
   _accDelay = accDelay;
@@ -129,10 +130,12 @@ void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
   _minSpeed = minSpeed;
 }
 
+
 void Coil::computeStepPerLayer(float length)
 {
   _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
 }
+
 
 void Coil::computeRatio()
 {
@@ -148,6 +151,7 @@ void Coil::computeRatio()
   Serial.println(pitchToSteps);
 #endif
 }
+
 
 // Determine when you need to start deceleration.
 void Coil::computeStepsTravel(float totalSteps)
@@ -193,6 +197,26 @@ void Coil::computeAll()
 #endif
 }
 
+void Coil::homing(bool dir, unsigned long layerStepsCounter)
+{
+  // Depending on the direction of travel, we need to re-invert and recalculate displacement.
+  // Else we use layerStepsCounter and pre-reversed direction.
+  float dist = layerStepsCounter;
+
+  if(dir)
+    {
+      (dist = _stepsPerLayer - layerStepsCounter);
+      dir = !dir;
+    }
+  // Convert step into distance.
+  dist = (dist*LEAD_SCREW_PITCH) / M2_STEPS_PER_TR;
+
+  // Little delay to mark end, and back to the start position.
+  delay(500);
+  runOnlyCarriage(dir, dist);
+}
+
+
 void Coil::runMultiLayer()
 {
   // Compute all values to make winding.
@@ -200,21 +224,24 @@ void Coil::runMultiLayer()
 
   bool direction = CLOCK;
   unsigned long totalStepsCounter = 0;
+  unsigned long layerStepsCounter = 0;
 
   while(totalStepsCounter < TurnToSteps(_coilTurns))
     {
-      runOneLayer(direction, &totalStepsCounter);
+      layerStepsCounter = 0;
+
+      runOneLayer(direction, &totalStepsCounter, &layerStepsCounter);
+
       // Invert direction when one layer is finished
       direction = !direction;
     }
 
-#ifdef DEBUG
-  Serial.print("step Tr : ");
-  Serial.println(totalStepsCounter);
-#endif
+  // Direction is already inverted !
+  homing(direction, layerStepsCounter);
 }
 
-void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter)
+
+void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned long *p_layerStepsCounter)
 {
   unsigned long delayMotorWinding = _minSpeed;
   unsigned long delayMotorCarriage = _minSpeed;
@@ -222,52 +249,19 @@ void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter)
   unsigned long lastMicrosMotorCarriage = 0;
   unsigned long lastMicrosAcc = 0;
 
-  unsigned long layerStepsCounter = 0;
-
-#ifdef DEBUGOFF
-  bool debug = true;
-
-  Serial.println("------------------");
-  Serial.print("stepsPerLayer : ");
-  Serial.println(_stepsPerLayer );
-  Serial.println("------------------");
-  unsigned long startMicros = micros();
-#endif
-
-  while((*p_totalStepsCounter< TurnToSteps(_coilTurns)) && (layerStepsCounter < _stepsPerLayer))
+  while((*p_totalStepsCounter< TurnToSteps(_coilTurns)) && (*p_layerStepsCounter < _stepsPerLayer))
     {
       unsigned long currentMicros = micros();
 
       if(timer(currentMicros, &lastMicrosAcc, _accDelay))
 	{
-	  if(layerStepsCounter < _stepsTravel)
+	  if(*p_layerStepsCounter < _stepsTravel)
 	    {
 	      // Acceleration
 	      acceleration(true, &delayMotorWinding, _maxSpeed, _ratio, &delayMotorCarriage);
-#ifdef DEBUGOFF
-	      if(delayMotorCarriage == _maxSpeed && debug)
-		{
-		  unsigned long result = 0;
-		  unsigned long endMicros = micros();
-		  result = endMicros - startMicros;
-		  debug = false;
-		  Serial.print("total step during acceleration : "), Serial.println(layerStepsCounter);
-		  Serial.print("Acc time : "), Serial.println(result);
-		  Serial.println("------------------");
-		}
-#endif
 	    }
 	  else
 	    {
-#ifdef DEBUGOFF
-	      if(delayMotorCarriage == _maxSpeed && !debug)
-		{
-		  debug = true;
-		  Serial.print("decceleration step : "), Serial.println(layerStepsCounter);
-		  Serial.println("------------------");
-		}
-#endif
-
 	      // Deceleration
 	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
 	    }
@@ -280,17 +274,18 @@ void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter)
       if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
 	{
 	  motorCarriage.oneStep(dir);
-	  layerStepsCounter++;
+	  *p_layerStepsCounter += 1;
 	}
     }
-//  Serial.println("total steps"), Serial.println(layerStepsCounter);
+  //  Serial.println("total steps"), Serial.println(layerStepsCounter);
 }
+
 
 void Coil::runOnlyCarriage(bool dir, float distance)
 {
-  // Set "_stepsPerLayer". Is number of steps for this distance.
+  // Number of steps for this distance, set "_stepsPerLayer" !
   computeStepPerLayer(distance);
-  // Set steps when you start deceleration.
+  // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(_stepsPerLayer);
 
   unsigned long delayMotor = _minSpeed;
@@ -325,9 +320,10 @@ void Coil::runOnlyCarriage(bool dir, float distance)
     }
 }
 
+
 void Coil::runOnlyCoil(bool dir, float turns)
 {
-  // Set steps when you start deceleration.
+  // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(TurnToSteps(turns));
 
   unsigned long delayMotor = _minSpeed;
