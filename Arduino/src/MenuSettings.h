@@ -34,6 +34,7 @@ public :
   void moveCoil();
   void runWinding();
 
+
 private:
 
   ClickEncoder *_Encoder;
@@ -57,6 +58,7 @@ private:
 		 ClickEncoder::Button buttonState);
   void getFloatingValue();
   void saveValue(float value);
+  void menuSuspend();
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

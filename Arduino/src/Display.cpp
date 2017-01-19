@@ -197,7 +197,19 @@ const void Display::engineWindingValue(float coilLength, float wireSize, unsigne
   _lcd.setCursor(LCD_CHARS-5,0);
   _lcd.print("W:"), _lcd.print(wireSize);
   _lcd.setCursor(0,1);
-  _lcd.print("Tr:"), _lcd.print(coilTurns);
+  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print("...");
+}
 
 
+const void Display::windingTurns(uint16_t coilTurns,uint16_t counter)
+{
+  _lcd.setCursor(0,1);
+  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
+}
+
+const void Display::windingSetSpeed(uint16_t speed)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(speed);
 }

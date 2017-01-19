@@ -249,6 +249,13 @@ void Setting::saveValue(float value)
     }
 }
 
+
+void Setting::menuSuspend()
+{
+  _Display->windingTurns(_Coil->getTurns(), _Coil->getCurrentTurns());
+}
+
+
 void Setting::moveCarriage()
 {
   char tmp_buffDistance[] = {"00.00"};
@@ -328,9 +335,26 @@ void Setting::moveCoil()
 
 void Setting::runWinding()
 {
+  bool isRun = true;
+
   _Display->engineWindingValue(CoilLength, WireSize, Turns);
+
   _Coil->setWinding(CoilLength, WireSize, Turns);
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
-  _Coil->runMultiLayer();
-  _Coil->disableMotors();
+
+  while(isRun)
+    {
+      if(_Coil->runMultiLayer()) // runMultiLayer return true if winding is finished.
+	{
+	  _Coil->disableMotors();
+	  isRun = false;
+	}
+      else
+	{
+	  menuSuspend();
+	}
+    }
 }
+
+
+

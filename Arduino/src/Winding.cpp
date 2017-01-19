@@ -9,6 +9,7 @@
  * return  : Return steps.
  ******************************************************************************/
 #define TurnToSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
+#define StepsToTurns(coilSteps) coilSteps / M1_STEPS_PER_TR
 
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
@@ -102,10 +103,16 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _accDelay (400),
   _maxSpeed (30),
   _minSpeed (1400),
+  _speed(0),
 
   _ratio(0),
   _stepsPerLayer(0),
-  _stepsTravel(0)
+  _stepsTravel(0),
+  _totalStepsCounter(0),
+  _layerStepsCounter(0),
+
+  _direction(CLOCK),
+  _isWinding(true)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -130,6 +137,7 @@ void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
+  _speed = _maxSpeed;
 }
 
 
@@ -187,51 +195,73 @@ void Coil::computeAll()
 #endif
 }
 
-void Coil::homing(bool dir, unsigned long layerStepsCounter)
+void Coil::homing(bool dir)
 {
-  // Depending on the direction of travel, we need to re-invert and recalculate displacement.
-  // Else we use layerStepsCounter and pre-reversed direction.
-  float dist = layerStepsCounter;
+  Serial.print("dir homing 1 : "), Serial.println(dir);
+  // Depending the direction of travel, we need to invert and recalculate displacement.
+  // Else we use "layerStepsCounter" and "direction".
+  float dist = _layerStepsCounter;
 
-  if(dir)
-    {
-      (dist = _stepsPerLayer - layerStepsCounter);
-      dir = !dir;
-    }
+  if(dir) dir = !dir;
+  else (dist = _stepsPerLayer - _layerStepsCounter);
   // Convert step into distance.
   dist = (dist*LEAD_SCREW_PITCH) / M2_STEPS_PER_TR;
 
   // Little delay to mark end, and back to the start position.
-  delay(500);
+  delay(1000);
+  Serial.print("dir homing 2 : "), Serial.println(dir);
   runOnlyCarriage(dir, dist);
 }
 
 
-void Coil::runMultiLayer()
+bool Coil::runMultiLayer()
 {
+  bool isResume = false;
+
   // Compute all values to make winding.
   computeAll();
 
-  bool direction = CLOCK;
-  unsigned long totalStepsCounter = 0;
-  unsigned long layerStepsCounter = 0;
-
-  while(totalStepsCounter < TurnToSteps(_coilTurns))
+  if(_isWinding)
     {
-      layerStepsCounter = 0;
+      _direction = C_CLOCK; // To start left to right.
+      _totalStepsCounter = 0;
+      _layerStepsCounter = 0;
+    }
+  else isResume = true;
 
-      runOneLayer(direction, &totalStepsCounter, &layerStepsCounter);
+  _isWinding = true;
 
-      // Invert direction when one layer is finished
-      direction = !direction;
+  while(_totalStepsCounter < TurnToSteps(_coilTurns) && _isWinding)
+    {
+      if(isResume) isResume = false;
+      else
+	{
+	  // initialize for the next loop, only if not a resume action.
+	  _layerStepsCounter = 0;
+	  // Invert direction when one layer is finished.
+	  _direction = !_direction;
+	}
+      // winding one layer.
+      runOneLayer();
+      // refresh turn by layer on lcd.
+      _Display->windingTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
     }
 
-  // Direction is already inverted !
-  homing(direction, layerStepsCounter);
+  if(_isWinding)
+    {
+      Serial.print("dir homing 0 : "), Serial.println(_direction);
+
+      // Return to the first position, only if winding is finished.
+      homing(_direction);
+    }
+
+  // If "_runWinding" is false we call "menuSuspend()" and "runMultiLayer" will be recalled.
+  // Else winding is finished.
+  return _isWinding;
 }
 
 
-void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned long *p_layerStepsCounter)
+void Coil::runOneLayer()
 {
   unsigned long delayMotorWinding = _minSpeed;
   unsigned long delayMotorCarriage = _minSpeed;
@@ -239,16 +269,23 @@ void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned lo
   unsigned long lastMicrosMotorCarriage = 0;
   unsigned long lastMicrosAcc = 0;
 
-  while((*p_totalStepsCounter< TurnToSteps(_coilTurns)) && (*p_layerStepsCounter < _stepsPerLayer))
+
+
+  while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
+      (_layerStepsCounter < _stepsPerLayer) &&
+      _isWinding )
     {
+      // If user click on encoder "_runwindig" become false and break the loop.
+      suspend();
+
       unsigned long currentMicros = micros();
 
       if(timer(currentMicros, &lastMicrosAcc, _accDelay))
 	{
-	  if(*p_layerStepsCounter < _stepsTravel)
+	  if(_layerStepsCounter < _stepsTravel)
 	    {
 	      // Acceleration
-	      acceleration(true, &delayMotorWinding, _maxSpeed, _ratio, &delayMotorCarriage);
+	      acceleration(true, &delayMotorWinding, _speed, _ratio, &delayMotorCarriage);
 	    }
 	  else
 	    {
@@ -259,15 +296,14 @@ void Coil::runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned lo
       if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
 	{
 	  motorWinding.oneStep(C_CLOCK);
-	  *p_totalStepsCounter += 1;
+	  _totalStepsCounter += 1;
 	}
       if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
 	{
-	  motorCarriage.oneStep(dir);
-	  *p_layerStepsCounter += 1;
+	  motorCarriage.oneStep(_direction);
+	  _layerStepsCounter += 1;
 	}
     }
-  //  Serial.println("total steps"), Serial.println(layerStepsCounter);
 }
 
 
@@ -348,9 +384,13 @@ void Coil::runOnlyCoil(bool dir, float turns)
     }
 }
 
-void Coil::stopMotion()
+void Coil::suspend()
 {
-
+  ClickEncoder::Button buttonState = _Encoder->getButton();
+  if( buttonState == ClickEncoder::Clicked )
+    {
+      _isWinding = false;
+    }
 }
 
 void Coil::disableMotors()
@@ -358,3 +398,14 @@ void Coil::disableMotors()
   motorWinding.disable();
   motorCarriage.disable();
 }
+
+
+uint16_t Coil::getTurns()
+{
+  return _coilTurns;
+}
+uint16_t Coil::getCurrentTurns()
+{
+  return StepsToTurns(_totalStepsCounter);
+}
+

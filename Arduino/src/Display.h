@@ -126,6 +126,9 @@ public:
   const void engineMoveDirection(float value, bool turns);
   const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns);
 
+  // Winding
+  const void windingTurns(uint16_t coilTurns,uint16_t counter);
+  const void windingSetSpeed(uint16_t speed);
 };
 
 #endif /* SRC_DISPLAY_H_ */

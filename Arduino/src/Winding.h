@@ -8,8 +8,9 @@
 #include "Display.h"
 #include "ClickEncoder.h"
 
-#define ACCELERATION true
-#define DECELERATION false
+#define ACCELERATION 	true
+#define DECELERATION 	false
+#define UPDATE		true
 
 class Coil
 {
@@ -21,12 +22,16 @@ public:
   void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
   void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
 
-  void runMultiLayer();
-  void runOneLayer(bool dir, unsigned long *p_totalStepsCounter, unsigned long *p_layerStepsCounter);
+  bool runMultiLayer();
+  void runOneLayer();
   void runOnlyCarriage(bool dir, float distance);
   void runOnlyCoil(bool dir, float turns);
-  void stopMotion();
+  void suspend();
   void disableMotors();
+
+  uint16_t getTurns();
+  uint16_t getCurrentTurns();
+
 
 private:
 
@@ -35,7 +40,7 @@ private:
   void computeStepsTravel(float totalSteps);
   void computeAll();
 
-  void homing(bool dir, unsigned long layerStepsCounter);
+  void homing(bool dir);
 
 private:
 
@@ -54,13 +59,18 @@ private:
   unsigned long _accDelay;
   unsigned long _maxSpeed;
   unsigned long _minSpeed;
+  unsigned long _speed;
 
   // reduction ratio for motor.
   float _ratio;
   // steps for one layer.
   unsigned long _stepsPerLayer;
   unsigned long _stepsTravel;
+  unsigned long _totalStepsCounter;
+  unsigned long _layerStepsCounter;
 
+  bool _direction;
+  bool _isWinding;
 };
 
 #endif
