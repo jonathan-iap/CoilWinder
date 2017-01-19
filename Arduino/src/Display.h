@@ -31,6 +31,13 @@
 #define MSG_RAZ 	"Reset values ? "
 #define MSG_MOVE	"Move in mm"
 
+#define MSG_SPEED		"Speed"
+#define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
+#define MSG_EXIT		"Exit"
+#define SIZE_MSG_EXIT 		COUNTOF(MSG_EXIT)
+#define CURSOR_EXIT		(((LCD_CHARS-(SIZE_MSG_SAVE+SIZE_MSG_SAVE+SIZE_MSG_EXIT))/2)+SIZE_MSG_SPEED)
+#define MSG_SAVE		"Save"
+#define SIZE_MSG_SAVE 		COUNTOF(MSG_SAVE)
 #define MSG_EDIT		"Edit"
 #define SIZE_MSG_EDIT 		COUNTOF(MSG_EDIT)
 #define MSG_NEXT 		"Next:"
@@ -68,14 +75,14 @@ public :
   };
 
   uint8_t back[8] = {
-      0b00000,
       0b00100,
       0b01100,
       0b11111,
       0b01101,
       0b00101,
       0b00001,
-      0b00000
+      0b01001,
+      0b01111
   };
 
   uint8_t enter[8] = {
@@ -110,6 +117,7 @@ public:
   const void clear();
   const void blank(uint8_t size);
   const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
+  const void blinkWorld(uint8_t index);
   const void loadBar();
 
   // Render menu item
@@ -128,6 +136,7 @@ public:
 
   // Winding
   const void windingTurns(uint16_t coilTurns,uint16_t counter);
+  const void windingSelectAction();
   const void windingSetSpeed(uint16_t speed);
 };
 

@@ -81,6 +81,34 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
     }
 }
 
+const void Display::blinkWorld(uint8_t index)
+{
+  static bool basculeSet = true;
+
+  if(basculeSet)
+    {
+      switch (index)
+      {
+	case 1 : { _lcd.setCursor(0, 0); blank(SIZE_MSG_SPEED); break; }
+	case 2 : { _lcd.setCursor(CURSOR_EXIT, 0); blank(SIZE_MSG_EXIT); break; }
+	case 3 : { _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0); blank(SIZE_MSG_SAVE); break; }
+	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); blank(1); break; }
+      }
+      basculeSet = false;
+    }
+  else
+    {
+      switch (index)
+      {
+	case 1 : { _lcd.setCursor(0, 0); _lcd.print(MSG_SPEED); break; }
+	case 2 : { _lcd.setCursor(CURSOR_EXIT, 0); _lcd.print(MSG_EXIT); break; }
+	case 3 : { _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0); _lcd.print(MSG_SAVE); break; }
+	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); _lcd.write((byte)IconBack); break; }
+      }
+      basculeSet = true;
+    }
+}
+
 // Print an animation load bar
 const void Display::loadBar()
 {
@@ -206,6 +234,20 @@ const void Display::windingTurns(uint16_t coilTurns,uint16_t counter)
   _lcd.setCursor(0,1);
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
 }
+
+
+const void Display::windingSelectAction()
+{
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SPEED);
+  _lcd.setCursor(CURSOR_EXIT, 0);
+  _lcd.print(MSG_EXIT);
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0);
+  _lcd.print(MSG_SAVE);
+  _lcd.setCursor((LCD_CHARS-1), LCD_LINES);
+  _lcd.write((byte)IconBack);
+}
+
 
 const void Display::windingSetSpeed(uint16_t speed)
 {

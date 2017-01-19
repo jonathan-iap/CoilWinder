@@ -140,7 +140,7 @@ void Setting::engine(bool save)
     }
 }
 
-// Move cursor on character to edit
+// Move cursor on character to select.
 void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue[],
 			      uint8_t buffSize, uint8_t offset, bool cursoJumpEnd)
 {
@@ -159,6 +159,30 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
   if(timer(currentTime, &lastTime, delayTimeBlock))
     {
       _Display->blinkValue(*index, arrayValue, buffSize, false, offset);
+    }
+
+  // To determine the direction of the next movement.
+  *last = *index;
+}
+
+void Setting::selectCharacter(int8_t *index, int8_t *last)
+{
+  static unsigned long lastTime;
+  unsigned long currentTime = millis();
+
+  *index += _Encoder->getValue();
+
+  clampValue(index, 1, 4);
+
+  // Print old world if we move : Forward , backward
+  if(*index>*last || *index<*last )
+    {
+      _Display->windingSelectAction();
+    }
+  // Blinking of the selected world
+  if(timer(currentTime, &lastTime, delayTimeBlock))
+    {
+      _Display->blinkWorld(*index);
     }
 
   // To determine the direction of the next movement.
@@ -250,9 +274,34 @@ void Setting::saveValue(float value)
 }
 
 
-void Setting::menuSuspend()
+bool Setting::menuSuspend()
 {
+  int8_t currentIndex = 0;
+  int8_t lastIndex = 0;
+  bool isRun = true;
+
+  _Display->clear();
+  _Display->windingSelectAction();
   _Display->windingTurns(_Coil->getTurns(), _Coil->getCurrentTurns());
+
+  while(isRun)
+    {
+      selectCharacter(&currentIndex, &lastIndex);
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  switch (currentIndex)
+	  {
+	    case 1 : {break;}//speed
+	    case 2 : {return false; break;}//exit
+	    case 3 : {break;}//save
+	    case 4 : {return true; break;}//back
+	  }
+
+	  isRun = EXIT;
+	}
+    }
 }
 
 
@@ -274,13 +323,14 @@ void Setting::moveCarriage()
 
   while(run)
     {
+      // Set direction by clicking on "</>" or "N" to exit.
       selectCharacter(&currentIndex, &lastIndex, MSG_DIRECTION, (SIZE_MSG_DIRECTION-1),
 		      (LCD_CHARS-SIZE_MSG_DIRECTION+1), false);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-	  if(currentIndex < 4)
+	  if(currentIndex < 4) // Select direction "</>"
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
@@ -319,7 +369,7 @@ void Setting::moveCoil()
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-	  if(currentIndex < 4)
+	  if(currentIndex < 4) // Select direction "</>"
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
@@ -337,21 +387,26 @@ void Setting::runWinding()
 {
   bool isRun = true;
 
+  // Display value that are used for current winding.
   _Display->engineWindingValue(CoilLength, WireSize, Turns);
 
+  // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
 
   while(isRun)
     {
-      if(_Coil->runMultiLayer()) // runMultiLayer return true if winding is finished.
+      // Start winding with "runMultiLayer()"
+      if(_Coil->runMultiLayer()) // "runMultiLayer()" return true if winding is finished.
 	{
 	  _Coil->disableMotors();
 	  isRun = false;
 	}
-      else
+      else // If user click on encoder during winding.
 	{
-	  menuSuspend();
+	  isRun = menuSuspend();
+
+	  if(isRun)_Display->engineWindingValue(CoilLength, WireSize, Turns);
 	}
     }
 }
