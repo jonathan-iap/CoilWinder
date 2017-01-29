@@ -32,7 +32,7 @@ public :
   void resetAction(bool razValues);
   void moveCarriage();
   void moveCoil();
-  void runWinding();
+  void runWinding(bool resumeCurrent, bool resumeSaved);
 
 
 private:

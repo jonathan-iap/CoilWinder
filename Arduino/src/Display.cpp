@@ -22,6 +22,7 @@ const void Display::begin()
   _lcd.createChar(IconBack, back);
   _lcd.createChar(IconEnter, enter);
   _lcd.createChar(IconBlock, block);
+  _lcd.createChar(IconSave, save);
 
   // Quick 3 blinks of back-light
   for(uint8_t i=3; i>0; i--)
@@ -222,7 +223,7 @@ const void Display::engineWindingValue(float coilLength, float wireSize, unsigne
   _lcd.clear();
   _lcd.setCursor(0,0);
   _lcd.print("L:"), _lcd.print(coilLength);
-  _lcd.setCursor(LCD_CHARS-5,0);
+  _lcd.setCursor(LCD_CHARS-6,0);
   _lcd.print("W:"), _lcd.print(wireSize);
   _lcd.setCursor(0,1);
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print("...");

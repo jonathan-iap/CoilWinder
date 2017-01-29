@@ -90,7 +90,7 @@ bool runWinding(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding();
+      setting.runWinding(0,0);
     }
   return true;
 }
@@ -99,7 +99,16 @@ bool runResume(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding();
+      setting.runWinding(1,0);
+    }
+  return true;
+}
+
+bool runSaved(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.runWinding(0,1);
     }
   return true;
 }
@@ -180,8 +189,9 @@ MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miMaxSpeed, me
 MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
 MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
 MenuItem(miTurns, "3.Turns", miStart, miCoilLength, miWinding, Menu::NullItem, editTurns);
-MenuItem(miStart, "4.Start", miResume, miTurns, miWinding, Menu::NullItem, runWinding);
-MenuItem(miResume, "Resume", miBack1, miStart, miWinding, Menu::NullItem, runResume);
+MenuItem(miStart, "4.Start new", miResume, miTurns, miWinding, Menu::NullItem, runWinding);
+MenuItem(miResume, "Resume current", miSaved, miStart, miWinding, Menu::NullItem, runResume);
+MenuItem(miSaved, "Resume saved", miBack1, miResume, miWinding, Menu::NullItem, runSaved);
 MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
 // Sub-menu 2.1 -> 2.?
 MenuItem(miMovCarriage, "Move carriage", miMovCoil, Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);

@@ -112,7 +112,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _layerStepsCounter(0),
 
   _direction(CLOCK),
-  _isWinding(true)
+  _isNewCoil(true)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -197,7 +197,6 @@ void Coil::computeAll()
 
 void Coil::homing(bool dir)
 {
-  Serial.print("dir homing 1 : "), Serial.println(dir);
   // Depending the direction of travel, we need to invert and recalculate displacement.
   // Else we use "layerStepsCounter" and "direction".
   float dist = _layerStepsCounter;
@@ -208,20 +207,19 @@ void Coil::homing(bool dir)
   dist = (dist*LEAD_SCREW_PITCH) / M2_STEPS_PER_TR;
 
   // Little delay to mark end, and back to the start position.
-  delay(1000);
-  Serial.print("dir homing 2 : "), Serial.println(dir);
+  delay(800);
   runOnlyCarriage(dir, dist);
 }
 
 
-bool Coil::runMultiLayer()
+bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
 {
   bool isResume = false;
 
   // Compute all values to make winding.
   computeAll();
 
-  if(_isWinding)
+  if(_isNewCoil && !resumeCurrent)
     {
       _direction = C_CLOCK; // To start left to right.
       _totalStepsCounter = 0;
@@ -229,9 +227,9 @@ bool Coil::runMultiLayer()
     }
   else isResume = true;
 
-  _isWinding = true;
+  _isNewCoil = true;
 
-  while(_totalStepsCounter < TurnToSteps(_coilTurns) && _isWinding)
+  while(_totalStepsCounter < TurnToSteps(_coilTurns) && _isNewCoil)
     {
       if(isResume) isResume = false;
       else
@@ -247,17 +245,15 @@ bool Coil::runMultiLayer()
       _Display->windingTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
     }
 
-  if(_isWinding)
+  if(_isNewCoil)
     {
-      Serial.print("dir homing 0 : "), Serial.println(_direction);
-
       // Return to the first position, only if winding is finished.
       homing(_direction);
     }
 
   // If "_runWinding" is false we call "menuSuspend()" and "runMultiLayer" will be recalled.
   // Else winding is finished.
-  return _isWinding;
+  return _isNewCoil;
 }
 
 
@@ -269,11 +265,9 @@ void Coil::runOneLayer()
   unsigned long lastMicrosMotorCarriage = 0;
   unsigned long lastMicrosAcc = 0;
 
-
-
   while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
       (_layerStepsCounter < _stepsPerLayer) &&
-      _isWinding )
+      _isNewCoil )
     {
       // If user click on encoder "_runwindig" become false and break the loop.
       suspend();
@@ -389,7 +383,7 @@ void Coil::suspend()
   ClickEncoder::Button buttonState = _Encoder->getButton();
   if( buttonState == ClickEncoder::Clicked )
     {
-      _isWinding = false;
+      _isNewCoil = false;
     }
 }
 

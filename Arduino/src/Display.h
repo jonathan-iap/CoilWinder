@@ -20,6 +20,7 @@
 #define IconEnter	4
 #define IconValid	5
 #define IconBlock	6
+#define IconSave	7
 
 #define MSG_WIRE_SIZE	"Wire size in mm"
 #define MSG_COIL_LENGTH	"Length in mm"
@@ -104,6 +105,17 @@ public :
       0b11111,
       0b11111,
       0b11111,
+      0b11111
+  };
+
+  uint8_t save[8] = {
+      0b00100,
+      0b00100,
+      0b00100,
+      0b11111,
+      0b01110,
+      0b00100,
+      0b00000,
       0b11111
   };
 

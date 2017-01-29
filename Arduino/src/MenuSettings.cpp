@@ -383,7 +383,7 @@ void Setting::moveCoil()
     }
 }
 
-void Setting::runWinding()
+void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 {
   bool isRun = true;
 
@@ -397,7 +397,7 @@ void Setting::runWinding()
   while(isRun)
     {
       // Start winding with "runMultiLayer()"
-      if(_Coil->runMultiLayer()) // "runMultiLayer()" return true if winding is finished.
+      if(_Coil->runMultiLayer(resumeCurrent, resumeSaved)) // "runMultiLayer()" return true if winding is finished.
 	{
 	  _Coil->disableMotors();
 	  isRun = false;
