@@ -26,7 +26,7 @@ public:
   void runOneLayer();
   void runOnlyCarriage(bool dir, float distance);
   void runOnlyCoil(bool dir, float turns);
-  void suspend();
+  bool suspend();
   void disableMotors();
 
   uint16_t getTurns();

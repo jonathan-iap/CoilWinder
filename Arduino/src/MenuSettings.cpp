@@ -156,7 +156,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
   _Display->engineFillChar(*last, *index, buffSize, arrayValue, offset);
 
   // Blinking of the selected character
-  if(timer(currentTime, &lastTime, delayTimeBlock))
+  if(timer(currentTime, &lastTime, DelayTimeBlock))
     {
       _Display->blinkValue(*index, arrayValue, buffSize, false, offset);
     }
@@ -180,7 +180,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last)
       _Display->windingSelectAction();
     }
   // Blinking of the selected world
-  if(timer(currentTime, &lastTime, delayTimeBlock))
+  if(timer(currentTime, &lastTime, DelayTimeBlock))
     {
       _Display->blinkWorld(*index);
     }
@@ -231,7 +231,7 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
       arrayValue[index] = count;
 
       // Blinking value
-      if(timer(currentTimeSet, &lastTimeSet, delayTimeBlank))
+      if(timer(currentTimeSet, &lastTimeSet, DelayTimeBlank))
 	{
 	  _Display->blinkValue(index, arrayValue, buffSize, true, 0);
 	}
@@ -274,10 +274,11 @@ void Setting::saveValue(float value)
 }
 
 
-bool Setting::menuSuspend()
+uint8_t Setting::menuSuspend()
 {
   int8_t currentIndex = 0;
   int8_t lastIndex = 0;
+  uint8_t returnValue = 0;
   bool isRun = true;
 
   _Display->clear();
@@ -293,15 +294,16 @@ bool Setting::menuSuspend()
 	{
 	  switch (currentIndex)
 	  {
-	    case 1 : {break;}//speed
-	    case 2 : {return false; break;}//exit
-	    case 3 : {break;}//save
-	    case 4 : {return true; break;}//back
+	    case 1 : {returnValue = SET_CURRENT_SPEED; break;}//speed
+	    case 2 : {returnValue = EXIT_WINDING; break;}//exit
+	    case 3 : {returnValue = SAVE; break;}//save
+	    case 4 : {returnValue = CONTINUE_WINDING; break;}//back
 	  }
 
 	  isRun = EXIT;
 	}
     }
+  return returnValue;
 }
 
 
@@ -387,9 +389,6 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 {
   bool isRun = true;
 
-  // Display value that are used for current winding.
-  _Display->engineWindingValue(CoilLength, WireSize, Turns);
-
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
@@ -404,9 +403,19 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 	}
       else // If user click on encoder during winding.
 	{
-	  isRun = menuSuspend();
+	  uint8_t state = menuSuspend();
 
-	  if(isRun)_Display->engineWindingValue(CoilLength, WireSize, Turns);
+	  switch (state)
+	  {
+	    case SET_CURRENT_SPEED : {break;}//speed
+	    case EXIT_WINDING :
+	      {
+		isRun = false;
+		break;
+	      }
+	    case SAVE : {break;}//save
+	    case CONTINUE_WINDING : {break;}
+	  }
 	}
     }
 }

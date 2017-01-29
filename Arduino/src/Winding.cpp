@@ -215,17 +215,30 @@ void Coil::homing(bool dir)
 bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
 {
   bool isResume = false;
+  bool backHome = true;
 
   // Compute all values to make winding.
   computeAll();
 
-  if(_isNewCoil && !resumeCurrent)
+  // Resume winding
+  if( !_isNewCoil || resumeCurrent || resumeSaved)
+    {
+      isResume = true;
+      if(_totalStepsCounter >= TurnToSteps(_coilTurns))
+	{
+	  backHome = false;
+	}
+    }
+  // New winding
+  else
     {
       _direction = C_CLOCK; // To start left to right.
       _totalStepsCounter = 0;
       _layerStepsCounter = 0;
     }
-  else isResume = true;
+
+  // Display value that are used for current winding.
+  _Display->engineWindingValue(_coilLength, _wireSize, _coilTurns, getCurrentTurns());
 
   _isNewCoil = true;
 
@@ -245,7 +258,7 @@ bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
       _Display->windingTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
     }
 
-  if(_isNewCoil)
+  if(_isNewCoil && backHome)
     {
       // Return to the first position, only if winding is finished.
       homing(_direction);
@@ -270,7 +283,7 @@ void Coil::runOneLayer()
       _isNewCoil )
     {
       // If user click on encoder "_runwindig" become false and break the loop.
-      suspend();
+      _isNewCoil = suspend();
 
       unsigned long currentMicros = micros();
 
@@ -313,9 +326,12 @@ void Coil::runOnlyCarriage(bool dir, float distance)
   unsigned long lastMicrosAcc = 0;
 
   unsigned long stepsCounter = 0;
+  bool stop = true;
 
-  while( stepsCounter < _stepsPerLayer )
+  while(stop && stepsCounter < _stepsPerLayer )
     {
+      stop = suspend();
+
       unsigned long currentMicros = micros();
 
       if(timer(currentMicros, &lastMicrosAcc, _accDelay))
@@ -351,9 +367,11 @@ void Coil::runOnlyCoil(bool dir, float turns)
   unsigned long lastMicrosAcc = 0;
 
   unsigned long stepsCounter = 0;
+  bool stop = true;
 
-  while( stepsCounter < TurnToSteps(turns))
+  while( stop && stepsCounter < TurnToSteps(turns))
     {
+      stop = suspend();
       unsigned long currentMicros = micros();
 
       if(timer(currentMicros, &lastMicrosAcc, _accDelay))
@@ -378,13 +396,16 @@ void Coil::runOnlyCoil(bool dir, float turns)
     }
 }
 
-void Coil::suspend()
+bool Coil::suspend()
 {
+  bool state = true;
+
   ClickEncoder::Button buttonState = _Encoder->getButton();
   if( buttonState == ClickEncoder::Clicked )
     {
-      _isNewCoil = false;
+      return state = false;
     }
+  else return state;
 }
 
 void Coil::disableMotors()

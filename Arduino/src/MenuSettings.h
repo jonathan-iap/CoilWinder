@@ -16,10 +16,13 @@
 #include "Save.h"
 #include "Winding.h"
 
-#define SAVE		true
-#define NOT_SAVE	false
-#define delayTimeBlock 	250
-#define delayTimeBlank 	150
+#define NOT_SAVE		false
+#define SAVE			true
+#define SET_CURRENT_SPEED	2
+#define EXIT_WINDING		3
+#define CONTINUE_WINDING 	4
+#define DelayTimeBlock 	 	250
+#define DelayTimeBlank 	 	150
 
 class Setting: public Memory
 {
@@ -59,7 +62,7 @@ private:
 		 ClickEncoder::Button buttonState);
   void getFloatingValue();
   void saveValue(float value);
-  bool menuSuspend();
+  uint8_t menuSuspend();
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */
