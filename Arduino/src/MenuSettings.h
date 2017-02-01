@@ -44,6 +44,7 @@ private:
   Display *_Display;
   Coil *_Coil;
 
+  int8_t speedPercent;
   uint8_t _idValue;
   uint8_t _buffSize;
   float *p_floatingValue;
@@ -62,6 +63,7 @@ private:
 		 ClickEncoder::Button buttonState);
   void getFloatingValue();
   void saveValue(float value);
+  uint16_t ajustSpeed(int8_t *speedInPercent);
   uint8_t menuSuspend();
 };
 

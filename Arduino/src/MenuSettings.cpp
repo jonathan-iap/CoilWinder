@@ -7,10 +7,11 @@
 #include "MenuSettings.h"
 
 Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
-: _idValue(0),
-  _buffSize(0),
-  p_floatingValue(0),
-  p_arrayValue(0)
+:  speedPercent(100),
+   _idValue(0),
+   _buffSize(0),
+   p_floatingValue(0),
+   p_arrayValue(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -336,7 +337,7 @@ void Setting::moveCarriage()
 	    {
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
-	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, MaxSpeed);
 	      _Coil->runOnlyCarriage(direction, tmp_distance);
 	      _Coil->disableMotors();
 	    }
@@ -376,7 +377,7 @@ void Setting::moveCoil()
 	      currentIndex == 0 ? direction = C_CLOCK :direction = CLOCK;
 
 	      // set and start displacement.
-	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+	      _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, MaxSpeed);
 	      _Coil->runOnlyCoil(direction, tmp_turns);
 	      _Coil->disableMotors();
 	    }
@@ -385,13 +386,42 @@ void Setting::moveCoil()
     }
 }
 
+
+uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
+{
+  bool run = true;
+  int8_t oldSpeed = 0;
+
+  _Display->engineAjustSpeed(false, *speedInPercent);
+
+  while(run)
+    {
+      *speedInPercent += _Encoder->getValue();
+
+      clampValue(speedInPercent, 0, 100);
+
+      if(*speedInPercent != oldSpeed) _Display->engineAjustSpeed(true, *speedInPercent);
+
+      oldSpeed = *speedInPercent;
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  run = EXIT;
+	}
+    }
+
+  return map(*speedInPercent, 0, 100, MinSpeed, MaxSpeed);
+}
+
+
 void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 {
   bool isRun = true;
 
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
-  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed);
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, Speed);
 
   while(isRun)
     {
@@ -401,13 +431,18 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 	  _Coil->disableMotors();
 	  isRun = false;
 	}
-      else // If user click on encoder during winding.
+      // If user click on encoder during winding.
+      else
 	{
 	  uint8_t state = menuSuspend();
 
 	  switch (state)
 	  {
-	    case SET_CURRENT_SPEED : {break;}//speed
+	    case SET_CURRENT_SPEED :
+	      {
+		ajustSpeed(&speedPercent);
+		break;
+	      }
 	    case EXIT_WINDING :
 	      {
 		isRun = false;

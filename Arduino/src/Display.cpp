@@ -229,6 +229,20 @@ const void Display::engineWindingValue(float coilLength, float wireSize, unsigne
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(currentTurns),  _lcd.print(" ");
 }
 
+const void Display::engineAjustSpeed(bool refresh, int8_t percent)
+{
+  if(!refresh)
+    {
+      _lcd.clear();
+      _lcd.setCursor(0,0);
+      _lcd.print("Current speed :");
+    }
+
+  _lcd.setCursor(0,1);
+  _lcd.print(percent); _lcd.print("%"); _lcd.print("  ");
+}
+
+
 
 const void Display::windingTurns(uint16_t coilTurns,uint16_t counter)
 {

@@ -145,6 +145,7 @@ public:
   const void engineResetConfirm(bool razValues);
   const void engineMoveDirection(float value, bool turns);
   const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns);
+  const void engineAjustSpeed(bool refresh, int8_t percent);
 
   // Winding
   const void windingTurns(uint16_t coilTurns,uint16_t counter);

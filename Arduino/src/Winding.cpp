@@ -132,12 +132,12 @@ void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
 }
 
 
-void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
+void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed, uint16_t speed)
 {
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
-  _speed = _maxSpeed;
+  _speed = speed;
 }
 
 
@@ -224,6 +224,8 @@ bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
   if( !_isNewCoil || resumeCurrent || resumeSaved)
     {
       isResume = true;
+
+      // Protection if user click on and winding is finish. Carriage don't move.
       if(_totalStepsCounter >= TurnToSteps(_coilTurns))
 	{
 	  backHome = false;
@@ -264,8 +266,7 @@ bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
       homing(_direction);
     }
 
-  // If "_runWinding" is false we call "menuSuspend()" and "runMultiLayer" will be recalled.
-  // Else winding is finished.
+  // Become false if we interrupt winding
   return _isNewCoil;
 }
 
@@ -396,6 +397,7 @@ void Coil::runOnlyCoil(bool dir, float turns)
     }
 }
 
+// Check if button was pressed
 bool Coil::suspend()
 {
   bool state = true;
@@ -408,6 +410,8 @@ bool Coil::suspend()
   else return state;
 }
 
+
+
 void Coil::disableMotors()
 {
   motorWinding.disable();
@@ -419,6 +423,8 @@ uint16_t Coil::getTurns()
 {
   return _coilTurns;
 }
+
+
 uint16_t Coil::getCurrentTurns()
 {
   return StepsToTurns(_totalStepsCounter);

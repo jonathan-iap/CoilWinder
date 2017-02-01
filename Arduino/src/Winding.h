@@ -20,7 +20,7 @@ public:
   ~Coil();
 
   void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
-  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
+  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed, uint16_t speed);
 
   bool runMultiLayer(bool resumeCurrent, bool resumeSaved);
   void runOneLayer();
