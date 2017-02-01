@@ -13,7 +13,8 @@ Memory::Memory()
   Turns(0),
   MaxSpeed(0),
   MinSpeed(0),
-  AccDelay(0)
+  AccDelay(0),
+  Speed(0)
 {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set

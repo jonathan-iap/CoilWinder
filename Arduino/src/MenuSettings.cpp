@@ -387,12 +387,13 @@ void Setting::moveCoil()
 }
 
 
-uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
+uint16_t Setting::ajustSpeed(bool initSpeed, int8_t *speedInPercent)
 {
+  bool refresh = true;
   bool run = true;
   int8_t oldSpeed = 0;
 
-  _Display->engineAjustSpeed(false, *speedInPercent);
+  _Display->engineAjustSpeed( !refresh, initSpeed, *speedInPercent);
 
   while(run)
     {
@@ -400,7 +401,7 @@ uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
 
       clampValue(speedInPercent, 0, 100);
 
-      if(*speedInPercent != oldSpeed) _Display->engineAjustSpeed(true, *speedInPercent);
+      if(*speedInPercent != oldSpeed) _Display->engineAjustSpeed(refresh, !initSpeed, *speedInPercent);
 
       oldSpeed = *speedInPercent;
 
@@ -417,10 +418,12 @@ uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
 
 void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 {
+  bool start_MSG = true;
   bool isRun = true;
 
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
+  Speed = ajustSpeed(start_MSG, &speedPercent);
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, Speed);
 
   while(isRun)
@@ -440,7 +443,7 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 	  {
 	    case SET_CURRENT_SPEED :
 	      {
-		ajustSpeed(&speedPercent);
+		_Coil->updateSpeed(ajustSpeed(false, &speedPercent));
 		break;
 	      }
 	    case EXIT_WINDING :

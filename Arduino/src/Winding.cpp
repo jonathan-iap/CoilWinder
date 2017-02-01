@@ -141,6 +141,12 @@ void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
 }
 
 
+void Coil::updateSpeed(uint16_t speed)
+{
+  _speed = speed;
+}
+
+
 void Coil::computeStepPerLayer(float length)
 {
   _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;

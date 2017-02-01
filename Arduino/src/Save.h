@@ -57,8 +57,9 @@ protected :
   float Turns;
   float MaxSpeed;
   float MinSpeed;
-  float Speed;
   float AccDelay;
+
+  uint16_t Speed;
 
   char _buff_WireSize[BUFFSIZE_WIRE];
   char _buff_CoilLength[BUFFSIZE_COIL];
@@ -73,7 +74,6 @@ private :
   uint8_t _addr_Turns;
   uint8_t _addr_MaxSpeed;
   uint8_t _addr_MinSpeed;
-  uint8_t _addr_Speed;
   uint8_t _addr_AccDelay;
   uint8_t _addr_DefaultSettings;
 

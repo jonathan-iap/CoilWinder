@@ -63,7 +63,7 @@ private:
 		 ClickEncoder::Button buttonState);
   void getFloatingValue();
   void saveValue(float value);
-  uint16_t ajustSpeed(int8_t *speedInPercent);
+  uint16_t ajustSpeed(bool initSpeed, int8_t *speedInPercent);
   uint8_t menuSuspend();
 };
 

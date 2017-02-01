@@ -229,13 +229,14 @@ const void Display::engineWindingValue(float coilLength, float wireSize, unsigne
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(currentTurns),  _lcd.print(" ");
 }
 
-const void Display::engineAjustSpeed(bool refresh, int8_t percent)
+const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
 {
   if(!refresh)
     {
       _lcd.clear();
       _lcd.setCursor(0,0);
-      _lcd.print("Current speed :");
+      if(initMSG) _lcd.print("Start speed :");
+      else _lcd.print("Current speed :");
     }
 
   _lcd.setCursor(0,1);
