@@ -397,19 +397,19 @@ uint16_t Setting::ajustSpeed(bool initSpeed, int8_t *speedInPercent)
 
   while(run)
     {
+      // Value increase when you turn encoder
       *speedInPercent += _Encoder->getValue();
-
-      clampValue(speedInPercent, 0, 100);
-
+      // Clamp to 1% at 100%
+      clampValue(speedInPercent, 1, 100);
+      // Refresh LCD only if value change
       if(*speedInPercent != oldSpeed) _Display->engineAjustSpeed(refresh, !initSpeed, *speedInPercent);
 
       oldSpeed = *speedInPercent;
 
+      // Click for exit
       ClickEncoder::Button buttonState = _Encoder->getButton();
-      if( buttonState == ClickEncoder::Clicked )
-	{
-	  run = EXIT;
-	}
+      if( buttonState == ClickEncoder::Clicked ) run = EXIT;
+
     }
 
   return map(*speedInPercent, 0, 100, MinSpeed, MaxSpeed);
@@ -423,8 +423,7 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
-  Speed = ajustSpeed(start_MSG, &speedPercent);
-  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, Speed);
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(start_MSG, &speedPercent));
 
   while(isRun)
     {
@@ -451,7 +450,12 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 		isRun = false;
 		break;
 	      }
-	    case SAVE : {break;}//save
+	    case SAVE :
+	      {
+		_idValue = id_RESUME;
+		saveValue(0);
+		break;
+	      }//save
 	    case CONTINUE_WINDING : {break;}
 	  }
 	}

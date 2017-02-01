@@ -191,10 +191,15 @@ const void Display::engineSave(float value)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
-  _lcd.print("Save in eeprom ?");
-  _lcd.setCursor(0,LCD_LINES);
-  _lcd.print(value);
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
+  _lcd.print("Save ?");
+  if(value > 0)
+    {
+      _lcd.setCursor(0,LCD_LINES);
+      _lcd.print(value);
+      _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
+    }
+  else _lcd.setCursor(0, LCD_LINES);
+
   _lcd.print(MSG_CHOICE);
 }
 
@@ -225,7 +230,7 @@ const void Display::engineWindingValue(float coilLength, float wireSize, unsigne
   _lcd.print("L:"), _lcd.print(coilLength);
   _lcd.setCursor(LCD_CHARS-6,0);
   _lcd.print("W:"), _lcd.print(wireSize);
-  _lcd.setCursor(0,1);
+  _lcd.setCursor(0,LCD_LINES);
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(currentTurns),  _lcd.print(" ");
 }
 
@@ -239,7 +244,7 @@ const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
       else _lcd.print("Current speed :");
     }
 
-  _lcd.setCursor(0,1);
+  _lcd.setCursor(0,LCD_LINES);
   _lcd.print(percent); _lcd.print("%"); _lcd.print("  ");
 }
 

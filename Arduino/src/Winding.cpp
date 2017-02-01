@@ -436,3 +436,14 @@ uint16_t Coil::getCurrentTurns()
   return StepsToTurns(_totalStepsCounter);
 }
 
+
+uint32_t Coil::getTotalStepsCounter()
+{
+  return _totalStepsCounter;
+}
+
+
+uint32_t Coil::getLayerStepsCounter()
+{
+  return _layerStepsCounter;
+}

@@ -13,7 +13,7 @@
 #include "EEPROMex.h"
 #include "Function.h"
 
-// First EEprom address to start
+// Start EEprom address
 #define MEN_BASE  50
 // String to check if EEprom memory is initialize
 #define MSG_IS_SET "is set"
@@ -32,6 +32,7 @@
 #define id_MAX_SPEED	4
 #define id_MIN_SPEED	5
 #define id_ACC_DELAY	6
+#define id_RESUME	7
 
 class Memory
 {
@@ -58,8 +59,8 @@ protected :
   float MaxSpeed;
   float MinSpeed;
   float AccDelay;
-
-  uint16_t Speed;
+  uint32_t TotalSteps;
+  uint32_t LayerSteps;
 
   char _buff_WireSize[BUFFSIZE_WIRE];
   char _buff_CoilLength[BUFFSIZE_COIL];
@@ -76,6 +77,8 @@ private :
   uint8_t _addr_MinSpeed;
   uint8_t _addr_AccDelay;
   uint8_t _addr_DefaultSettings;
+  uint8_t _addr_TotalSteps;
+  uint8_t _addr_LayerSteps;
 
   void writeFloatToData(float Data, char buffer[], const uint8_t bufferSize);
 };

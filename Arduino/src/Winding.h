@@ -32,7 +32,8 @@ public:
 
   uint16_t getTurns();
   uint16_t getCurrentTurns();
-
+  uint32_t getTotalStepsCounter();
+  uint32_t getLayerStepsCounter();
 
 private:
 

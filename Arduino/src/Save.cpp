@@ -14,19 +14,22 @@ Memory::Memory()
   MaxSpeed(0),
   MinSpeed(0),
   AccDelay(0),
-  Speed(0)
+  TotalSteps(0),
+  LayerSteps(0)
 {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
   EEPROM.setMemPool(MEN_BASE, EEPROMSizeUno);
 
-  _addr_WireSize=EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
-  _addr_CoilLength=EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
-  _addr_Turns=EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
-  _addr_MaxSpeed=EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
-  _addr_MinSpeed=EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
-  _addr_AccDelay=EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
-  _addr_DefaultSettings=EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
+  _addr_WireSize	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
+  _addr_CoilLength	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
+  _addr_Turns		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
+  _addr_MaxSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
+  _addr_MinSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
+  _addr_AccDelay	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
+  _addr_DefaultSettings	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
+  _addr_TotalSteps	= EEPROM.getAddress(sizeof(uint32_t));
+  _addr_LayerSteps	= EEPROM.getAddress(sizeof(uint32_t));
 
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
@@ -71,6 +74,12 @@ void Memory::save(char buffer[], const uint8_t id)
 	EEPROM.updateBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
 	break;
       }
+    case id_RESUME :
+      {
+	EEPROM.updateLong(_addr_TotalSteps, TotalSteps);
+	EEPROM.updateLong(_addr_LayerSteps, LayerSteps);
+	break;
+      }
   }
 }
 
@@ -108,6 +117,12 @@ void Memory::read(char buffer[], const uint8_t id)
 	EEPROM.readBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
 	break;
       }
+    case id_RESUME :
+      {
+	TotalSteps = EEPROM.readLong(_addr_TotalSteps);
+	LayerSteps = EEPROM.readLong(_addr_LayerSteps);
+	break;
+      }
   }
 }
 
@@ -139,6 +154,9 @@ void Memory::reset()
   EEPROM.writeBlock<char>(_addr_AccDelay, INIT_ACC_DELAY, BUFFSIZE_ACC_DELAY);
 
   EEPROM.writeBlock<char>(_addr_DefaultSettings, MSG_IS_SET, BUFFSIZE_DEFAULT);
+
+  EEPROM.writeLong(_addr_TotalSteps, 0);
+  EEPROM.writeLong(_addr_LayerSteps, 0);
 }
 
 bool Memory::isSet()
