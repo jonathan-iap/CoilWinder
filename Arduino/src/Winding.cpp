@@ -141,6 +141,13 @@ void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned lon
 }
 
 
+void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps)
+{
+  _totalStepsCounter = totalSteps;
+  _layerStepsCounter = layerSteps;
+}
+
+
 void Coil::updateSpeed(uint16_t speed)
 {
   _speed = speed;

@@ -18,9 +18,7 @@
 #define IconRight	2
 #define IconBack	3
 #define IconEnter	4
-#define IconValid	5
-#define IconBlock	6
-#define IconSave	7
+#define IconBlock	5
 
 #define MSG_WIRE_SIZE	"Wire size in mm"
 #define MSG_COIL_LENGTH	"Length in mm"
@@ -41,8 +39,8 @@
 #define SIZE_MSG_SAVE 		COUNTOF(MSG_SAVE)
 #define MSG_EDIT		"Edit"
 #define SIZE_MSG_EDIT 		COUNTOF(MSG_EDIT)
-#define MSG_NEXT 		"Next:"
-#define SIZE_MSG_NEXT 		COUNTOF(MSG_NEXT)
+#define MSG_CHOICE_SAVE		"Save/"
+#define SIZE_MSG_CHOICE_SAVE	COUNTOF(MSG_CHOICE_SAVE)
 #define MSG_CHOICE 		"Y/N"
 #define SIZE_MSG_CHOICE		COUNTOF(MSG_CHOICE)
 #define MSG_DIRECTION 		"</>/N"
@@ -105,17 +103,6 @@ public :
       0b11111,
       0b11111,
       0b11111,
-      0b11111
-  };
-
-  uint8_t save[8] = {
-      0b00100,
-      0b00100,
-      0b00100,
-      0b11111,
-      0b01110,
-      0b00100,
-      0b00000,
       0b11111
   };
 

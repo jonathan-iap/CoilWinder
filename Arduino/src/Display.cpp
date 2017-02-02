@@ -22,7 +22,6 @@ const void Display::begin()
   _lcd.createChar(IconBack, back);
   _lcd.createChar(IconEnter, enter);
   _lcd.createChar(IconBlock, block);
-  _lcd.createChar(IconSave, save);
 
   // Quick 3 blinks of back-light
   for(uint8_t i=3; i>0; i--)
@@ -150,9 +149,8 @@ const void Display::engineHome(char label[], char arrayValue[])
   _lcd.print(label);
   _lcd.setCursor(0, LCD_LINES);
   _lcd.print(arrayValue);
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_NEXT),LCD_LINES);
-  _lcd.print(MSG_NEXT);
-  _lcd.write((byte)IconRight);
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE_SAVE),LCD_LINES);
+  _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)IconRight);
 }
 
 const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
@@ -169,10 +167,10 @@ const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
 
 const void Display::engineEditMode(bool setMode)
 {
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_NEXT), LCD_LINES);
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE_SAVE), LCD_LINES);
   if(setMode)
     {
-      for(uint8_t i=SIZE_MSG_NEXT; i>0; i--)
+      for(uint8_t i=SIZE_MSG_CHOICE_SAVE; i>0; i--)
 	{
 	  _lcd.print(' ');
 	}
@@ -181,8 +179,7 @@ const void Display::engineEditMode(bool setMode)
     }
   else
     {
-      _lcd.print(MSG_NEXT);
-      _lcd.write((byte)IconRight);
+      _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)IconRight);
     }
 }
 
@@ -196,10 +193,8 @@ const void Display::engineSave(float value)
     {
       _lcd.setCursor(0,LCD_LINES);
       _lcd.print(value);
-      _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
     }
-  else _lcd.setCursor(0, LCD_LINES);
-
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
   _lcd.print(MSG_CHOICE);
 }
 

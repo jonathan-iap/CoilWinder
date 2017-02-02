@@ -110,6 +110,7 @@ void Setting::idToValue()
 // Navigate menu
 void Setting::engine(bool save)
 {
+  char arrayLcdScreen[LCD_CHARS+1] = {0};
   bool run = true;
   int8_t last = 0;
   int8_t index = 0;
@@ -424,6 +425,12 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(start_MSG, &speedPercent));
+  if(resumeSaved)
+    {
+      _idValue = id_RESUME;
+      read(0, _idValue);
+      _Coil->setSteps(TotalSteps, LayerSteps);
+    }
 
   while(isRun)
     {
@@ -436,6 +443,7 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
       // If user click on encoder during winding.
       else
 	{
+	  menuSuspendStart:
 	  uint8_t state = menuSuspend();
 
 	  switch (state)
@@ -453,9 +461,11 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 	    case SAVE :
 	      {
 		_idValue = id_RESUME;
+		TotalSteps = _Coil->getTotalStepsCounter();
+		LayerSteps = _Coil->getLayerStepsCounter();
 		saveValue(0);
-		break;
-	      }//save
+		goto menuSuspendStart;
+	      }
 	    case CONTINUE_WINDING : {break;}
 	  }
 	}
