@@ -489,8 +489,8 @@ void Setting::navigationEngine(const uint8_t id)
 {
   _idValue = id;
   setValueFromId();
-  formatingArray();
-  _Display->reworkTest(_label, stringContainers);
+
+  _Display->reworkTest(_label, _actionBar);
   delay(10000);
 }
 
@@ -506,7 +506,8 @@ void Setting::setValueFromId()
     case id_TEST :
       {
 	setValues(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE,
-		  &WireSize, BTN_CHOICE_SAVE, SIZE_BTN_CHOICE_SAVE);
+		  &WireSize, actionChoiceSave, SIZE_BTN_CHOICE_SAVE);
+	formatingArray(_buff_WireSize, actionChoiceSave);
 	break;
       }
   }
@@ -540,23 +541,28 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
 
 
 /******************************************************************************
- * brief   : Concatenate label string with a middle space.
- * details : Concatenate label string and action bar string with a middle
- * space to be displayed on a single line.
- * return  : New string is stored in "stringContainers"
+ * brief   : Concatenate strings with a middle space.
+ * details : Concatenate "label" string and "action button" string with a middle
+ * space to be displayed and manipulate on a single line.
+ * return  : New string is stored in "actionBar"
  ******************************************************************************/
-void Setting::formatingArray()
+void Setting::formatingArray(char arrayValue[], const char labelBtn[])
 {
   for (uint8_t i=0; i<LCD_CHARS; i++)
     {
-      if (i < (_sizeBuffValue-1)) stringContainers[i] = *p_arrayValue++;
-      else if ( i < (_formattingOffset+1)) stringContainers[i] = ' ';
-      else stringContainers[i] = *p_arrayBtn++;
+      if (i < (_sizeBuffValue-1)) _actionBar[i] = *p_arrayValue++;
+      else if ( i < (_formattingOffset)) _actionBar[i] = ' ';
+      else _actionBar[i] = *p_arrayBtn++;
     }
 
   // Initialize pointer at the first position
-  for (uint8_t i = _sizeBuffValue; i > 0; i--) p_arrayValue--;
-  for (uint8_t i = _sizeBuffBtn+1; i > 0; i--) p_arrayBtn--;
+  p_arrayValue = arrayValue;
+  p_arrayBtn = labelBtn;
+
+#ifdef DEBUG
+  Serial.print("value : "); Serial.println(p_arrayValue);
+  Serial.print("btn : "); Serial.println(p_arrayBtn);
+#endif
 }
 
 

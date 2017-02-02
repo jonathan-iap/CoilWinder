@@ -31,6 +31,8 @@
 #define MSG_MOVE	"Move in mm"
 
 #define MSG_TEST	"Rework nav"
+const char actionChoiceSave[] = {'S','a','v','e','/',IconRight};
+#define SIZE_BTN_CHOICE_SAVE	COUNTOF(actionChoiceSave)
 
 #define MSG_SPEED		"Speed"
 #define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
