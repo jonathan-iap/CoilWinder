@@ -271,3 +271,13 @@ const void Display::windingSetSpeed(uint16_t speed)
   _lcd.setCursor(0,0);
   _lcd.print(speed);
 }
+
+
+const void Display::reworkTest(char label[], char container[])
+{
+  _lcd.clear();
+    _lcd.setCursor(0, 0);
+    _lcd.print(label);
+    _lcd.setCursor(0, LCD_LINES);
+    _lcd.print(container);
+}

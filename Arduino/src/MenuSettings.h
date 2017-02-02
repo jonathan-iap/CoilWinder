@@ -24,6 +24,11 @@
 #define DelayTimeBlock 	 	250
 #define DelayTimeBlank 	 	150
 
+#define BTN_CHOICE		"Y/N"
+#define BTN_CHOICE_SAVE		"Save/1"
+#define SIZE_BTN_CHOICE_SAVE	COUNTOF(BTN_CHOICE_SAVE)
+
+
 class Setting: public Memory
 {
 public :
@@ -65,6 +70,23 @@ private:
   void saveValue(float value);
   uint16_t ajustSpeed(bool initSpeed, int8_t *speedInPercent);
   uint8_t menuSuspend();
+
+  /*Dev----------------------------------------------------------------*/
+  char stringContainers[LCD_CHARS]={0};
+  uint8_t _sizeBuffValue;
+  uint8_t _sizeBuffBtn;
+  char *p_arrayBtn;
+  uint8_t _formattingOffset;
+
+public:
+  void navigationEngine(const uint8_t id);
+
+private:
+  void setValueFromId();
+  void setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+		 float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
+  void formatingArray();
+  /*End Dev----------------------------------------------------------------*/
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

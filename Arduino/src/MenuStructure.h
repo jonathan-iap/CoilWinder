@@ -176,15 +176,25 @@ bool menuRAZ(const Menu::Action_t a)
   return true;
 }
 
+bool reworkTest(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.navigationEngine(id_TEST);
+    }
+  return true;
+}
+
 // Framework for menu ---------------------------------------------------------
 
 // Name, Label, Next, Previous, Parent, Child, Callback
 // Menu 0
 MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
 // Menu 1 -> 3
-MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
+//MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, miMovCarriage, menuDummy);
 MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miMaxSpeed, menuDummy);
+
 // Sub-menu 1.1 -> 1.6
 MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
 MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
@@ -204,6 +214,11 @@ MenuItem(miAccTime, "Acc time", miResetVal, miMinSpeed, miSettings, Menu::NullIt
 MenuItem(miResetVal, "Raz all Values", miResetEEp, miAccTime, miSettings, Menu::NullItem, menuRAZ);
 MenuItem(miResetEEp, "Reset EEprom", miBack3, miResetVal, miSettings, Menu::NullItem, menuReset);
 MenuItem(miBack3, "Back \1", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
+
+/*** TEST ***/
+// Uncomment item "Winding" after
+MenuItem(miWinding, "TEST", miMoves, Menu::NullItem, miExit,  Menu::NullItem, reworkTest);
+/************/
 
 // ----------------------------------------------------------------------------
 

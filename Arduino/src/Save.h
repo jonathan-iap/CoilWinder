@@ -34,6 +34,8 @@
 #define id_ACC_DELAY	6
 #define id_RESUME	7
 
+#define id_TEST		8
+
 class Memory
 {
 public :

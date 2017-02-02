@@ -30,6 +30,8 @@
 #define MSG_RAZ 	"Reset values ? "
 #define MSG_MOVE	"Move in mm"
 
+#define MSG_TEST	"Rework nav"
+
 #define MSG_SPEED		"Speed"
 #define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
 #define MSG_EXIT		"Exit"
@@ -138,6 +140,8 @@ public:
   const void windingTurns(uint16_t coilTurns,uint16_t counter);
   const void windingSelectAction();
   const void windingSetSpeed(uint16_t speed);
+
+  const void reworkTest(char label[], char container[]);
 };
 
 #endif /* SRC_DISPLAY_H_ */

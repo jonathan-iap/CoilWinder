@@ -11,7 +11,11 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
    _idValue(0),
    _buffSize(0),
    p_floatingValue(0),
-   p_arrayValue(0)
+   p_arrayValue(0),
+   _sizeBuffValue(0),
+   _sizeBuffBtn(0),
+   p_arrayBtn(0),
+   _formattingOffset(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -110,7 +114,6 @@ void Setting::idToValue()
 // Navigate menu
 void Setting::engine(bool save)
 {
-  char arrayLcdScreen[LCD_CHARS+1] = {0};
   bool run = true;
   int8_t last = 0;
   int8_t index = 0;
@@ -141,6 +144,7 @@ void Setting::engine(bool save)
       if(index>_buffSize) index = _buffSize-1;
     }
 }
+
 
 // Move cursor on character to select.
 void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue[],
@@ -472,5 +476,87 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
     }
 }
 
+
+/***********************************************************************************
+DEV
+ ***********************************************************************************/
+
+/******************************************************************************
+ * brief   : Engine for navigation during setting menu.
+ * details : Drive all functions to set value in edit mode.
+ ******************************************************************************/
+void Setting::navigationEngine(const uint8_t id)
+{
+  _idValue = id;
+  setValueFromId();
+  formatingArray();
+  _Display->reworkTest(_label, stringContainers);
+  delay(10000);
+}
+
+/******************************************************************************
+ * brief   : Assign value and action
+ * details : Depending the Id pass through navigationEngine(), we set value
+ * and action if needed.
+ ******************************************************************************/
+void Setting::setValueFromId()
+{
+  switch (_idValue)
+  {
+    case id_TEST :
+      {
+	setValues(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE,
+		  &WireSize, BTN_CHOICE_SAVE, SIZE_BTN_CHOICE_SAVE);
+	break;
+      }
+  }
+}
+
+
+/******************************************************************************
+ * brief   : Set the values to work with them
+ * details : Assign variable from memory and depending what we want to set.
+ * Value was display like this :
+ *        ----------------------
+ * LCD -> |label               |
+ *        |value        btn/btn|
+ *        ----------------------
+ *******************************************************************************/
+void Setting::setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+			float *value, const char labelBtn[], const uint8_t sizeLabelBtn)
+{
+  // Displayed on left top.
+  strcpy(_label, label);
+  // Pass values saved from memory.
+  p_arrayValue 		= arrayValue;
+  _sizeBuffValue	= sizeLabelVal;
+  p_floatingValue 	= value;
+  // Action bar
+  p_arrayBtn 		= labelBtn;
+  _sizeBuffBtn		= sizeLabelBtn;
+  // Offset between value and action bar (btn/btn).
+  _formattingOffset	= LCD_CHARS - sizeLabelBtn;
+}
+
+
+/******************************************************************************
+ * brief   : Concatenate label string with a middle space.
+ * details : Concatenate label string and action bar string with a middle
+ * space to be displayed on a single line.
+ * return  : New string is stored in "stringContainers"
+ ******************************************************************************/
+void Setting::formatingArray()
+{
+  for (uint8_t i=0; i<LCD_CHARS; i++)
+    {
+      if (i < (_sizeBuffValue-1)) stringContainers[i] = *p_arrayValue++;
+      else if ( i < (_formattingOffset+1)) stringContainers[i] = ' ';
+      else stringContainers[i] = *p_arrayBtn++;
+    }
+
+  // Initialize pointer at the first position
+  for (uint8_t i = _sizeBuffValue; i > 0; i--) p_arrayValue--;
+  for (uint8_t i = _sizeBuffBtn+1; i > 0; i--) p_arrayBtn--;
+}
 
 
