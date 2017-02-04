@@ -180,7 +180,7 @@ bool reworkTest(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.navigationEngine(id_TEST);
+      setting.editionMenu(id_TEST);
     }
   return true;
 }

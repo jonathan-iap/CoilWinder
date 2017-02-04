@@ -14,11 +14,11 @@
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 
-#define IconLeft 	1
-#define IconRight	2
-#define IconBack	3
-#define IconEnter	4
-#define IconBlock	5
+#define ICONLEFT 	1
+#define ICONRIGHT	2
+#define ICONBACK	3
+#define ICONENTER	4
+#define ICONBLOCK	5
 
 #define MSG_WIRE_SIZE	"Wire size in mm"
 #define MSG_COIL_LENGTH	"Length in mm"
@@ -31,7 +31,7 @@
 #define MSG_MOVE	"Move in mm"
 
 #define MSG_TEST	"Rework nav"
-const char actionChoiceSave[] = {'S','a','v','e','/',IconRight};
+const char actionChoiceSave[] = {'S','a','v','e','/','T','/','s','t','/',ICONRIGHT};
 #define SIZE_BTN_CHOICE_SAVE	COUNTOF(actionChoiceSave)
 
 #define MSG_SPEED		"Speed"
@@ -120,6 +120,7 @@ public:
   const void clear();
   const void blank(uint8_t size);
   const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
+  const void blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize); // New
   const void blinkWorld(uint8_t index);
   const void loadBar();
 
@@ -131,6 +132,7 @@ public:
   // MenuSetting
   const void engineHome(char label[], char arrayValue[]);
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
+  const void engineFillChar(int8_t last, int8_t index, char actionBar[]); // New
   const void engineEditMode(bool setMode);
   const void engineSave(float value);
   const void engineResetConfirm(bool razValues);

@@ -485,12 +485,14 @@ DEV
  * brief   : Engine for navigation during setting menu.
  * details : Drive all functions to set value in edit mode.
  ******************************************************************************/
-void Setting::navigationEngine(const uint8_t id)
+void Setting::editionMenu(const uint8_t id)
 {
   _idValue = id;
   setValueFromId();
 
   _Display->reworkTest(_label, _actionBar);
+
+  navigationEngine();
   delay(10000);
 }
 
@@ -505,9 +507,8 @@ void Setting::setValueFromId()
   {
     case id_TEST :
       {
-	setValues(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE,
-		  &WireSize, actionChoiceSave, SIZE_BTN_CHOICE_SAVE);
-	formatingArray(_buff_WireSize, actionChoiceSave);
+	setAllForEdit(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE,
+		      &WireSize, actionChoiceSave, SIZE_BTN_CHOICE_SAVE);
 	break;
       }
   }
@@ -535,8 +536,8 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   // Action bar
   p_arrayBtn 		= labelBtn;
   _sizeBuffBtn		= sizeLabelBtn;
-  // Offset between value and action bar (btn/btn).
-  _formattingOffset	= LCD_CHARS - sizeLabelBtn;
+  _formattingOffset	= LCD_CHARS - sizeLabelBtn; // Offset between value and action bar (btn/btn).
+
 }
 
 
@@ -546,7 +547,7 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
  * space to be displayed and manipulate on a single line.
  * return  : New string is stored in "actionBar"
  ******************************************************************************/
-void Setting::formatingArray(char arrayValue[], const char labelBtn[])
+void Setting::arrayFormatting(char arrayValue[], const char labelBtn[])
 {
   for (uint8_t i=0; i<LCD_CHARS; i++)
     {
@@ -566,3 +567,149 @@ void Setting::formatingArray(char arrayValue[], const char labelBtn[])
 }
 
 
+/******************************************************************************
+ * brief   : Assign and format values
+ * details : This function is just a container it's run setValue() and
+ * arrayFormatting().
+ ******************************************************************************/
+void Setting::setAllForEdit(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+			    float *value, const char labelBtn[], const uint8_t sizeLabelBtn)
+{
+  setValues(label, arrayValue, sizeLabelVal, value, labelBtn, sizeLabelBtn);
+  arrayFormatting(arrayValue, labelBtn);
+}
+
+
+/******************************************************************************
+ * brief   : Engine to navigate and edit current menu.
+ * details : Enslave click encoder to navigate into edit menu.
+ ******************************************************************************/
+uint8_t Setting::navigationEngine()
+{
+  bool run = true;
+  int8_t index = 0;
+  int8_t  lastIndex = 0;
+  uint8_t btn;
+  uint8_t wordSize = 0;
+  unsigned long lastTime;
+
+
+  while(run)
+    {
+      selectCharacter(&index, &lastIndex, &wordSize, &lastTime);
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+
+	}
+    }
+
+  return btn=true;
+}
+
+
+/******************************************************************************
+ * brief   : Move cursor.
+ * details : Manages the displacement of cursor and as well as being displayed.
+ ******************************************************************************/
+void Setting::selectCharacter(int8_t *index, int8_t *lastIndex,  uint8_t *wordSize, unsigned long *lastTime)
+{
+  unsigned long currentTime = millis();
+
+  // Get encoder movement, clamp returned value and detect sense of motion
+  *index += _Encoder->getValue();
+
+  clampValue(index, 0, (LCD_CHARS-1));
+
+  int8_t motion = motionSense(*index, *lastIndex);
+
+  // If motion is detected cursor is moved
+  if(motion > 0)
+    {
+      ignoreChar(index, motion);
+
+      *wordSize = wordDetect(index, motion);
+
+      _Display->engineFillChar(*lastIndex, *index, _actionBar);
+    }
+
+
+  // Blinking of the selected character
+  if(timer(currentTime, lastTime, DelayTimeBlock))
+    {
+      _Display->blinkSelection(*index, _actionBar, *wordSize);
+    }
+
+  // To determine the direction of the next movement.
+  *lastIndex = *index;
+}
+
+/******************************************************************************
+ * brief   : Detect if the cursor is moving.
+ * details : If the index change we determine if the cursor move left or right
+ * or
+ * return  : New position for cursor.
+ ******************************************************************************/
+uint8_t Setting::motionSense(int8_t index, int8_t lastIndex)
+{
+  // Move left to right
+  if(index > lastIndex)
+    {
+      return CURSOR_MOVE_RIGHT;
+    }
+  // Move right to left
+  else if (index < lastIndex)
+    {
+      return  CURSOR_MOVE_LEFT;
+    }
+  // No movement
+  else return false;
+}
+
+/******************************************************************************
+ * brief   : Detect if cursor is on word
+ * details : If the cursor is at the beginning of a word, we browse the word
+ * until the last character.
+ * return  : The size of word and 0 if is just a single character.
+ ******************************************************************************/
+uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
+{
+  uint8_t wordSize = 0;
+
+  while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	// Upper case
+      || (_actionBar[*index] > 96 && _actionBar[*index] < 123))	// Lower case
+    {
+
+      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -=1;
+
+      wordSize ++;
+    }
+
+  if(wordSize >= 1 && sense == CURSOR_MOVE_RIGHT)
+    {
+      *index -=1;
+      return wordSize;
+    }
+  else if(wordSize >= 1 && sense == CURSOR_MOVE_LEFT)
+    {
+      *index +=1;
+      return wordSize;
+    }
+  else return false; // Single character.
+}
+
+/******************************************************************************
+ * brief   : Ignore unwanted character.
+ * details : If cursor is on unwanted character We ignore it by jumping
+ * from an index.
+ * return  : New position for cursor by the pointer "*index".
+ ******************************************************************************/
+void Setting::ignoreChar(int8_t *index, uint8_t sense)
+{
+  // Ignored character.
+  while(_actionBar[*index] == '.' || _actionBar[*index] == '/' || _actionBar[*index] == ' ')
+    {
+      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -= 1;
+    }
+}

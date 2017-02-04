@@ -16,6 +16,8 @@
 #include "Save.h"
 #include "Winding.h"
 
+#define CURSOR_MOVE_LEFT	1
+#define CURSOR_MOVE_RIGHT	2
 #define NOT_SAVE		false
 #define SAVE			true
 #define SET_CURRENT_SPEED	2
@@ -46,11 +48,7 @@ private:
   Coil *_Coil;
 
   int8_t speedPercent;
-  uint8_t _idValue;
   uint8_t _buffSize;
-  float *p_floatingValue;
-  char *p_arrayValue;
-  char _label[16]; // Minimum lcd screen 16 + 1 for null character
 
   void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value);
   void idToValue();
@@ -68,20 +66,33 @@ private:
   uint8_t menuSuspend();
 
   /*Dev----------------------------------------------------------------*/
-  char _actionBar[LCD_CHARS]={0};
+  uint8_t _idValue;
+  char _label[16]; // Minimum lcd screen 16 + 1 for null character
+  char *p_arrayValue;
   uint8_t _sizeBuffValue;
-  uint8_t _sizeBuffBtn;
+  float *p_floatingValue;
   const char *p_arrayBtn;
+  uint8_t _sizeBuffBtn;
   uint8_t _formattingOffset;
+  char _actionBar[LCD_CHARS]={0};
+
 
 public:
-  void navigationEngine(const uint8_t id);
+  void editionMenu(const uint8_t id);
 
 private:
   void setValueFromId();
   void setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
 		 float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
-  void formatingArray(char arrayValue[], const char labelBtn[]);
+  void arrayFormatting(char arrayValue[], const char labelBtn[]);
+  void setAllForEdit(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+		     float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
+  uint8_t navigationEngine();
+  void selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *wordSize, unsigned long *lastTime);
+  uint8_t motionSense(int8_t index, int8_t lastIndex);
+  uint8_t wordDetect(int8_t *index, uint8_t sense);
+  void ignoreChar(int8_t *index, uint8_t sense);
+
   /*End Dev----------------------------------------------------------------*/
 };
 

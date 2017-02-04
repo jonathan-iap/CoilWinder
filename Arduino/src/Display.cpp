@@ -17,11 +17,11 @@ const void Display::begin()
 {
   _lcd.begin(LCD_CHARS,LCD_LINES);
 
-  _lcd.createChar(IconLeft, left);
-  _lcd.createChar(IconRight, right);
-  _lcd.createChar(IconBack, back);
-  _lcd.createChar(IconEnter, enter);
-  _lcd.createChar(IconBlock, block);
+  _lcd.createChar(ICONLEFT, left);
+  _lcd.createChar(ICONRIGHT, right);
+  _lcd.createChar(ICONBACK, back);
+  _lcd.createChar(ICONENTER, enter);
+  _lcd.createChar(ICONBLOCK, block);
 
   // Quick 3 blinks of back-light
   for(uint8_t i=3; i>0; i--)
@@ -64,7 +64,7 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
       if(_index > _arraySize)
 	{
 	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.write((byte)IconRight);
+	  _lcd.write((byte)ICONRIGHT);
 	}
       else
 	{
@@ -76,7 +76,39 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
   else
     {
       _lcd.setCursor((_index+offset), LCD_LINES);
-      _blank ? _lcd.print(" ") : _lcd.write((byte)IconBlock);
+      _blank ? _lcd.print(" ") : _lcd.write((byte)ICONBLOCK);
+      basculeSet = true;
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Reprint char if cursor move.
+ * details : If cursor is moving on new position we need to print the
+ * character of the old index and a block on new character.
+ ******************************************************************************/
+const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize)
+{
+  static bool basculeSet = true;
+
+  _lcd.setCursor(index, LCD_LINES);
+
+  if(basculeSet)
+    {
+      if(wordSize > 0)
+	{
+	  for(uint8_t i=wordSize; i>0; i--) _lcd.write(actionBar[i]);
+	}
+      else _lcd.write(actionBar[index]);
+      basculeSet = false;
+    }
+  else
+    {
+      if(wordSize > 0)
+	{
+	  for(uint8_t i=wordSize; i>0; i--) _lcd.write(ICONBLOCK);
+	}
+      else _lcd.write(ICONBLOCK);
       basculeSet = true;
     }
 }
@@ -103,7 +135,7 @@ const void Display::blinkWorld(uint8_t index)
 	case 1 : { _lcd.setCursor(0, 0); _lcd.print(MSG_SPEED); break; }
 	case 2 : { _lcd.setCursor(CURSOR_EXIT, 0); _lcd.print(MSG_EXIT); break; }
 	case 3 : { _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0); _lcd.print(MSG_SAVE); break; }
-	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); _lcd.write((byte)IconBack); break; }
+	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); _lcd.write((byte)ICONBACK); break; }
       }
       basculeSet = true;
     }
@@ -116,7 +148,7 @@ const void Display::loadBar()
 
   for(uint8_t i=LCD_CHARS; i>0; i--)
     {
-      _lcd.write((byte)IconBlock);
+      _lcd.write((byte)ICONBLOCK);
       delay(10);
     }
 }
@@ -126,7 +158,7 @@ const void Display::loadBar()
 const void Display::renderIconOn(uint8_t pos, bool currentItem)
 {
   _lcd.setCursor(0, pos);
-  currentItem ? _lcd.write((uint8_t)IconEnter) : _lcd.write(20);
+  currentItem ? _lcd.write((uint8_t)ICONENTER) : _lcd.write(20);
 }
 
 const void Display::renderItem(const char item[])
@@ -137,7 +169,7 @@ const void Display::renderItem(const char item[])
 const void Display::renderIconChild()
 {
   _lcd.write(20);
-  _lcd.write((uint8_t)IconRight);
+  _lcd.write((uint8_t)ICONRIGHT);
   blank(7);
 }
 
@@ -150,7 +182,7 @@ const void Display::engineHome(char label[], char arrayValue[])
   _lcd.setCursor(0, LCD_LINES);
   _lcd.print(arrayValue);
   _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE_SAVE),LCD_LINES);
-  _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)IconRight);
+  _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)ICONRIGHT);
 }
 
 const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
@@ -161,9 +193,23 @@ const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
       _lcd.setCursor((last + offset), LCD_LINES);
 
       (index<last && index == buffSize-2) ?
-	  _lcd.write((byte)IconRight) : _lcd.print(arrayValue[last]);
+	  _lcd.write((byte)ICONRIGHT) : _lcd.print(arrayValue[last]);
     }
 }
+
+/******************************************************************************
+ * brief   : Reprint char if cursor move.
+ * details : If cursor is moving on new position we need to print the
+ * character of the old index and a block on new character.
+ ******************************************************************************/
+const void Display::engineFillChar(int8_t last, int8_t index, char actionBar[])
+{
+  _lcd.setCursor(last , LCD_LINES);
+  _lcd.write(actionBar[last]);
+  _lcd.setCursor(index , LCD_LINES);
+  _lcd.write(ICONBLOCK);
+}
+
 
 const void Display::engineEditMode(bool setMode)
 {
@@ -179,7 +225,7 @@ const void Display::engineEditMode(bool setMode)
     }
   else
     {
-      _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)IconRight);
+      _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)ICONRIGHT);
     }
 }
 
@@ -261,7 +307,7 @@ const void Display::windingSelectAction()
   _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0);
   _lcd.print(MSG_SAVE);
   _lcd.setCursor((LCD_CHARS-1), LCD_LINES);
-  _lcd.write((byte)IconBack);
+  _lcd.write((byte)ICONBACK);
 }
 
 
