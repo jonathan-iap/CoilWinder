@@ -164,11 +164,8 @@ bool Memory::isSet()
   char set[BUFFSIZE_DEFAULT];
   EEPROM.readBlock<char>(_addr_DefaultSettings, set, BUFFSIZE_DEFAULT);
 
-  if(Buffercmp((uint8_t*)MSG_IS_SET, (uint8_t*)set, BUFFSIZE_DEFAULT))
-    {
-      return false;
-    }
-  else return true;
+  // True if the two buffers are equals
+  return Buffercmp((uint8_t*)MSG_IS_SET, (uint8_t*)set, BUFFSIZE_DEFAULT);
 }
 
 /* PRIVATE -------------------------------------------------------------------*/
