@@ -16,8 +16,7 @@
 #include "Save.h"
 #include "Winding.h"
 
-#define CURSOR_MOVE_LEFT	1
-#define CURSOR_MOVE_RIGHT	2
+
 #define NOT_SAVE		false
 #define SAVE			true
 #define SET_CURRENT_SPEED	2
@@ -88,7 +87,8 @@ private:
   void setAllForEdit(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
 		     float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
   uint8_t navigationEngine();
-  void selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *wordSize, unsigned long *lastTime);
+  void selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+		       uint8_t *wordSize, unsigned long *lastTime);
   uint8_t motionSense(int8_t index, int8_t lastIndex);
   uint8_t wordDetect(int8_t *index, uint8_t sense);
   void ignoreChar(int8_t *index, uint8_t sense);

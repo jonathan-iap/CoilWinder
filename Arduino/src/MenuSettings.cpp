@@ -587,16 +587,18 @@ void Setting::setAllForEdit(const char label[], char arrayValue[], const uint8_t
 uint8_t Setting::navigationEngine()
 {
   bool run = true;
+  uint8_t btn;
+
   int8_t index = 0;
   int8_t  lastIndex = 0;
-  uint8_t btn;
+  uint8_t lastSense = 0;
   uint8_t wordSize = 0;
   unsigned long lastTime;
 
 
   while(run)
     {
-      selectCharacter(&index, &lastIndex, &wordSize, &lastTime);
+      selectCharacter(&index, &lastIndex, &lastSense, &wordSize, &lastTime);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
@@ -613,32 +615,41 @@ uint8_t Setting::navigationEngine()
  * brief   : Move cursor.
  * details : Manages the displacement of cursor and as well as being displayed.
  ******************************************************************************/
-void Setting::selectCharacter(int8_t *index, int8_t *lastIndex,  uint8_t *wordSize, unsigned long *lastTime)
+void Setting::selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+			      uint8_t *wordSize, unsigned long *lastTime)
 {
   unsigned long currentTime = millis();
 
   // Get encoder movement, clamp returned value and detect sense of motion
   *index += _Encoder->getValue();
 
+  delay(10);
+
   clampValue(index, 0, (LCD_CHARS-1));
 
-  int8_t motion = motionSense(*index, *lastIndex);
+  uint8_t motion = motionSense(*index, *lastIndex);
 
-  // If motion is detected cursor is moved
+  // Index of cursor is moved if a movement has been detected
   if(motion > 0)
     {
+      // Index must be moved on the other size of word if we change direction.
+      if(motion!=*lastSense && *wordSize>1)
+	{
+	  motion == CURSOR_MOVE_RIGHT ? *index+=*wordSize : *index-=*wordSize;
+	}
+
       ignoreChar(index, motion);
 
       *wordSize = wordDetect(index, motion);
 
-      _Display->engineFillChar(*lastIndex, *index, _actionBar);
+      *lastSense = motion; // Old the motion sense
     }
 
 
   // Blinking of the selected character
-  if(timer(currentTime, lastTime, DelayTimeBlock))
+  if(timer(currentTime, lastTime, DelayTimeBlock) || motion>0 )
     {
-      _Display->blinkSelection(*index, _actionBar, *wordSize);
+      _Display->blinkSelection(*index, _actionBar, *wordSize, *lastSense);
     }
 
   // To determine the direction of the next movement.
@@ -675,27 +686,25 @@ uint8_t Setting::motionSense(int8_t index, int8_t lastIndex)
  ******************************************************************************/
 uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
 {
+  bool isCharacter = false;
   uint8_t wordSize = 0;
 
   while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	// Upper case
       || (_actionBar[*index] > 96 && _actionBar[*index] < 123))	// Lower case
     {
-
       sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -=1;
 
       wordSize ++;
+      isCharacter = true;
     }
 
-  if(wordSize >= 1 && sense == CURSOR_MOVE_RIGHT)
+  if(isCharacter)
     {
-      *index -=1;
-      return wordSize;
+      // Set index at the end or on character
+      sense == CURSOR_MOVE_RIGHT ? *index -=1 : *index +=1;
     }
-  else if(wordSize >= 1 && sense == CURSOR_MOVE_LEFT)
-    {
-      *index +=1;
-      return wordSize;
-    }
+
+  if(wordSize > 1) return wordSize;
   else return false; // Single character.
 }
 

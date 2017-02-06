@@ -14,6 +14,9 @@
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 
+#define CURSOR_MOVE_LEFT	1
+#define CURSOR_MOVE_RIGHT	2
+
 #define ICONLEFT 	1
 #define ICONRIGHT	2
 #define ICONBACK	3
@@ -120,7 +123,7 @@ public:
   const void clear();
   const void blank(uint8_t size);
   const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
-  const void blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize); // New
+  const void blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize, uint8_t sense); // New
   const void blinkWorld(uint8_t index);
   const void loadBar();
 
@@ -132,7 +135,6 @@ public:
   // MenuSetting
   const void engineHome(char label[], char arrayValue[]);
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
-  const void engineFillChar(int8_t last, int8_t index, char actionBar[]); // New
   const void engineEditMode(bool setMode);
   const void engineSave(float value);
   const void engineResetConfirm(bool razValues);

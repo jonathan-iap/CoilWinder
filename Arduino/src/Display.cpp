@@ -87,28 +87,37 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
  * details : If cursor is moving on new position we need to print the
  * character of the old index and a block on new character.
  ******************************************************************************/
-const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize)
+const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize,
+				   uint8_t sense)
 {
   static bool basculeSet = true;
 
-  _lcd.setCursor(index, LCD_LINES);
-
   if(basculeSet)
     {
-      if(wordSize > 0)
-	{
-	  for(uint8_t i=wordSize; i>0; i--) _lcd.write(actionBar[i]);
-	}
-      else _lcd.write(actionBar[index]);
+      _lcd.setCursor(0, LCD_LINES);
+      _lcd.print(actionBar);
       basculeSet = false;
     }
   else
     {
-      if(wordSize > 0)
+      if(wordSize > 1)
 	{
-	  for(uint8_t i=wordSize; i>0; i--) _lcd.write(ICONBLOCK);
+	  if(sense == CURSOR_MOVE_RIGHT)
+	    {
+	      _lcd.setCursor((index-(wordSize-1)), LCD_LINES);
+	      blank(wordSize);
+	    }
+	  else
+	    {
+	      _lcd.setCursor(index, LCD_LINES);
+	      blank(wordSize);
+	    }
 	}
-      else _lcd.write(ICONBLOCK);
+      else
+	{
+	  _lcd.setCursor(index, LCD_LINES);
+	  _lcd.write(ICONBLOCK);
+	}
       basculeSet = true;
     }
 }
@@ -195,19 +204,6 @@ const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
       (index<last && index == buffSize-2) ?
 	  _lcd.write((byte)ICONRIGHT) : _lcd.print(arrayValue[last]);
     }
-}
-
-/******************************************************************************
- * brief   : Reprint char if cursor move.
- * details : If cursor is moving on new position we need to print the
- * character of the old index and a block on new character.
- ******************************************************************************/
-const void Display::engineFillChar(int8_t last, int8_t index, char actionBar[])
-{
-  _lcd.setCursor(last , LCD_LINES);
-  _lcd.write(actionBar[last]);
-  _lcd.setCursor(index , LCD_LINES);
-  _lcd.write(ICONBLOCK);
 }
 
 
