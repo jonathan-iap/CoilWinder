@@ -87,36 +87,36 @@ const void Display::blinkValue(uint8_t _index, const char value[], int _arraySiz
  * details : If cursor is moving on new position we need to print the
  * character of the old index and a block on new character.
  ******************************************************************************/
-const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize,
-				   uint8_t sense)
+const void Display::blinkSelection(uint8_t index, char actionBar[],
+				   uint8_t wordSize, bool editMode)
 {
   static bool basculeSet = true;
 
-  if(basculeSet)
+  if(basculeSet) // Block ON
     {
-      _lcd.setCursor(0, LCD_LINES);
-      _lcd.print(actionBar);
-      basculeSet = false;
-    }
-  else
-    {
-      if(wordSize > 1)
-	{
-	  if(sense == CURSOR_MOVE_RIGHT)
-	    {
-	      _lcd.setCursor((index-(wordSize-1)), LCD_LINES);
-	      blank(wordSize);
-	    }
-	  else
-	    {
-	      _lcd.setCursor(index, LCD_LINES);
-	      blank(wordSize);
-	    }
-	}
-      else
+      if(editMode) // refresh only number
 	{
 	  _lcd.setCursor(index, LCD_LINES);
-	  _lcd.write(ICONBLOCK);
+	  _lcd.print(actionBar[index]);
+	}
+      else // refresh all line
+	{
+	  _lcd.setCursor(0, LCD_LINES);
+	  _lcd.print(actionBar);
+	}
+      basculeSet = false;
+    }
+  else // Block OFF
+    {
+      if(wordSize > 1) // Word
+	{
+	  _lcd.setCursor(index, LCD_LINES);
+	  blank(wordSize);
+	}
+      else // Number or single character
+	{
+	  _lcd.setCursor(index, LCD_LINES);
+	  editMode ? _lcd.write(' ') : _lcd.write(ICONBLOCK);
 	}
       basculeSet = true;
     }
@@ -223,6 +223,21 @@ const void Display::engineEditMode(bool setMode)
     {
       _lcd.print(MSG_CHOICE_SAVE); _lcd.write((byte)ICONRIGHT);
     }
+}
+
+
+/******************************************************************************
+ * brief   : Print "edit" message.
+ * details : When you click on number we switch on edit mode.
+ ******************************************************************************/
+const void Display::engineEditMode()
+{
+  _lcd.setCursor(MAX_SIZE_VALUE, LCD_LINES);
+
+  for(uint8_t i=0; i<LCD_CHARS; i++) _lcd.write(' ');
+
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_EDIT+1), LCD_LINES);
+  _lcd.print(MSG_EDIT);
 }
 
 

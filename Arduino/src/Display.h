@@ -14,6 +14,8 @@
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
 
+#define MAX_SIZE_VALUE		6 // max value is -> #define INIT_COIL "000.00"
+
 #define CURSOR_MOVE_LEFT	1
 #define CURSOR_MOVE_RIGHT	2
 
@@ -34,8 +36,19 @@
 #define MSG_MOVE	"Move in mm"
 
 #define MSG_TEST	"Rework nav"
-const char actionChoiceSave[] = {'S','a','v','e','/','T','/','s','t','/',ICONRIGHT};
+const char actionChoiceSave[] = {'S','a','v','e','/',ICONLEFT,'/',ICONRIGHT};
 #define SIZE_BTN_CHOICE_SAVE	COUNTOF(actionChoiceSave)
+#define KEYWORD_SAVE		"Save"
+#define SIZE_KEYWORD_SAVE 	COUNTOF(KEYWORD_SAVE)
+#define KEYWORD_SPEED		"Speed"
+#define SIZE_KEYWORD_SPEED 	COUNTOF(KEYWORD_SPEED)
+#define KEYWORD_EXIT		"Exit"
+#define SIZE_KEYWORD_EXIT 	COUNTOF(KEYWORD_EXIT)
+
+#define isNUMBER		10
+#define isWORD_SAVE		11
+#define isWORD_SPEED		12
+#define isWORD_EXIT		13
 
 #define MSG_SPEED		"Speed"
 #define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
@@ -123,7 +136,7 @@ public:
   const void clear();
   const void blank(uint8_t size);
   const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
-  const void blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize, uint8_t sense); // New
+  const void blinkSelection(uint8_t index, char actionBar[], uint8_t wordSize, bool editMode); // New
   const void blinkWorld(uint8_t index);
   const void loadBar();
 
@@ -136,6 +149,7 @@ public:
   const void engineHome(char label[], char arrayValue[]);
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   const void engineEditMode(bool setMode);
+  const void engineEditMode(); //New
   const void engineSave(float value);
   const void engineResetConfirm(bool razValues);
   const void engineMoveDirection(float value, bool turns);

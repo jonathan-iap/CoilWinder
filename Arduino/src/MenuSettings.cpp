@@ -598,12 +598,35 @@ uint8_t Setting::navigationEngine()
 
   while(run)
     {
-      selectCharacter(&index, &lastIndex, &lastSense, &wordSize, &lastTime);
+      cursorMovement(&index, &lastIndex, &lastSense, &wordSize, &lastTime);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-
+	  switch(selectedAction(index, lastIndex, wordSize))
+	  {
+	    case isNUMBER:
+	      {
+		Serial.println("is a number !");
+		editValue(index, buttonState);
+		break;
+	      }
+	    case isWORD_SAVE:
+	      {
+		Serial.println("is word Save !");
+		break;
+	      }
+	    case ICONRIGHT :
+	      {
+		Serial.println("is icon Right");
+		break;
+	      }
+	    case 0 :
+	      {
+		Serial.println("is unknown");
+		break;
+	      }
+	  }
 	}
     }
 
@@ -615,8 +638,8 @@ uint8_t Setting::navigationEngine()
  * brief   : Move cursor.
  * details : Manages the displacement of cursor and as well as being displayed.
  ******************************************************************************/
-void Setting::selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
-			      uint8_t *wordSize, unsigned long *lastTime)
+void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+			     uint8_t *wordSize, unsigned long *lastTime)
 {
   unsigned long currentTime = millis();
 
@@ -632,10 +655,10 @@ void Setting::selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *lastSen
   // Index of cursor is moved if a movement has been detected
   if(motion > 0)
     {
-      // Index must be moved on the other size of word if we change direction.
-      if(motion!=*lastSense && *wordSize>1)
+      // Index is jumped to the end of the word
+      if(*wordSize > 1 && motion == CURSOR_MOVE_RIGHT)
 	{
-	  motion == CURSOR_MOVE_RIGHT ? *index+=*wordSize : *index-=*wordSize;
+	  *index+=*wordSize;
 	}
 
       ignoreChar(index, motion);
@@ -649,7 +672,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *lastIndex, uint8_t *lastSen
   // Blinking of the selected character
   if(timer(currentTime, lastTime, DelayTimeBlock) || motion>0 )
     {
-      _Display->blinkSelection(*index, _actionBar, *wordSize, *lastSense);
+      _Display->blinkSelection(*index, _actionBar, *wordSize, false);
     }
 
   // To determine the direction of the next movement.
@@ -689,6 +712,7 @@ uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
   bool isCharacter = false;
   uint8_t wordSize = 0;
 
+  // Characters counting
   while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	// Upper case
       || (_actionBar[*index] > 96 && _actionBar[*index] < 123))	// Lower case
     {
@@ -700,8 +724,8 @@ uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
 
   if(isCharacter)
     {
-      // Set index at the end or on character
-      sense == CURSOR_MOVE_RIGHT ? *index -=1 : *index +=1;
+      // Set index at the beginning of the word
+      sense == CURSOR_MOVE_RIGHT ? *index -=wordSize : *index +=1;
     }
 
   if(wordSize > 1) return wordSize;
@@ -720,5 +744,99 @@ void Setting::ignoreChar(int8_t *index, uint8_t sense)
   while(_actionBar[*index] == '.' || _actionBar[*index] == '/' || _actionBar[*index] == ' ')
     {
       sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -= 1;
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Checks if it's a number
+ * details : Checks if the selected character is a number
+ * return  : true if yes.
+ ******************************************************************************/
+bool Setting::isNumber(int8_t index)
+{
+  if(_actionBar[index]<58 && _actionBar[index]>47) return true;
+  else return false;
+}
+
+
+/******************************************************************************
+ * brief   : Checks if it's a word
+ * details : Checks if the current cursor is on word
+ * return  : true if yes and fill tmp_word[]
+ ******************************************************************************/
+bool Setting::isWord(int8_t index, uint8_t wordSize, char tmp_word[])
+{
+  if(wordSize>1)
+    {
+      uint8_t count = 0;
+
+      for(uint8_t i=index; i<(index+wordSize); i++)
+	{
+	  tmp_word[count] = _actionBar[i];
+	  count++;
+	}
+      return true;
+    }
+  else return false;
+}
+
+
+/******************************************************************************
+ * brief   : Sorts the selected action
+ * details : Depending where the cursor is placed, it's identified which action
+ * to be taken by returning a number who can be used in switch case.
+ * return  :
+ ******************************************************************************/
+uint8_t Setting::selectedAction(int8_t index, uint8_t lastSense, uint8_t wordSize)
+{
+  char tmp_word[wordSize+1] = {0};
+
+  if(isNumber(index))
+    {
+      return isNUMBER;
+    }
+  else if(isWord(index, wordSize, tmp_word))
+    {
+      if(Buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
+	return isWORD_SAVE;
+      else return 0;
+    }
+  else
+    {
+      if(_actionBar[index] == ICONRIGHT) return ICONRIGHT;
+    }
+  return 0;
+}
+
+
+/******************************************************************************
+ * brief   : Set value selected
+ * details : Allows you to set the selected value (between 0 to 9).
+ * Click for exit.
+ ******************************************************************************/
+void Setting::editValue(int8_t index, ClickEncoder::Button buttonState)
+{
+  // Erase icons or words to show we are in the edit mode
+  _Display->engineEditMode();
+
+  // Set the value as long as the user does not click
+  int8_t count = _actionBar[index];
+  unsigned long lastTimeSet;
+
+  while((buttonState = _Encoder->getButton()) != ClickEncoder::Clicked)
+    {
+      unsigned long currentTimeSet = millis();
+
+      count+= _Encoder->getValue();
+      clampValue(&count, '0', '9');
+
+      _actionBar[index] = count;
+
+      // Blinking value
+      if(timer(currentTimeSet, &lastTimeSet, DelayTimeBlank))
+	{
+	  _Display->blinkSelection(index, _actionBar, 0, true);
+	}
     }
 }
