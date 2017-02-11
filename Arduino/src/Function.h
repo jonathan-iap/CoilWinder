@@ -19,7 +19,8 @@
 
 void clampValue(int8_t *_val, uint8_t _min, uint8_t _max);
 bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long delay);
-uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength);
+uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLength);
+void bufferCopy(uint8_t* originArray, uint8_t* targetArray, int8_t index, uint8_t wordSize);
 
 
 #endif /* SRC_FUNCTION_H_ */

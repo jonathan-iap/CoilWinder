@@ -23,7 +23,7 @@
 #define EXIT_WINDING		3
 #define CONTINUE_WINDING 	4
 #define DelayTimeBlock 	 	250
-#define DelayTimeBlank 	 	150
+#define DelayTimeBlank 	 	120
 
 
 class Setting: public Memory
@@ -59,7 +59,6 @@ private:
 		    bool jumpEnd);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 		 ClickEncoder::Button buttonState);
-  void getFloatingValue();
   void saveValue(float value);
   uint16_t ajustSpeed(bool initSpeed, int8_t *speedInPercent);
   uint8_t menuSuspend();
@@ -72,9 +71,8 @@ private:
   float *p_floatingValue;
   const char *p_arrayBtn;
   uint8_t _sizeBuffBtn;
-  uint8_t _formattingOffset;
+  uint8_t _positionAB; // Where the action bar will be displayed
   char _actionBar[LCD_CHARS]={0};
-
 
 public:
   void editionMenu(const uint8_t id);
@@ -83,20 +81,23 @@ private:
   void setValueFromId();
   void setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
 		 float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
-  void arrayFormatting(char arrayValue[], const char labelBtn[]);
-  void setAllForEdit(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
-		     float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
+  void setActionBar(char arrayValue[], char labelAB[]);
+  void setAll(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+	      float *value, const char labelBtn[], const uint8_t sizeLabelBtn,
+	      uint8_t AB_position);
   uint8_t navigationEngine();
   void cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
-		       uint8_t *wordSize, unsigned long *lastTime);
+		      uint8_t *wordSize, unsigned long *lastTime);
   uint8_t motionSense(int8_t index, int8_t lastIndex);
   uint8_t wordDetect(int8_t *index, uint8_t sense);
   void ignoreChar(int8_t *index, uint8_t sense);
-  bool isNumber(int8_t index);
-  bool isWord(int8_t index, uint8_t wordSize, char tmp_word[]);
-  uint8_t selectedAction(int8_t index, uint8_t lastSense, uint8_t wordSize);
+  bool isNumber(char array[], int8_t index);
+  bool isWord(char array[], int8_t index, uint8_t wordSize, char return_word[]);
+  uint8_t selectedAction(int8_t index, uint8_t wordSize);
   void editValue(int8_t index, ClickEncoder::Button buttonState);
-
+  void getFloatingValue();
+  bool saveValue(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+		 uint8_t *wordSize, unsigned long *lastTime);
 
   /*End Dev----------------------------------------------------------------*/
 };

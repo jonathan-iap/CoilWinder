@@ -44,22 +44,43 @@ bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long dela
 
 /******************************************************************************
  * brief   : Compare the content of two buffer.
- * details : pBuffer1, buffer one is the reference
- * pBuffer2, buffer to compare
+ * details : originArray, buffer one is the reference
+ * targetArray, buffer to compare
  * BufferLength, length of buffer one.
  * return  : 1 if the two buffers are equals.
  ******************************************************************************/
-uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint16_t BufferLength)
+uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLength)
 {
   while(BufferLength--)
     {
-      if((*pBuffer1) != *pBuffer2)
+      Serial.print("cmp A1 et A2 : "); Serial.print(*originArray);
+      Serial.print("/"); Serial.println(*targetArray);
+
+      if((*originArray) != *targetArray)
 	{
 	  return false;
 	}
-      pBuffer1++;
-      pBuffer2++;
+      originArray++;
+      targetArray++;
     }
 
   return true;
+}
+
+
+/******************************************************************************
+ * brief   : Copy two buffer.
+ * details : Allows you to copy only one part of buffer origin
+ * into a target array.
+ * return  : Buffer is directly copy into an other.
+ ******************************************************************************/
+void bufferCopy(uint8_t* originArray, uint8_t* targetArray, int8_t index, uint8_t wordSize)
+{
+  uint8_t count = 0;
+
+  for(uint8_t i=index; i<(index+wordSize); i++)
+    {
+      targetArray[count] = originArray[i];
+      count++;
+    }
 }

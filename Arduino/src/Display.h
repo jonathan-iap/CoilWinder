@@ -19,36 +19,55 @@
 #define CURSOR_MOVE_LEFT	1
 #define CURSOR_MOVE_RIGHT	2
 
-#define ICONLEFT 	1
-#define ICONRIGHT	2
-#define ICONBACK	3
-#define ICONENTER	4
-#define ICONBLOCK	5
+/* Custom characters defined in the first 8 characters of the LCD */
+#define ICONBLOCK	"\x01"// Print only as a char. This will have 'unexpected' results when used in a string!
+#define ICONLEFT 	"\x02"
+#define ICONRIGHT	"\x03"
 
-#define MSG_WIRE_SIZE	"Wire size in mm"
-#define MSG_COIL_LENGTH	"Length in mm"
-#define MSG_TURNS	"Turns in tr"
-#define MSG_MAX_SPEED	"MAX speed in us"
-#define MSG_MIN_SPEED	"MIN speed in us"
-#define MSG_ACC_DELAY	"Acc delay in us"
+/* Units ______________________________________________________________*/
+#define UNIT_MM		"mm"
+#define UNIT_TR		"Tr"
+#define UNIT_US		"uS"
+/* Labels _____________________________________________________________*/
+#define MSG_TEST		"Rework nav"
+#define MSG_WIRE_SIZE	"Wire size in" UNIT_MM
+#define MSG_COIL_LENGTH	"Length in " UNIT_MM
+#define MSG_TURNS	"Turns in " UNIT_TR
+#define MSG_MAX_SPEED	"MAX speed in " UNIT_US
+#define MSG_MIN_SPEED	"MIN speed in " UNIT_US
+#define MSG_ACC_DELAY	"Acc delay in " UNIT_US
 #define MSG_RESET 	"Reset EEprom ? "
 #define MSG_RAZ 	"Reset values ? "
-#define MSG_MOVE	"Move in mm"
-
-#define MSG_TEST	"Rework nav"
-const char actionChoiceSave[] = {'S','a','v','e','/',ICONLEFT,'/',ICONRIGHT};
-#define SIZE_BTN_CHOICE_SAVE	COUNTOF(actionChoiceSave)
+#define MSG_MOVE	"Move in " UNIT_MM
+/* Keywords ___________________________________________________________*/
 #define KEYWORD_SAVE		"Save"
 #define SIZE_KEYWORD_SAVE 	COUNTOF(KEYWORD_SAVE)
 #define KEYWORD_SPEED		"Speed"
 #define SIZE_KEYWORD_SPEED 	COUNTOF(KEYWORD_SPEED)
 #define KEYWORD_EXIT		"Exit"
 #define SIZE_KEYWORD_EXIT 	COUNTOF(KEYWORD_EXIT)
-
+#define KEYWORD_YES		"Yes"
+#define SIZE_KEYWORD_YES 	COUNTOF(KEYWORD_YES)
+#define KEYWORD_NO		"No"
+#define SIZE_KEYWORD_NO 	COUNTOF(KEYWORD_NO)
+/* Actions bar ________________________________________________________*/
+#define ACTIONBAR_SETVALUE	KEYWORD_SAVE "/" ICONRIGHT
+#define SIZE_AB_SETVALUE	COUNTOF(ACTIONBAR_SETVALUE)
+#define ACTIONBAR_SAVE		KEYWORD_YES "/" KEYWORD_NO
+#define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT " " KEYWORD_EXIT
+/* Recognition of words _______________________________________________*/
+// Just number
 #define isNUMBER		10
+// Keyword
 #define isWORD_SAVE		11
 #define isWORD_SPEED		12
 #define isWORD_EXIT		13
+#define isWORD_YES		14
+#define isWORD_NO		15
+// Icons
+#define isICONLEFT		20
+#define isICONRIGHT		21
+#define isICONBACK		22
 
 #define MSG_SPEED		"Speed"
 #define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
@@ -70,6 +89,17 @@ class Display
 {
   // Public variables -----------------------------------------------------------
 public :
+
+  uint8_t block[8] = {
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111,
+      0b11111
+  };
 
   uint8_t left[8] = {
       0b00010,
@@ -93,38 +123,6 @@ public :
       0b00000
   };
 
-  uint8_t back[8] = {
-      0b00100,
-      0b01100,
-      0b11111,
-      0b01101,
-      0b00101,
-      0b00001,
-      0b01001,
-      0b01111
-  };
-
-  uint8_t enter[8] = {
-      0b00000,
-      0b10000,
-      0b10100,
-      0b10110,
-      0b11111,
-      0b00110,
-      0b00100,
-      0b00000
-  };
-
-  uint8_t block[8] = {
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111
-  };
 
   // Public functions -----------------------------------------------------------
 public:
@@ -151,6 +149,7 @@ public:
   const void engineEditMode(bool setMode);
   const void engineEditMode(); //New
   const void engineSave(float value);
+  const void engineSave_N(float value); //New
   const void engineResetConfirm(bool razValues);
   const void engineMoveDirection(float value, bool turns);
   const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns);
@@ -161,7 +160,8 @@ public:
   const void windingSelectAction();
   const void windingSetSpeed(uint16_t speed);
 
-  const void reworkTest(char label[], char container[]);
+  const void engine_setValue(char label[], char container[], uint8_t position);
+  const void TestActionBar();
 };
 
 #endif /* SRC_DISPLAY_H_ */

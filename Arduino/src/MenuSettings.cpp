@@ -13,9 +13,9 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
    p_floatingValue(0),
    p_arrayValue(0),
    _sizeBuffValue(0),
-   _sizeBuffBtn(0),
    p_arrayBtn(0),
-   _formattingOffset(0)
+   _sizeBuffBtn(0),
+   _positionAB(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -246,11 +246,6 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
   _Display->engineEditMode(false);
 }
 
-// convert value of array on float.
-void Setting::getFloatingValue()
-{
-  *p_floatingValue = atof(p_arrayValue);
-}
 
 // Print current value and ask save? if yes save in eeprom memory.
 void Setting::saveValue(float value)
@@ -489,11 +484,7 @@ void Setting::editionMenu(const uint8_t id)
 {
   _idValue = id;
   setValueFromId();
-
-  _Display->reworkTest(_label, _actionBar);
-
   navigationEngine();
-  delay(10000);
 }
 
 /******************************************************************************
@@ -507,8 +498,8 @@ void Setting::setValueFromId()
   {
     case id_TEST :
       {
-	setAllForEdit(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE,
-		      &WireSize, actionChoiceSave, SIZE_BTN_CHOICE_SAVE);
+	setAll(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE, &WireSize,
+	       ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, (LCD_LINES-1));
 	break;
       }
   }
@@ -536,8 +527,6 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   // Action bar
   p_arrayBtn 		= labelBtn;
   _sizeBuffBtn		= sizeLabelBtn;
-  _formattingOffset	= LCD_CHARS - sizeLabelBtn; // Offset between value and action bar (btn/btn).
-
 }
 
 
@@ -547,20 +536,25 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
  * space to be displayed and manipulate on a single line.
  * return  : New string is stored in "actionBar"
  ******************************************************************************/
-void Setting::arrayFormatting(char arrayValue[], const char labelBtn[])
+void Setting::setActionBar(char arrayValue[], char labelAB[])
 {
+  uint8_t offset = LCD_CHARS - SIZE_AB_SETVALUE;
+
   for (uint8_t i=0; i<LCD_CHARS; i++)
     {
       if (i < (_sizeBuffValue-1)) _actionBar[i] = *p_arrayValue++;
-      else if ( i < (_formattingOffset)) _actionBar[i] = ' ';
+      else if ( i <= offset) _actionBar[i] = ' ';
       else _actionBar[i] = *p_arrayBtn++;
     }
 
+  _actionBar[LCD_CHARS]= 0; // End of array (null character)
+
   // Initialize pointer at the first position
   p_arrayValue = arrayValue;
-  p_arrayBtn = labelBtn;
+  p_arrayBtn = labelAB;
 
 #ifdef DEBUG
+  Serial.print("action bar : "); Serial.println(_actionBar);
   Serial.print("value : "); Serial.println(p_arrayValue);
   Serial.print("btn : "); Serial.println(p_arrayBtn);
 #endif
@@ -568,17 +562,16 @@ void Setting::arrayFormatting(char arrayValue[], const char labelBtn[])
 
 
 /******************************************************************************
- * brief   : Assign and format values
- * details : This function is just a container it's run setValue() and
- * arrayFormatting().
+ * brief   : Simple container to set all values.
  ******************************************************************************/
-void Setting::setAllForEdit(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
-			    float *value, const char labelBtn[], const uint8_t sizeLabelBtn)
+void Setting::setAll(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
+		     float *value, const char labelBtn[], const uint8_t sizeLabelBtn,
+		     uint8_t AB_position)
 {
+  _positionAB = AB_position;
   setValues(label, arrayValue, sizeLabelVal, value, labelBtn, sizeLabelBtn);
-  arrayFormatting(arrayValue, labelBtn);
+  setActionBar(arrayValue, (char*)labelBtn);
 }
-
 
 /******************************************************************************
  * brief   : Engine to navigate and edit current menu.
@@ -595,6 +588,7 @@ uint8_t Setting::navigationEngine()
   uint8_t wordSize = 0;
   unsigned long lastTime;
 
+  _Display->engine_setValue(_label, _actionBar, _positionAB);
 
   while(run)
     {
@@ -603,11 +597,11 @@ uint8_t Setting::navigationEngine()
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-	  switch(selectedAction(index, lastIndex, wordSize))
+	  switch(selectedAction(index, wordSize))
 	  {
 	    case isNUMBER:
 	      {
-		Serial.println("is a number !");
+		Serial.println("is a number");
 		editValue(index, buttonState);
 		break;
 	      }
@@ -616,9 +610,10 @@ uint8_t Setting::navigationEngine()
 		Serial.println("is word Save !");
 		break;
 	      }
-	    case ICONRIGHT :
+	    case isICONRIGHT :
 	      {
 		Serial.println("is icon Right");
+		run = EXIT;
 		break;
 	      }
 	    case 0 :
@@ -646,7 +641,7 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
   // Get encoder movement, clamp returned value and detect sense of motion
   *index += _Encoder->getValue();
 
-  delay(10);
+  delay(10); // Debounce.
 
   clampValue(index, 0, (LCD_CHARS-1));
 
@@ -655,7 +650,7 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
   // Index of cursor is moved if a movement has been detected
   if(motion > 0)
     {
-      // Index is jumped to the end of the word
+      // Index is jumped to the end of the word +1
       if(*wordSize > 1 && motion == CURSOR_MOVE_RIGHT)
 	{
 	  *index+=*wordSize;
@@ -713,8 +708,8 @@ uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
   uint8_t wordSize = 0;
 
   // Characters counting
-  while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	// Upper case
-      || (_actionBar[*index] > 96 && _actionBar[*index] < 123))	// Lower case
+  while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	 // Upper case
+      || (_actionBar[*index] > 96 && _actionBar[*index] < 123))  // Lower case
     {
       sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -=1;
 
@@ -750,12 +745,12 @@ void Setting::ignoreChar(int8_t *index, uint8_t sense)
 
 /******************************************************************************
  * brief   : Checks if it's a number
- * details : Checks if the selected character is a number
+ * details : Checks if character in the array at the index is a number
  * return  : true if yes.
  ******************************************************************************/
-bool Setting::isNumber(int8_t index)
+bool Setting::isNumber(char array[], int8_t index)
 {
-  if(_actionBar[index]<58 && _actionBar[index]>47) return true;
+  if(array[index]<58 && array[index]>47) return true;
   else return false;
 }
 
@@ -765,17 +760,11 @@ bool Setting::isNumber(int8_t index)
  * details : Checks if the current cursor is on word
  * return  : true if yes and fill tmp_word[]
  ******************************************************************************/
-bool Setting::isWord(int8_t index, uint8_t wordSize, char tmp_word[])
+bool Setting::isWord(char array[], int8_t index, uint8_t wordSize, char return_word[])
 {
   if(wordSize>1)
     {
-      uint8_t count = 0;
-
-      for(uint8_t i=index; i<(index+wordSize); i++)
-	{
-	  tmp_word[count] = _actionBar[i];
-	  count++;
-	}
+      bufferCopy((uint8_t*)array, (uint8_t*)return_word, index, wordSize);
       return true;
     }
   else return false;
@@ -788,23 +777,37 @@ bool Setting::isWord(int8_t index, uint8_t wordSize, char tmp_word[])
  * to be taken by returning a number who can be used in switch case.
  * return  :
  ******************************************************************************/
-uint8_t Setting::selectedAction(int8_t index, uint8_t lastSense, uint8_t wordSize)
+uint8_t Setting::selectedAction(int8_t index, uint8_t wordSize)
 {
   char tmp_word[wordSize+1] = {0};
+Serial.print("index : "); Serial.println(index);
+Serial.print("wordsize : "); Serial.println(wordSize);
 
-  if(isNumber(index))
+  if(isNumber(_actionBar, index))
     {
+      Serial.println("** is a number **");
+
       return isNUMBER;
     }
-  else if(isWord(index, wordSize, tmp_word))
+  else if(isWord(_actionBar, index, wordSize, tmp_word))
     {
-      if(Buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
+      Serial.println("** is a word **");
+
+      if(buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
 	return isWORD_SAVE;
+      else if(buffercmp((uint8_t*) KEYWORD_YES, (uint8_t*) tmp_word, SIZE_KEYWORD_YES))
+	return isWORD_YES;
+      else if(buffercmp((uint8_t*) ICONRIGHT, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
+	return isICONRIGHT;
       else return 0;
     }
   else
     {
-      if(_actionBar[index] == ICONRIGHT) return ICONRIGHT;
+      switch (_actionBar[index])
+      {
+	case ICONLEFT[0] : return isICONLEFT; break;
+	case ICONRIGHT[0] : return isICONRIGHT; break;
+      }
     }
   return 0;
 }
@@ -837,6 +840,66 @@ void Setting::editValue(int8_t index, ClickEncoder::Button buttonState)
       if(timer(currentTimeSet, &lastTimeSet, DelayTimeBlank))
 	{
 	  _Display->blinkSelection(index, _actionBar, 0, true);
+	}
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Convert value of array on float.
+ * details : Converts an array even if characters are present.
+ ******************************************************************************/
+void Setting::getFloatingValue()
+{
+  *p_floatingValue = atof(p_arrayValue);
+}
+
+
+
+/******************************************************************************
+ * brief   : Sub menu save
+ * details : Print current value and ask save? if yes save in eeprom memory.
+ ******************************************************************************/
+bool Setting::saveValue(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+			uint8_t *wordSize, unsigned long *lastTime)
+{
+  bool run = true;
+
+  // actionBar(p_arrayValue, _sizeBuffValue, BTN_confirmSave, SIZE_BTN_SAVE);
+  _Display->engineSave_N(*p_floatingValue);
+
+  while(run)
+    {
+      //clampValue(index, (LCD_CHARS-SIZE_BTN_SAVE),(LCD_CHARS-1));
+      cursorMovement(index, lastIndex, lastSense, wordSize, lastTime);
+
+      ClickEncoder::Button buttonState = _Encoder->getButton();
+      if( buttonState == ClickEncoder::Clicked )
+	{
+	  switch(selectedAction(*index, *wordSize))
+	  {
+	    case isWORD_YES:
+	      {
+		Serial.println("is word Yes");
+		save(p_arrayValue, _idValue);
+		_Display->loadBar();
+		return true;
+		break;
+	      }
+	    case isWORD_NO:
+	      {
+		Serial.println("is word No");
+		//actionBar(p_arrayValue, _sizeBuffValue, BTN_actionBarSave, SIZE_BTN_AB_SAVE);
+		*index=0;
+		return false;
+		break;
+	      }
+	    case 0 :
+	      {
+		Serial.println("is unknown");
+		break;
+	      }
+	  }
 	}
     }
 }
