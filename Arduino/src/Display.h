@@ -55,6 +55,9 @@
 #define SIZE_AB_SETVALUE	COUNTOF(ACTIONBAR_SETVALUE)
 #define ACTIONBAR_SAVE		KEYWORD_YES "/" KEYWORD_NO
 #define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT " " KEYWORD_EXIT
+#define ACTIONBAR_TEST		ICONLEFT "/" ICONRIGHT "/" KEYWORD_YES "/" KEYWORD_NO
+#define SIZE_AB_TEST	COUNTOF(ACTIONBAR_TEST)
+
 /* Recognition of words _______________________________________________*/
 // Just number
 #define isNUMBER		10

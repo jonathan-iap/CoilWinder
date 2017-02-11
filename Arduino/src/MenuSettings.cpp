@@ -13,9 +13,10 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
    p_floatingValue(0),
    p_arrayValue(0),
    _sizeBuffValue(0),
-   p_arrayBtn(0),
-   _sizeBuffBtn(0),
-   _positionAB(0)
+   p_arrayAB(0),
+   _sizeAB(0),
+   _positionAB(0),
+   _minIndex(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -157,7 +158,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last, const char arrayValue
 
   clampValue(index, 0, buffSize-1);
 
-  *index = ignoreChar(*index, *last, arrayValue, buffSize, cursoJumpEnd);
+  *index = IgnoreChar(*index, *last, arrayValue, buffSize, cursoJumpEnd);
 
   _Display->engineFillChar(*last, *index, buffSize, arrayValue, offset);
 
@@ -196,7 +197,7 @@ void Setting::selectCharacter(int8_t *index, int8_t *last)
 }
 
 // Jump to the next index to ignore char.
-int8_t Setting::ignoreChar(int8_t index, int8_t last, const char value[],
+int8_t Setting::IgnoreChar(int8_t index, int8_t last, const char value[],
 			   int arraySize, bool jumpEnd)
 {
   if( jumpEnd && index > arraySize-2)
@@ -498,8 +499,10 @@ void Setting::setValueFromId()
   {
     case id_TEST :
       {
-	setAll(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE, &WireSize,
-	       ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, (LCD_LINES-1));
+	//		setAll(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE, &WireSize,
+	//		       ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, (LCD_LINES-1));
+	setAll(MSG_TEST, 0, 0, 0,
+	       ACTIONBAR_TEST, SIZE_AB_TEST, (LCD_LINES-1));
 	break;
       }
   }
@@ -515,18 +518,18 @@ void Setting::setValueFromId()
  *        |value        btn/btn|
  *        ----------------------
  *******************************************************************************/
-void Setting::setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
-			float *value, const char labelBtn[], const uint8_t sizeLabelBtn)
+void Setting::setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
+			float *value, const char actionBar[], const uint8_t sizeActionBar)
 {
   // Displayed on left top.
   strcpy(_label, label);
   // Pass values saved from memory.
   p_arrayValue 		= arrayValue;
-  _sizeBuffValue	= sizeLabelVal;
+  _sizeBuffValue	= sizeOfArrayValue;
   p_floatingValue 	= value;
   // Action bar
-  p_arrayBtn 		= labelBtn;
-  _sizeBuffBtn		= sizeLabelBtn;
+  p_arrayAB 		= actionBar;
+  _sizeAB		= sizeActionBar;
 }
 
 
@@ -538,25 +541,30 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
  ******************************************************************************/
 void Setting::setActionBar(char arrayValue[], char labelAB[])
 {
-  uint8_t offset = LCD_CHARS - SIZE_AB_SETVALUE;
+  uint8_t offset = LCD_CHARS - _sizeAB;
 
+  // Set where the cursor start
+  if(_sizeBuffValue == 0) _minIndex = offset;
+  else _minIndex = 0;
+
+  // Fill the action bar
   for (uint8_t i=0; i<LCD_CHARS; i++)
     {
       if (i < (_sizeBuffValue-1)) _actionBar[i] = *p_arrayValue++;
       else if ( i <= offset) _actionBar[i] = ' ';
-      else _actionBar[i] = *p_arrayBtn++;
+      else _actionBar[i] = *p_arrayAB++;
     }
 
   _actionBar[LCD_CHARS]= 0; // End of array (null character)
 
   // Initialize pointer at the first position
   p_arrayValue = arrayValue;
-  p_arrayBtn = labelAB;
+  p_arrayAB = labelAB;
 
 #ifdef DEBUG
   Serial.print("action bar : "); Serial.println(_actionBar);
   Serial.print("value : "); Serial.println(p_arrayValue);
-  Serial.print("btn : "); Serial.println(p_arrayBtn);
+  Serial.print("btn : "); Serial.println(p_arrayAB);
 #endif
 }
 
@@ -564,13 +572,13 @@ void Setting::setActionBar(char arrayValue[], char labelAB[])
 /******************************************************************************
  * brief   : Simple container to set all values.
  ******************************************************************************/
-void Setting::setAll(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
-		     float *value, const char labelBtn[], const uint8_t sizeLabelBtn,
+void Setting::setAll(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
+		     float *value, const char actionBar[], const uint8_t sizeActionBar,
 		     uint8_t AB_position)
 {
   _positionAB = AB_position;
-  setValues(label, arrayValue, sizeLabelVal, value, labelBtn, sizeLabelBtn);
-  setActionBar(arrayValue, (char*)labelBtn);
+  setValues(label, arrayValue, sizeOfArrayValue, value, actionBar, sizeActionBar);
+  setActionBar(arrayValue, (char*)actionBar);
 }
 
 /******************************************************************************
@@ -641,9 +649,7 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
   // Get encoder movement, clamp returned value and detect sense of motion
   *index += _Encoder->getValue();
 
-  delay(10); // Debounce.
-
-  clampValue(index, 0, (LCD_CHARS-1));
+  clampValue(index, _minIndex, (LCD_CHARS-1));
 
   uint8_t motion = motionSense(*index, *lastIndex);
 
@@ -656,9 +662,9 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
 	  *index+=*wordSize;
 	}
 
-      ignoreChar(index, motion);
+      ignoreChar(_actionBar, index, motion);
 
-      *wordSize = wordDetect(index, motion);
+      *wordSize = wordDetect(_actionBar, index, motion);
 
       *lastSense = motion; // Old the motion sense
     }
@@ -674,131 +680,32 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
   *lastIndex = *index;
 }
 
-/******************************************************************************
- * brief   : Detect if the cursor is moving.
- * details : If the index change we determine if the cursor move left or right
- * or
- * return  : New position for cursor.
- ******************************************************************************/
-uint8_t Setting::motionSense(int8_t index, int8_t lastIndex)
-{
-  // Move left to right
-  if(index > lastIndex)
-    {
-      return CURSOR_MOVE_RIGHT;
-    }
-  // Move right to left
-  else if (index < lastIndex)
-    {
-      return  CURSOR_MOVE_LEFT;
-    }
-  // No movement
-  else return false;
-}
-
-/******************************************************************************
- * brief   : Detect if cursor is on word
- * details : If the cursor is at the beginning of a word, we browse the word
- * until the last character.
- * return  : The size of word and 0 if is just a single character.
- ******************************************************************************/
-uint8_t Setting::wordDetect(int8_t *index, uint8_t sense)
-{
-  bool isCharacter = false;
-  uint8_t wordSize = 0;
-
-  // Characters counting
-  while((_actionBar[*index] > 64 && _actionBar[*index] < 91)	 // Upper case
-      || (_actionBar[*index] > 96 && _actionBar[*index] < 123))  // Lower case
-    {
-      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -=1;
-
-      wordSize ++;
-      isCharacter = true;
-    }
-
-  if(isCharacter)
-    {
-      // Set index at the beginning of the word
-      sense == CURSOR_MOVE_RIGHT ? *index -=wordSize : *index +=1;
-    }
-
-  if(wordSize > 1) return wordSize;
-  else return false; // Single character.
-}
-
-/******************************************************************************
- * brief   : Ignore unwanted character.
- * details : If cursor is on unwanted character We ignore it by jumping
- * from an index.
- * return  : New position for cursor by the pointer "*index".
- ******************************************************************************/
-void Setting::ignoreChar(int8_t *index, uint8_t sense)
-{
-  // Ignored character.
-  while(_actionBar[*index] == '.' || _actionBar[*index] == '/' || _actionBar[*index] == ' ')
-    {
-      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -= 1;
-    }
-}
-
-
-/******************************************************************************
- * brief   : Checks if it's a number
- * details : Checks if character in the array at the index is a number
- * return  : true if yes.
- ******************************************************************************/
-bool Setting::isNumber(char array[], int8_t index)
-{
-  if(array[index]<58 && array[index]>47) return true;
-  else return false;
-}
-
-
-/******************************************************************************
- * brief   : Checks if it's a word
- * details : Checks if the current cursor is on word
- * return  : true if yes and fill tmp_word[]
- ******************************************************************************/
-bool Setting::isWord(char array[], int8_t index, uint8_t wordSize, char return_word[])
-{
-  if(wordSize>1)
-    {
-      bufferCopy((uint8_t*)array, (uint8_t*)return_word, index, wordSize);
-      return true;
-    }
-  else return false;
-}
-
 
 /******************************************************************************
  * brief   : Sorts the selected action
  * details : Depending where the cursor is placed, it's identified which action
  * to be taken by returning a number who can be used in switch case.
- * return  :
  ******************************************************************************/
 uint8_t Setting::selectedAction(int8_t index, uint8_t wordSize)
 {
   char tmp_word[wordSize+1] = {0};
-Serial.print("index : "); Serial.println(index);
-Serial.print("wordsize : "); Serial.println(wordSize);
 
   if(isNumber(_actionBar, index))
     {
-      Serial.println("** is a number **");
-
       return isNUMBER;
     }
   else if(isWord(_actionBar, index, wordSize, tmp_word))
     {
-      Serial.println("** is a word **");
-
       if(buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
 	return isWORD_SAVE;
       else if(buffercmp((uint8_t*) KEYWORD_YES, (uint8_t*) tmp_word, SIZE_KEYWORD_YES))
 	return isWORD_YES;
-      else if(buffercmp((uint8_t*) ICONRIGHT, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
-	return isICONRIGHT;
+      else if(buffercmp((uint8_t*) KEYWORD_NO, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
+	return isWORD_NO;
+      else if(buffercmp((uint8_t*) KEYWORD_SPEED, (uint8_t*) tmp_word, SIZE_KEYWORD_SPEED))
+	return isWORD_SPEED;
+      else if(buffercmp((uint8_t*) KEYWORD_EXIT, (uint8_t*) tmp_word, SIZE_KEYWORD_EXIT))
+	return isWORD_EXIT;
       else return 0;
     }
   else

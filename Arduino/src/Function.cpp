@@ -84,3 +84,102 @@ void bufferCopy(uint8_t* originArray, uint8_t* targetArray, int8_t index, uint8_
       count++;
     }
 }
+
+
+/******************************************************************************
+ * brief   : Detect if the cursor is moving.
+ * details : If the index change we determine if the cursor move left or right
+ * or
+ * return  : New position for cursor.
+ ******************************************************************************/
+uint8_t motionSense(int8_t index, int8_t lastIndex)
+{
+  // Move left to right
+  if(index > lastIndex)
+    {
+      return CURSOR_MOVE_RIGHT;
+    }
+  // Move right to left
+  else if (index < lastIndex)
+    {
+      return  CURSOR_MOVE_LEFT;
+    }
+  // No movement
+  else return false;
+}
+
+
+/******************************************************************************
+ * brief   : Ignore unwanted character.
+ * details : If cursor is on unwanted character We ignore it by jumping
+ * from an index.
+ * return  : New position for cursor by the pointer "*index".
+ ******************************************************************************/
+void ignoreChar(char array[], int8_t *index, uint8_t sense)
+{
+  // Ignored character.
+  while(array[*index] == '.' || array[*index] == '/' || array[*index] == ' ')
+    {
+      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -= 1;
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Detect if cursor is on word
+ * details : If the cursor is at the beginning of a word, we browse the word
+ * until the last character.
+ * return  : The size of word and 0 if is just a single character.
+ ******************************************************************************/
+uint8_t wordDetect(char array[], int8_t *index, uint8_t sense)
+{
+  bool isCharacter = false;
+  uint8_t wordSize = 0;
+
+  // Characters counting
+  while((array[*index] > 64 && array[*index] < 91)	 // Upper case
+      || (array[*index] > 96 && array[*index] < 123))  // Lower case
+    {
+      sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -=1;
+
+      wordSize ++;
+      isCharacter = true;
+    }
+
+  if(isCharacter)
+    {
+      // Set index at the beginning of the word
+      sense == CURSOR_MOVE_RIGHT ? *index -=wordSize : *index +=1;
+    }
+
+  if(wordSize > 1) return wordSize;
+  else return false; // Single character.
+}
+
+
+/******************************************************************************
+ * brief   : Checks if it's a number
+ * details : Checks if character in the array at the index is a number
+ * return  : true if yes.
+ ******************************************************************************/
+bool isNumber(char array[], int8_t index)
+{
+  if(array[index]<58 && array[index]>47) return true;
+  else return false;
+}
+
+
+/******************************************************************************
+ * brief   : Checks if it's a word
+ * details : Checks if the current cursor is on word
+ * return  : true if yes and fill "tmp_word[]" with "array"
+ ******************************************************************************/
+bool isWord(char array[], int8_t index, uint8_t wordSize, char return_word[])
+{
+  if(wordSize>1)
+    {
+      bufferCopy((uint8_t*)array, (uint8_t*)return_word, index, wordSize);
+      return true;
+    }
+  else return false;
+}
