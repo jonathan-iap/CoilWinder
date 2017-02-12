@@ -97,6 +97,7 @@ private:
 		      uint8_t *wordSize, unsigned long *lastTime);
   void editValue(int8_t index);
   bool selectedAction(uint8_t wordSize);
+  //CallBacks
   void update();
   void retry();
   void setSave();

@@ -65,7 +65,7 @@ bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_WIRESIZE);
+      setting.editionMenu(id_WIRESIZE);
     }
   return true;
 }
@@ -74,7 +74,7 @@ bool editLength(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_COILLENGTH);
+      setting.editionMenu(id_COILLENGTH);
     }
   return true;
 }
@@ -83,7 +83,7 @@ bool editTurns(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_TURNS);
+      setting.editionMenu(id_TURNS);
     }
   return true;
 }
@@ -119,7 +119,7 @@ bool editMaxSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_MAX_SPEED);
+      setting.editionMenu(id_MAX_SPEED);
     }
   return true;
 }
@@ -128,7 +128,7 @@ bool editMinSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_MIN_SPEED);
+      setting.editionMenu(id_MIN_SPEED);
     }
   return true;
 }
@@ -137,7 +137,7 @@ bool editAccTime(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.setId(id_ACC_DELAY);
+      setting.editionMenu(id_ACC_DELAY);
     }
   return true;
 }
@@ -193,7 +193,7 @@ bool reworkTest(const Menu::Action_t a)
 // Menu 0
 MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
 // Menu 1 -> 3
-//MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
+MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
 MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, miMovCarriage, menuDummy);
 MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miMaxSpeed, menuDummy);
 
@@ -219,7 +219,7 @@ MenuItem(miBack3, BACK, Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, 
 
 /*** TEST ***/
 // Uncomment item "Winding" after
-MenuItem(miWinding, "TEST", miMoves, Menu::NullItem, miExit,  Menu::NullItem, reworkTest);
+//MenuItem(miWinding, "TEST", miMoves, Menu::NullItem, miExit,  Menu::NullItem, reworkTest);
 /************/
 
 // ----------------------------------------------------------------------------

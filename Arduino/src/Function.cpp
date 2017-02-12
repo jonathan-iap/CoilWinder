@@ -49,19 +49,19 @@ bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long dela
  * BufferLength, length of buffer one.
  * return  : 1 if the two buffers are equals.
  ******************************************************************************/
-uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLength)
+bool buffercmp(char originArray[], char targetArray[], uint16_t BufferLength)
 {
+  char *S1 = originArray;
+  char *S2 = targetArray;
+
   while(BufferLength--)
     {
-      Serial.print("cmp A1 et A2 : "); Serial.print(*originArray);
-      Serial.print("/"); Serial.println(*targetArray);
-
-      if(*originArray != *targetArray)
+      if(*S1 != *S2) return false;
+      else
 	{
-	  return false;
+	  S1++;
+	  S2++;
 	}
-      originArray++;
-      targetArray++;
     }
 
   return true;
@@ -74,19 +74,17 @@ uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLe
  * into a target array.
  * return  : Buffer is directly copy into an other.
  ******************************************************************************/
-void bufferCopy(uint8_t* originArray, uint8_t* targetArray, int8_t index, uint8_t wordSize)
+void bufferCopy(char originArray[], char targetArray[], int8_t index, uint8_t wordSize)
 {
-  uint8_t*p_S1 = originArray;
-  uint8_t*p_S2 = targetArray;
   uint8_t count = 0;
 
   for(uint8_t i=index; i<(index+wordSize); i++)
     {
-      p_S2[count] = p_S1[i];
+      targetArray[count] = originArray[i];
       count++;
     }
 
-  p_S2[count] = 0; // add null character to the end
+  targetArray[count] = 0; // add null character to the end
 }
 
 
@@ -182,7 +180,7 @@ bool isWord(char array[], int8_t index, uint8_t wordSize, char return_word[])
 {
   if(wordSize>1)
     {
-      bufferCopy((uint8_t*)array, (uint8_t*)return_word, index, wordSize);
+      bufferCopy(array, return_word, index, wordSize);
       return true;
     }
   else return false;

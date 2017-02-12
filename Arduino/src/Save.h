@@ -65,12 +65,12 @@ protected :
   uint32_t TotalSteps;
   uint32_t LayerSteps;
 
-  char _buff_WireSize[BUFFSIZE_WIRE];
-  char _buff_CoilLength[BUFFSIZE_COIL];
-  char _buff_Turns[BUFFSIZE_TURNS];
-  char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED];
-  char _buff_MinSpeed[BUFFSIZE_MIN_SPEED];
-  char _buff_AccDelay[BUFFSIZE_ACC_DELAY];
+  char _buff_WireSize[BUFFSIZE_WIRE+1];
+  char _buff_CoilLength[BUFFSIZE_COIL+1];
+  char _buff_Turns[BUFFSIZE_TURNS+1];
+  char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED+1];
+  char _buff_MinSpeed[BUFFSIZE_MIN_SPEED+1];
+  char _buff_AccDelay[BUFFSIZE_ACC_DELAY+1];
 
 private :
   uint8_t _addr_WireSize;

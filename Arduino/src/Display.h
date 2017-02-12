@@ -27,7 +27,7 @@
 /* Units ______________________________________________________________*/
 #define UNIT_MM		"mm"
 #define UNIT_TR		"Tr"
-#define UNIT_US		"uS"
+#define UNIT_US		"us"
 /* Labels _____________________________________________________________*/
 #define MSG_TEST	"Rework nav"
 #define MSG_WIRE_SIZE	"Wire size in " UNIT_MM

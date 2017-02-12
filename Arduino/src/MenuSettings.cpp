@@ -510,6 +510,36 @@ void Setting::setValueFromId()
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
+    case id_COILLENGTH :
+      {
+	setValues(MSG_COIL_LENGTH, _buff_CoilLength, BUFFSIZE_COIL, &CoilLength, UNIT_MM,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
+    case id_TURNS :
+      {
+	setValues(MSG_TURNS, _buff_Turns, BUFFSIZE_TURNS, &Turns, UNIT_TR,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
+    case id_MAX_SPEED :
+      {
+	setValues(MSG_MAX_SPEED, _buff_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed, UNIT_US,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
+    case id_MIN_SPEED :
+      {
+	setValues(MSG_MIN_SPEED, _buff_MinSpeed, BUFFSIZE_MIN_SPEED, &MinSpeed, UNIT_US,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
+    case id_ACC_DELAY :
+      {
+	setValues(MSG_ACC_DELAY, _buff_AccDelay, BUFFSIZE_ACC_DELAY, &AccDelay, UNIT_US,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
   }
 }
 
@@ -536,20 +566,7 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   strcpy(_unit, unit);
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
-
-#ifdef DEBUG
-  Serial.println("*************************");
-  Serial.println("setValue function : ");
-  Serial.println("*************************");
-  Serial.print("label           : "); Serial.println(_label);
-  Serial.print("p_arrayValue    : "); Serial.println(p_arrayValue);
-  Serial.print("_sizeBuffValue  : "); Serial.println(_sizeBuffValue);
-  Serial.print("p_floatingValue : "); Serial.println(*p_floatingValue);
-  Serial.print("_unit           : "); Serial.println(_unit);
-  Serial.print("action bar      : "); Serial.println(_actionBar);
-  Serial.print("index           : "); Serial.println(_minIndex);
-  Serial.println("*************************");
-#endif
+  _index = 0;
 }
 
 
@@ -579,11 +596,6 @@ void Setting::setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
   _actionBar[LCD_CHARS+1]= 0; // End of array (null character)
 
   _positionAB = AB_LinePosition; // Display position
-
-#ifdef DEBUGOFF
-  Serial.print("action bar : "); Serial.println(_actionBar);
-  Serial.print("index : "); Serial.println(_minIndex);
-#endif
 }
 
 
@@ -711,24 +723,24 @@ bool Setting::selectedAction(uint8_t wordSize)
     }
   else if(isWord(_actionBar, _index, wordSize, tmp_word))
     {
-      if(buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
+      if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
 	{
 	  setSave(); // Display and update values
 	  return CONTINU;
 	}
-      else if(buffercmp((uint8_t*) KEYWORD_YES, (uint8_t*) tmp_word, SIZE_KEYWORD_YES))
+      else if(buffercmp((char*)KEYWORD_YES, tmp_word, SIZE_KEYWORD_YES))
 	{
 	  if(_tmpId == id_SAVE) save(p_arrayValue, _idValue);
 	  return EXIT;
 	}
-      else if(buffercmp((uint8_t*) KEYWORD_NO, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
+      else if(buffercmp((char*)KEYWORD_NO, tmp_word, SIZE_KEYWORD_NO))
 	{
 	  if(_tmpId == id_SAVE) retry();
 	  return CONTINU;
 	}
-      else if(buffercmp((uint8_t*) KEYWORD_SPEED, (uint8_t*) tmp_word, SIZE_KEYWORD_SPEED))
+      else if(buffercmp((char*)KEYWORD_SPEED, tmp_word, SIZE_KEYWORD_SPEED))
 	return isWORD_SPEED;
-      else if(buffercmp((uint8_t*) KEYWORD_EXIT, (uint8_t*) tmp_word, SIZE_KEYWORD_EXIT))
+      else if(buffercmp((char*)KEYWORD_EXIT, tmp_word, SIZE_KEYWORD_EXIT))
 	return isWORD_EXIT;
       else return 0;
     }
@@ -758,7 +770,7 @@ bool Setting::selectedAction(uint8_t wordSize)
  ******************************************************************************/
 void Setting::update()
 {
-  bufferCopy((uint8_t*)_actionBar, (uint8_t*)p_arrayValue, 0, _sizeBuffValue);
+  bufferCopy(_actionBar, p_arrayValue, 0, _sizeBuffValue);
   *p_floatingValue = atof(p_arrayValue);
 }
 
@@ -770,7 +782,6 @@ void Setting::retry()
 {
   setValueFromId();
   _Display->engine_setValue(_label, _actionBar, _positionAB);
-  _index = 0; // Need when action bar is changed
 }
 
 /******************************************************************************
