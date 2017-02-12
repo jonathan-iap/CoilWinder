@@ -8,15 +8,15 @@
 
 Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
 :  speedPercent(100),
-   _idValue(0),
    _buffSize(0),
-   p_floatingValue(0),
+   _idValue(0),
    p_arrayValue(0),
    _sizeBuffValue(0),
-   p_arrayAB(0),
-   _sizeAB(0),
+   p_floatingValue(0),
    _positionAB(0),
-   _minIndex(0)
+   _index(0),
+   _minIndex(0),
+   _tmpId(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -112,6 +112,13 @@ void Setting::idToValue()
   engine(SAVE);
 }
 
+
+void Setting::getFloatingValue()
+{
+  *p_floatingValue = atof(p_arrayValue);
+}
+
+
 // Navigate menu
 void Setting::engine(bool save)
 {
@@ -132,7 +139,7 @@ void Setting::engine(bool save)
 	  if(index > _buffSize)
 	    {
 	      getFloatingValue();
-	      if(save) saveValue(*p_floatingValue);
+	      if(save) saveValue_old(*p_floatingValue);
 	      run = EXIT;
 	    }
 	  // Else set the new value
@@ -249,7 +256,7 @@ void Setting::editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 
 
 // Print current value and ask save? if yes save in eeprom memory.
-void Setting::saveValue(float value)
+void Setting::saveValue_old(float value)
 {
   int8_t currentIndex = 0;
   int8_t lastIndex = 0;
@@ -463,7 +470,7 @@ void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
 		_idValue = id_RESUME;
 		TotalSteps = _Coil->getTotalStepsCounter();
 		LayerSteps = _Coil->getLayerStepsCounter();
-		saveValue(0);
+		saveValue_old(0);
 		goto menuSuspendStart;
 	      }
 	    case CONTINUE_WINDING : {break;}
@@ -497,12 +504,10 @@ void Setting::setValueFromId()
 {
   switch (_idValue)
   {
-    case id_TEST :
+    case id_WIRESIZE :
       {
-	//		setAll(MSG_TEST, _buff_WireSize, BUFFSIZE_WIRE, &WireSize,
-	//		       ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, (LCD_LINES-1));
-	setAll(MSG_TEST, 0, 0, 0,
-	       ACTIONBAR_TEST, SIZE_AB_TEST, (LCD_LINES-1));
+	setValues(MSG_WIRE_SIZE, _buff_WireSize, BUFFSIZE_WIRE, &WireSize, UNIT_MM,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
   }
@@ -519,7 +524,8 @@ void Setting::setValueFromId()
  *        ----------------------
  *******************************************************************************/
 void Setting::setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
-			float *value, const char actionBar[], const uint8_t sizeActionBar)
+			float *value, const char unit[], const char actionBar[],
+			const uint8_t sizeActionBar, uint8_t AB_LinePosition)
 {
   // Displayed on left top.
   strcpy(_label, label);
@@ -527,59 +533,59 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   p_arrayValue 		= arrayValue;
   _sizeBuffValue	= sizeOfArrayValue;
   p_floatingValue 	= value;
+  strcpy(_unit, unit);
   // Action bar
-  p_arrayAB 		= actionBar;
-  _sizeAB		= sizeActionBar;
-}
-
-
-/******************************************************************************
- * brief   : Concatenate strings with a middle space.
- * details : Concatenate "label" string and "action button" string with a middle
- * space to be displayed and manipulate on a single line.
- * return  : New string is stored in "actionBar"
- ******************************************************************************/
-void Setting::setActionBar(char arrayValue[], char labelAB[])
-{
-  uint8_t offset = LCD_CHARS - _sizeAB;
-
-  // Set where the cursor start
-  if(_sizeBuffValue == 0) _minIndex = offset;
-  else _minIndex = 0;
-
-  // Fill the action bar
-  for (uint8_t i=0; i<LCD_CHARS; i++)
-    {
-      if (i < (_sizeBuffValue-1)) _actionBar[i] = *p_arrayValue++;
-      else if ( i <= offset) _actionBar[i] = ' ';
-      else _actionBar[i] = *p_arrayAB++;
-    }
-
-  _actionBar[LCD_CHARS]= 0; // End of array (null character)
-
-  // Initialize pointer at the first position
-  p_arrayValue = arrayValue;
-  p_arrayAB = labelAB;
+  setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
 
 #ifdef DEBUG
-  Serial.print("action bar : "); Serial.println(_actionBar);
-  Serial.print("value : "); Serial.println(p_arrayValue);
-  Serial.print("btn : "); Serial.println(p_arrayAB);
+  Serial.println("*************************");
+  Serial.println("setValue function : ");
+  Serial.println("*************************");
+  Serial.print("label           : "); Serial.println(_label);
+  Serial.print("p_arrayValue    : "); Serial.println(p_arrayValue);
+  Serial.print("_sizeBuffValue  : "); Serial.println(_sizeBuffValue);
+  Serial.print("p_floatingValue : "); Serial.println(*p_floatingValue);
+  Serial.print("_unit           : "); Serial.println(_unit);
+  Serial.print("action bar      : "); Serial.println(_actionBar);
+  Serial.print("index           : "); Serial.println(_minIndex);
+  Serial.println("*************************");
 #endif
 }
 
 
 /******************************************************************************
- * brief   : Simple container to set all values.
+ * brief   : Prepare action bar.
+ * details : If "sizeBuffValue>0", action bar is concatenated with "label"
+ * string and "action bar" string with a middle space.
+ * This action bar is displayed and manipulated on a single line.
+ * return  : New string is stored in "actionBar"
  ******************************************************************************/
-void Setting::setAll(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
-		     float *value, const char actionBar[], const uint8_t sizeActionBar,
-		     uint8_t AB_position)
+void Setting::setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
+			   const char actionBar[], const uint8_t sizeActionBar,
+			   uint8_t AB_LinePosition)
 {
-  _positionAB = AB_position;
-  setValues(label, arrayValue, sizeOfArrayValue, value, actionBar, sizeActionBar);
-  setActionBar(arrayValue, (char*)actionBar);
+  uint8_t offset = LCD_CHARS - sizeActionBar;
+
+  arrayValue == 0 ? _minIndex = offset : _minIndex = 0;
+
+  // Fill the action bar
+  for (uint8_t i=0; i<LCD_CHARS; i++)
+    {
+      if (i < (sizeOfArrayValue-1)) _actionBar[i] = *arrayValue++;
+      else if ( i <= offset) _actionBar[i] = ' ';
+      else _actionBar[i] = *actionBar++;
+    }
+
+  _actionBar[LCD_CHARS+1]= 0; // End of array (null character)
+
+  _positionAB = AB_LinePosition; // Display position
+
+#ifdef DEBUGOFF
+  Serial.print("action bar : "); Serial.println(_actionBar);
+  Serial.print("index : "); Serial.println(_minIndex);
+#endif
 }
+
 
 /******************************************************************************
  * brief   : Engine to navigate and edit current menu.
@@ -590,7 +596,6 @@ uint8_t Setting::navigationEngine()
   bool run = true;
   uint8_t btn;
 
-  int8_t index = 0;
   int8_t  lastIndex = 0;
   uint8_t lastSense = 0;
   uint8_t wordSize = 0;
@@ -600,36 +605,12 @@ uint8_t Setting::navigationEngine()
 
   while(run)
     {
-      cursorMovement(&index, &lastIndex, &lastSense, &wordSize, &lastTime);
+      cursorMovement(&lastIndex, &lastSense, &wordSize, &lastTime);
 
       ClickEncoder::Button buttonState = _Encoder->getButton();
       if( buttonState == ClickEncoder::Clicked )
 	{
-	  switch(selectedAction(index, wordSize))
-	  {
-	    case isNUMBER:
-	      {
-		Serial.println("is a number");
-		editValue(index, buttonState);
-		break;
-	      }
-	    case isWORD_SAVE:
-	      {
-		Serial.println("is word Save !");
-		break;
-	      }
-	    case isICONRIGHT :
-	      {
-		Serial.println("is icon Right");
-		run = EXIT;
-		break;
-	      }
-	    case 0 :
-	      {
-		Serial.println("is unknown");
-		break;
-	      }
-	  }
+	  run = selectedAction(wordSize);
 	}
     }
 
@@ -641,17 +622,17 @@ uint8_t Setting::navigationEngine()
  * brief   : Move cursor.
  * details : Manages the displacement of cursor and as well as being displayed.
  ******************************************************************************/
-void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+void Setting::cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
 			     uint8_t *wordSize, unsigned long *lastTime)
 {
   unsigned long currentTime = millis();
 
   // Get encoder movement, clamp returned value and detect sense of motion
-  *index += _Encoder->getValue();
+  _index += _Encoder->getValue();
 
-  clampValue(index, _minIndex, (LCD_CHARS-1));
+  clampValue(&_index, _minIndex, (LCD_CHARS-1));
 
-  uint8_t motion = motionSense(*index, *lastIndex);
+  uint8_t motion = motionSense(_index, *lastIndex);
 
   // Index of cursor is moved if a movement has been detected
   if(motion > 0)
@@ -659,12 +640,12 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
       // Index is jumped to the end of the word +1
       if(*wordSize > 1 && motion == CURSOR_MOVE_RIGHT)
 	{
-	  *index+=*wordSize;
+	  _index+=*wordSize;
 	}
 
-      ignoreChar(_actionBar, index, motion);
+      ignoreChar(_actionBar, &_index, motion);
 
-      *wordSize = wordDetect(_actionBar, index, motion);
+      *wordSize = wordDetect(_actionBar, &_index, motion);
 
       *lastSense = motion; // Old the motion sense
     }
@@ -673,50 +654,11 @@ void Setting::cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSens
   // Blinking of the selected character
   if(timer(currentTime, lastTime, DelayTimeBlock) || motion>0 )
     {
-      _Display->blinkSelection(*index, _actionBar, *wordSize, false);
+      _Display->blinkSelection(_index, _actionBar, *wordSize, false);
     }
 
   // To determine the direction of the next movement.
-  *lastIndex = *index;
-}
-
-
-/******************************************************************************
- * brief   : Sorts the selected action
- * details : Depending where the cursor is placed, it's identified which action
- * to be taken by returning a number who can be used in switch case.
- ******************************************************************************/
-uint8_t Setting::selectedAction(int8_t index, uint8_t wordSize)
-{
-  char tmp_word[wordSize+1] = {0};
-
-  if(isNumber(_actionBar, index))
-    {
-      return isNUMBER;
-    }
-  else if(isWord(_actionBar, index, wordSize, tmp_word))
-    {
-      if(buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
-	return isWORD_SAVE;
-      else if(buffercmp((uint8_t*) KEYWORD_YES, (uint8_t*) tmp_word, SIZE_KEYWORD_YES))
-	return isWORD_YES;
-      else if(buffercmp((uint8_t*) KEYWORD_NO, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
-	return isWORD_NO;
-      else if(buffercmp((uint8_t*) KEYWORD_SPEED, (uint8_t*) tmp_word, SIZE_KEYWORD_SPEED))
-	return isWORD_SPEED;
-      else if(buffercmp((uint8_t*) KEYWORD_EXIT, (uint8_t*) tmp_word, SIZE_KEYWORD_EXIT))
-	return isWORD_EXIT;
-      else return 0;
-    }
-  else
-    {
-      switch (_actionBar[index])
-      {
-	case ICONLEFT[0] : return isICONLEFT; break;
-	case ICONRIGHT[0] : return isICONRIGHT; break;
-      }
-    }
-  return 0;
+  *lastIndex = _index;
 }
 
 
@@ -725,7 +667,7 @@ uint8_t Setting::selectedAction(int8_t index, uint8_t wordSize)
  * details : Allows you to set the selected value (between 0 to 9).
  * Click for exit.
  ******************************************************************************/
-void Setting::editValue(int8_t index, ClickEncoder::Button buttonState)
+void Setting::editValue(int8_t index)
 {
   // Erase icons or words to show we are in the edit mode
   _Display->engineEditMode();
@@ -734,7 +676,8 @@ void Setting::editValue(int8_t index, ClickEncoder::Button buttonState)
   int8_t count = _actionBar[index];
   unsigned long lastTimeSet;
 
-  while((buttonState = _Encoder->getButton()) != ClickEncoder::Clicked)
+  ClickEncoder::Button btnState = _Encoder->getButton();
+  while((btnState = _Encoder->getButton()) != ClickEncoder::Clicked)
     {
       unsigned long currentTimeSet = millis();
 
@@ -753,60 +696,96 @@ void Setting::editValue(int8_t index, ClickEncoder::Button buttonState)
 
 
 /******************************************************************************
- * brief   : Convert value of array on float.
- * details : Converts an array even if characters are present.
+ * brief   : Sorts the selected action
+ * details : Depending where the cursor is placed, it's identified which action
+ * to be taken by returning a number who can be used in switch case.
  ******************************************************************************/
-void Setting::getFloatingValue()
+bool Setting::selectedAction(uint8_t wordSize)
 {
+  char tmp_word[wordSize+1] = {0};
+
+  if(isNumber(_actionBar, _index))
+    {
+      editValue(_index);
+      return CONTINU;
+    }
+  else if(isWord(_actionBar, _index, wordSize, tmp_word))
+    {
+      if(buffercmp((uint8_t*) KEYWORD_SAVE, (uint8_t*) tmp_word, SIZE_KEYWORD_SAVE))
+	{
+	  setSave(); // Display and update values
+	  return CONTINU;
+	}
+      else if(buffercmp((uint8_t*) KEYWORD_YES, (uint8_t*) tmp_word, SIZE_KEYWORD_YES))
+	{
+	  if(_tmpId == id_SAVE) save(p_arrayValue, _idValue);
+	  return EXIT;
+	}
+      else if(buffercmp((uint8_t*) KEYWORD_NO, (uint8_t*) tmp_word, SIZE_KEYWORD_NO))
+	{
+	  if(_tmpId == id_SAVE) retry();
+	  return CONTINU;
+	}
+      else if(buffercmp((uint8_t*) KEYWORD_SPEED, (uint8_t*) tmp_word, SIZE_KEYWORD_SPEED))
+	return isWORD_SPEED;
+      else if(buffercmp((uint8_t*) KEYWORD_EXIT, (uint8_t*) tmp_word, SIZE_KEYWORD_EXIT))
+	return isWORD_EXIT;
+      else return 0;
+    }
+  else
+    {
+      switch (_actionBar[_index])
+      {
+	case ICONLEFT[0] : return isICONLEFT; break;
+	case ICONRIGHT[0] :
+	{
+	  update();
+	  return EXIT; break;
+	}
+      }
+    }
+  return 0;
+}
+
+
+/*CallBacks __________________________________________________________________*/
+
+
+/******************************************************************************
+ * brief   : Update "p_arrayValue" and "p_floatingValue"
+ * details : Copy the value from "_actionBar" into "p_arrayValue" and
+ * update "p_floatingValue".
+ ******************************************************************************/
+void Setting::update()
+{
+  bufferCopy((uint8_t*)_actionBar, (uint8_t*)p_arrayValue, 0, _sizeBuffValue);
   *p_floatingValue = atof(p_arrayValue);
 }
 
 
+/******************************************************************************
+ * brief   : Restore display to re-edit value.
+ ******************************************************************************/
+void Setting::retry()
+{
+  setValueFromId();
+  _Display->engine_setValue(_label, _actionBar, _positionAB);
+  _index = 0; // Need when action bar is changed
+}
 
 /******************************************************************************
  * brief   : Sub menu save
  * details : Print current value and ask save? if yes save in eeprom memory.
  ******************************************************************************/
-bool Setting::saveValue(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
-			uint8_t *wordSize, unsigned long *lastTime)
+void Setting::setSave()
 {
-  bool run = true;
+  _tmpId = id_SAVE;
+  _index = 0; // Need when action bar is changed
 
-  // actionBar(p_arrayValue, _sizeBuffValue, BTN_confirmSave, SIZE_BTN_SAVE);
-  _Display->engineSave_N(*p_floatingValue);
-
-  while(run)
+  if(_idValue != id_RESUME)
     {
-      //clampValue(index, (LCD_CHARS-SIZE_BTN_SAVE),(LCD_CHARS-1));
-      cursorMovement(index, lastIndex, lastSense, wordSize, lastTime);
-
-      ClickEncoder::Button buttonState = _Encoder->getButton();
-      if( buttonState == ClickEncoder::Clicked )
-	{
-	  switch(selectedAction(*index, *wordSize))
-	  {
-	    case isWORD_YES:
-	      {
-		Serial.println("is word Yes");
-		save(p_arrayValue, _idValue);
-		_Display->loadBar();
-		return true;
-		break;
-	      }
-	    case isWORD_NO:
-	      {
-		Serial.println("is word No");
-		//actionBar(p_arrayValue, _sizeBuffValue, BTN_actionBarSave, SIZE_BTN_AB_SAVE);
-		*index=0;
-		return false;
-		break;
-	      }
-	    case 0 :
-	      {
-		Serial.println("is unknown");
-		break;
-	      }
-	  }
-	}
+      update();
+      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+      _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
     }
 }

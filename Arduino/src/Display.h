@@ -29,8 +29,8 @@
 #define UNIT_TR		"Tr"
 #define UNIT_US		"uS"
 /* Labels _____________________________________________________________*/
-#define MSG_TEST		"Rework nav"
-#define MSG_WIRE_SIZE	"Wire size in" UNIT_MM
+#define MSG_TEST	"Rework nav"
+#define MSG_WIRE_SIZE	"Wire size in " UNIT_MM
 #define MSG_COIL_LENGTH	"Length in " UNIT_MM
 #define MSG_TURNS	"Turns in " UNIT_TR
 #define MSG_MAX_SPEED	"MAX speed in " UNIT_US
@@ -53,11 +53,9 @@
 /* Actions bar ________________________________________________________*/
 #define ACTIONBAR_SETVALUE	KEYWORD_SAVE "/" ICONRIGHT
 #define SIZE_AB_SETVALUE	COUNTOF(ACTIONBAR_SETVALUE)
-#define ACTIONBAR_SAVE		KEYWORD_YES "/" KEYWORD_NO
+#define ACTIONBAR_CHOICE	KEYWORD_YES "/" KEYWORD_NO
+#define SIZE_AB_CHOICE		COUNTOF(ACTIONBAR_CHOICE)
 #define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT " " KEYWORD_EXIT
-#define ACTIONBAR_TEST		ICONLEFT "/" ICONRIGHT "/" KEYWORD_YES "/" KEYWORD_NO
-#define SIZE_AB_TEST	COUNTOF(ACTIONBAR_TEST)
-
 /* Recognition of words _______________________________________________*/
 // Just number
 #define isNUMBER		10
@@ -152,7 +150,7 @@ public:
   const void engineEditMode(bool setMode);
   const void engineEditMode(); //New
   const void engineSave(float value);
-  const void engineSave_N(float value); //New
+  const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB); //New
   const void engineResetConfirm(bool razValues);
   const void engineMoveDirection(float value, bool turns);
   const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns);

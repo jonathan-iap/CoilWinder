@@ -18,6 +18,8 @@
 #define state_EDIT	3
 #define state_BACK	4
 
+#define BACK	"Back" ICONLEFT
+
 extern ClickEncoder Encoder;
 extern Menu::Engine *engine;
 extern Display display;
@@ -39,7 +41,7 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
   display.renderItem(engine->getLabel(mi));
 
   // mark items that have children
-  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
+  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(LCD_CHARS);
 }
 
 
@@ -180,7 +182,7 @@ bool reworkTest(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_TEST);
+      setting.editionMenu(id_WIRESIZE);
     }
   return true;
 }
@@ -202,18 +204,18 @@ MenuItem(miTurns, "3.Turns", miStart, miCoilLength, miWinding, Menu::NullItem, e
 MenuItem(miStart, "4.Start new", miResume, miTurns, miWinding, Menu::NullItem, runWinding);
 MenuItem(miResume, "Resume current", miSaved, miStart, miWinding, Menu::NullItem, runResume);
 MenuItem(miSaved, "Resume saved", miBack1, miResume, miWinding, Menu::NullItem, runSaved);
-MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
+MenuItem(miBack1, BACK, Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
 // Sub-menu 2.1 -> 2.?
 MenuItem(miMovCarriage, "Move carriage", miMovCoil, Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);
 MenuItem(miMovCoil, "Move coil", miBack2, miMovCarriage, miMoves, Menu::NullItem, menuMovCoil);
-MenuItem(miBack2, "Back \1", Menu::NullItem, miMovCoil, miMoves, Menu::NullItem, menuBack);
+MenuItem(miBack2, BACK, Menu::NullItem, miMovCoil, miMoves, Menu::NullItem, menuBack);
 // Sub-menu 3.1 -> 3.?
 MenuItem(miMaxSpeed, "Max speed", miMinSpeed, Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);
 MenuItem(miMinSpeed, "Min speed", miAccTime, miMaxSpeed, miSettings, Menu::NullItem, editMinSpeed);
 MenuItem(miAccTime, "Acc time", miResetVal, miMinSpeed, miSettings, Menu::NullItem, editAccTime);
 MenuItem(miResetVal, "Raz all Values", miResetEEp, miAccTime, miSettings, Menu::NullItem, menuRAZ);
 MenuItem(miResetEEp, "Reset EEprom", miBack3, miResetVal, miSettings, Menu::NullItem, menuReset);
-MenuItem(miBack3, "Back \1", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
+MenuItem(miBack3, BACK, Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
 
 /*** TEST ***/
 // Uncomment item "Winding" after

@@ -56,7 +56,7 @@ uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLe
       Serial.print("cmp A1 et A2 : "); Serial.print(*originArray);
       Serial.print("/"); Serial.println(*targetArray);
 
-      if((*originArray) != *targetArray)
+      if(*originArray != *targetArray)
 	{
 	  return false;
 	}
@@ -76,13 +76,17 @@ uint16_t buffercmp(uint8_t* originArray, uint8_t* targetArray, uint16_t BufferLe
  ******************************************************************************/
 void bufferCopy(uint8_t* originArray, uint8_t* targetArray, int8_t index, uint8_t wordSize)
 {
+  uint8_t*p_S1 = originArray;
+  uint8_t*p_S2 = targetArray;
   uint8_t count = 0;
 
   for(uint8_t i=index; i<(index+wordSize); i++)
     {
-      targetArray[count] = originArray[i];
+      p_S2[count] = p_S1[i];
       count++;
     }
+
+  p_S2[count] = 0; // add null character to the end
 }
 
 

@@ -16,7 +16,7 @@
 #include "Save.h"
 #include "Winding.h"
 
-
+#define MIN_LCD			16 // Minimum lcd screen 15 + 1 for null character
 #define NOT_SAVE		false
 #define SAVE			true
 #define SET_CURRENT_SPEED	2
@@ -51,6 +51,7 @@ private:
 
   void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value);
   void idToValue();
+  void getFloatingValue();
   void engine(bool save);
   void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,
 		       uint8_t buffSize, uint8_t offset, bool cursoJumpEnd);
@@ -59,41 +60,46 @@ private:
 		    bool jumpEnd);
   void editValue(char arrayValue[], uint8_t buffSize, int8_t index,
 		 ClickEncoder::Button buttonState);
-  void saveValue(float value);
+  void saveValue_old(float value);
   uint16_t ajustSpeed(bool initSpeed, int8_t *speedInPercent);
   uint8_t menuSuspend();
 
   /*Dev----------------------------------------------------------------*/
+private:
   uint8_t _idValue;
-  char _label[16]; // Minimum lcd screen 16 + 1 for null character
+  char _label[MIN_LCD];
+
   char *p_arrayValue;
   uint8_t _sizeBuffValue;
   float *p_floatingValue;
-  const char *p_arrayAB;
-  uint8_t _sizeAB;
+  char _unit[3];
+
+  char _actionBar[LCD_CHARS+1];
   uint8_t _positionAB; // Where the action bar will be displayed
+
+  int8_t _index;
   uint8_t _minIndex;
-  char _actionBar[LCD_CHARS]={0};
+  uint8_t _tmpId;
 
 public:
   void editionMenu(const uint8_t id);
 
 private:
   void setValueFromId();
-  void setValues(const char label[], char arrayValue[], const uint8_t sizeLabelVal,
-		 float *value, const char labelBtn[], const uint8_t sizeLabelBtn);
-  void setActionBar(char arrayValue[], char labelAB[]);
-  void setAll(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
-	      float *value, const char actionBar[], const uint8_t sizeActionBar,
-	      uint8_t AB_position);
+  void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
+		 float *value, const char unit[], const char actionBar[],
+		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
+  void setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
+		    const char actionBar[], const uint8_t sizeActionBar,
+		    uint8_t AB_LinePosition);
   uint8_t navigationEngine();
-  void cursorMovement(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
+  void cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
 		      uint8_t *wordSize, unsigned long *lastTime);
-  uint8_t selectedAction(int8_t index, uint8_t wordSize);
-  void editValue(int8_t index, ClickEncoder::Button buttonState);
-  void getFloatingValue();
-  bool saveValue(int8_t *index, int8_t *lastIndex, uint8_t *lastSense,
-		 uint8_t *wordSize, unsigned long *lastTime);
+  void editValue(int8_t index);
+  bool selectedAction(uint8_t wordSize);
+  void update();
+  void retry();
+  void setSave();
 
   /*End Dev----------------------------------------------------------------*/
 };

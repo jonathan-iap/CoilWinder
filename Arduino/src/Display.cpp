@@ -258,15 +258,14 @@ const void Display::engineSave(float value)
  * brief   : Displays the backup message
  * details : When you click on "save"
  ******************************************************************************/
-const void Display::engineSave_N(float value)
+const void Display::engineSave(float value, char unit[], char actionBar[], uint8_t positionAB)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
-  _lcd.print("Save ?");
+  _lcd.print("Save? "); _lcd.print(value); _lcd.print(unit);
 
-  _lcd.setCursor(0,LCD_LINES);
-  _lcd.print(value);
-
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
 }
 
 const void Display::engineResetConfirm(bool razValues)

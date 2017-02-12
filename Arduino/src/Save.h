@@ -33,8 +33,9 @@
 #define id_MIN_SPEED	5
 #define id_ACC_DELAY	6
 #define id_RESUME	7
+#define id_SAVE		8
 
-#define id_TEST		8
+#define id_TEST		50
 
 class Memory
 {
