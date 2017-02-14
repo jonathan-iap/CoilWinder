@@ -164,7 +164,7 @@ bool menuReset(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.resetAction(false);
+      setting.editionMenu(id_RESET);
     }
   return true;
 }
@@ -173,7 +173,7 @@ bool menuRAZ(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.resetAction(true);
+      setting.editionMenu(id_RAZ);
     }
   return true;
 }

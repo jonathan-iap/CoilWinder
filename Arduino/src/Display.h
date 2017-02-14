@@ -37,7 +37,7 @@
 #define MSG_MIN_SPEED	"MIN speed in " UNIT_US
 #define MSG_ACC_DELAY	"Acc delay in " UNIT_US
 #define MSG_RESET 	"Reset EEprom ? "
-#define MSG_RAZ 	"Reset values ? "
+#define MSG_RAZ 	"Update values ? "
 #define MSG_MOVE	"Move in " UNIT_MM
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_SAVE		"Save"
@@ -56,19 +56,7 @@
 #define ACTIONBAR_CHOICE	KEYWORD_YES "/" KEYWORD_NO
 #define SIZE_AB_CHOICE		COUNTOF(ACTIONBAR_CHOICE)
 #define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT " " KEYWORD_EXIT
-/* Recognition of words _______________________________________________*/
-// Just number
-#define isNUMBER		10
-// Keyword
-#define isWORD_SAVE		11
-#define isWORD_SPEED		12
-#define isWORD_EXIT		13
-#define isWORD_YES		14
-#define isWORD_NO		15
-// Icons
-#define isICONLEFT		20
-#define isICONRIGHT		21
-#define isICONBACK		22
+
 
 #define MSG_SPEED		"Speed"
 #define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)

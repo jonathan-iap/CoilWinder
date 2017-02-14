@@ -485,7 +485,7 @@ DEV
  ***********************************************************************************/
 
 /******************************************************************************
- * brief   : Engine for navigation during setting menu.
+ * brief   : For edit values
  * details : Drive all functions to set value in edit mode.
  ******************************************************************************/
 void Setting::editionMenu(const uint8_t id)
@@ -497,8 +497,7 @@ void Setting::editionMenu(const uint8_t id)
 
 /******************************************************************************
  * brief   : Assign value and action
- * details : Depending the Id pass through navigationEngine(), we set value
- * and action if needed.
+ * details : Depending the Id, we set value and action if needed.
  ******************************************************************************/
 void Setting::setValueFromId()
 {
@@ -540,6 +539,16 @@ void Setting::setValueFromId()
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
+    case id_RESET :
+      {
+	setValues(MSG_RESET, id_RESET, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
+    case id_RAZ :
+      {
+	setValues(MSG_RAZ, id_RAZ, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
   }
 }
 
@@ -570,10 +579,21 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
 }
 
 
+void Setting::setValues(const char label[], uint8_t tmpId, const char actionBar[],
+			const uint8_t sizeActionBar, uint8_t AB_LinePosition)
+{
+  strcpy(_label, label);
+  _tmpId = tmpId;
+  // Action bar
+  setActionBar(0, 0, actionBar, sizeActionBar, AB_LinePosition);
+  _index = 0;
+}
+
+
 /******************************************************************************
  * brief   : Prepare action bar.
- * details : If "sizeBuffValue>0", action bar is concatenated with "label"
- * string and "action bar" string with a middle space.
+ * details : If "sizeBuffValue>0", action bar is concatenated with string
+ * "label" and string "action bar" with a middle space.
  * This action bar is displayed and manipulated on a single line.
  * return  : New string is stored in "actionBar"
  ******************************************************************************/
@@ -603,10 +623,9 @@ void Setting::setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
  * brief   : Engine to navigate and edit current menu.
  * details : Enslave click encoder to navigate into edit menu.
  ******************************************************************************/
-uint8_t Setting::navigationEngine()
+void Setting::navigationEngine()
 {
   bool run = true;
-  uint8_t btn;
 
   int8_t  lastIndex = 0;
   uint8_t lastSense = 0;
@@ -625,8 +644,6 @@ uint8_t Setting::navigationEngine()
 	  run = selectedAction(wordSize);
 	}
     }
-
-  return btn=true;
 }
 
 
@@ -710,7 +727,7 @@ void Setting::editValue(int8_t index)
 /******************************************************************************
  * brief   : Sorts the selected action
  * details : Depending where the cursor is placed, it's identified which action
- * to be taken by returning a number who can be used in switch case.
+ * to be taken. Work with call backs.
  ******************************************************************************/
 bool Setting::selectedAction(uint8_t wordSize)
 {
@@ -730,30 +747,33 @@ bool Setting::selectedAction(uint8_t wordSize)
 	}
       else if(buffercmp((char*)KEYWORD_YES, tmp_word, SIZE_KEYWORD_YES))
 	{
-	  if(_tmpId == id_SAVE) save(p_arrayValue, _idValue);
-	  return EXIT;
+	  switch (_tmpId)
+	  {
+	    case id_SAVE : {saveCurrent(); return EXIT; break;}
+	    case id_RESET: {resetAll(); return EXIT; break;}
+	    case id_RAZ  : {RAZ_All(); return EXIT; break;}
+	  }
 	}
       else if(buffercmp((char*)KEYWORD_NO, tmp_word, SIZE_KEYWORD_NO))
 	{
-	  if(_tmpId == id_SAVE) retry();
-	  return CONTINU;
+	  switch (_tmpId)
+	  {
+	    case id_SAVE : {retry(); return CONTINU; break;}
+	    case id_RESET || id_RAZ : {return EXIT; break;}
+	  }
 	}
       else if(buffercmp((char*)KEYWORD_SPEED, tmp_word, SIZE_KEYWORD_SPEED))
-	return isWORD_SPEED;
+	return EXIT;
       else if(buffercmp((char*)KEYWORD_EXIT, tmp_word, SIZE_KEYWORD_EXIT))
-	return isWORD_EXIT;
+	return EXIT;
       else return 0;
     }
   else
     {
       switch (_actionBar[_index])
       {
-	case ICONLEFT[0] : return isICONLEFT; break;
-	case ICONRIGHT[0] :
-	{
-	  update();
-	  return EXIT; break;
-	}
+	case ICONLEFT[0] : break;
+	case ICONRIGHT[0] :{update(); return EXIT; break;}
       }
     }
   return 0;
@@ -799,4 +819,39 @@ void Setting::setSave()
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
     }
+}
+
+
+/******************************************************************************
+ * brief   : Save current value.
+ * details : Store current value in EEprom memory.
+ ******************************************************************************/
+void Setting::saveCurrent()
+{
+  save(p_arrayValue, _idValue);
+  _Display->loadBar();
+}
+
+
+/******************************************************************************
+ * brief   : Reset all value in EEprom memories.
+ * details : All value are reset with the value contain in the
+ * "Configuration.h" file. But not updated, just reseted!
+ ******************************************************************************/
+void Setting::resetAll()
+{
+  reset();
+  _Display->loadBar();
+}
+
+
+/******************************************************************************
+ * brief   : Update all values from the EEprom memories.
+ * details : Restore all values stored in memory. Also after a reset,
+ * user have choice to continue is work with own values or update all values.
+ ******************************************************************************/
+void Setting::RAZ_All()
+{
+  readAll();
+  _Display->loadBar();
 }

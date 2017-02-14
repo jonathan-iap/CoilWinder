@@ -89,10 +89,12 @@ private:
   void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
 		 float *value, const char unit[], const char actionBar[],
 		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
+  void setValues(const char label[], uint8_t _tmpId, const char actionBar[],
+		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
   void setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
 		    const char actionBar[], const uint8_t sizeActionBar,
 		    uint8_t AB_LinePosition);
-  uint8_t navigationEngine();
+  void navigationEngine();
   void cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
 		      uint8_t *wordSize, unsigned long *lastTime);
   void editValue(int8_t index);
@@ -101,6 +103,9 @@ private:
   void update();
   void retry();
   void setSave();
+  void saveCurrent();
+  void resetAll();
+  void RAZ_All();
 
   /*End Dev----------------------------------------------------------------*/
 };

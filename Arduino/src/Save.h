@@ -34,6 +34,8 @@
 #define id_ACC_DELAY	6
 #define id_RESUME	7
 #define id_SAVE		8
+#define id_RESET	9
+#define id_RAZ		10
 
 #define id_TEST		50
 
