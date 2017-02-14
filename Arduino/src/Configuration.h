@@ -66,9 +66,13 @@
 #define INIT_WIRE	"0.00"
 #define INIT_COIL	"000.00"
 #define INIT_TURNS	"00000"
-#define INIT_MAXSPEED	"0070" // Is limited by micros() function. If you go futher steps are no longer counted correctly
+#define INIT_MAXSPEED	"0070" // 70us Is limited by micros() function. If you go futher steps are no longer counted correctly
 #define INIT_MINSPEED	"1800"
 #define INIT_ACC_DELAY	"0500"
+
+// Displacement value ---------------------------------------------------------------
+#define INIT_MOV_CAR	"00.00"
+#define INIT_MOV_COIL	"0000"
 
 // Serial Debug option ---------------------------------------------------------
 #define DEBUG // Uncomment to active serial debug.

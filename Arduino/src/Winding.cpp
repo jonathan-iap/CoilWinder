@@ -342,6 +342,11 @@ void Coil::runOnlyCarriage(bool dir, float distance)
   unsigned long stepsCounter = 0;
   bool stop = true;
 
+  Serial.println("***********************");
+  Serial.print("dir"); Serial.println(dir);
+  Serial.print("distance"); Serial.println(distance);
+  Serial.println("***********************");
+
   while(stop && stepsCounter < _stepsPerLayer )
     {
       stop = suspend();
@@ -382,6 +387,11 @@ void Coil::runOnlyCoil(bool dir, float turns)
 
   unsigned long stepsCounter = 0;
   bool stop = true;
+
+  Serial.println("***********************");
+  Serial.print("dir"); Serial.println(dir);
+  Serial.print("distance"); Serial.println(turns);
+  Serial.println("***********************");
 
   while( stop && stepsCounter < TurnToSteps(turns))
     {

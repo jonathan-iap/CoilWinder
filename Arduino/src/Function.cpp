@@ -120,7 +120,8 @@ uint8_t motionSense(int8_t index, int8_t lastIndex)
 void ignoreChar(char array[], int8_t *index, uint8_t sense)
 {
   // Ignored character.
-  while(array[*index] == '.' || array[*index] == '/' || array[*index] == ' ')
+  while(array[*index] == '.' || array[*index] == '/'
+      || array[*index] == ' ' || array[*index] == '|')
     {
       sense == CURSOR_MOVE_RIGHT ? *index += 1 : *index -= 1;
     }

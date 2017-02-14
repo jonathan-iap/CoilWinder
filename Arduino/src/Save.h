@@ -26,16 +26,21 @@
 #define BUFFSIZE_ACC_DELAY	(COUNTOF(INIT_ACC_DELAY))
 #define BUFFSIZE_DEFAULT 	(COUNTOF(MSG_IS_SET))
 
+/* ID _________________________________________________________________*/
+// Values
 #define id_WIRESIZE	1
 #define id_COILLENGTH	2
 #define id_TURNS	3
 #define id_MAX_SPEED	4
 #define id_MIN_SPEED	5
 #define id_ACC_DELAY	6
-#define id_RESUME	7
-#define id_SAVE		8
-#define id_RESET	9
-#define id_RAZ		10
+// Actions
+#define id_RESUME		20
+#define id_SAVE			21
+#define id_RESET		22
+#define id_RAZ			23
+#define id_MOVE_CARRIAGE	24
+#define id_MOVE_COIL		25
 
 #define id_TEST		50
 

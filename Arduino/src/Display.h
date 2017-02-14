@@ -39,6 +39,9 @@
 #define MSG_RESET 	"Reset EEprom ? "
 #define MSG_RAZ 	"Update values ? "
 #define MSG_MOVE	"Move in " UNIT_MM
+#define MSG_CLOCK	"Clk "
+#define MSG_C_CLOCK	"CClk "
+#define MSG_FOR_STOP	"Click to stop"
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_SAVE		"Save"
 #define SIZE_KEYWORD_SAVE 	COUNTOF(KEYWORD_SAVE)
@@ -55,7 +58,8 @@
 #define SIZE_AB_SETVALUE	COUNTOF(ACTIONBAR_SETVALUE)
 #define ACTIONBAR_CHOICE	KEYWORD_YES "/" KEYWORD_NO
 #define SIZE_AB_CHOICE		COUNTOF(ACTIONBAR_CHOICE)
-#define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT " " KEYWORD_EXIT
+#define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT "|" KEYWORD_EXIT
+#define SIZE_AB_MOVE		COUNTOF(ACTIONBAR_MOVE)
 
 
 #define MSG_SPEED		"Speed"
@@ -150,6 +154,7 @@ public:
   const void windingSetSpeed(uint16_t speed);
 
   const void engine_setValue(char label[], char container[], uint8_t position);
+  const void engineMoving(float value, char unit[], bool dir);
   const void TestActionBar();
 };
 

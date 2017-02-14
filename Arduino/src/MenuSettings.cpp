@@ -488,12 +488,24 @@ DEV
  * brief   : For edit values
  * details : Drive all functions to set value in edit mode.
  ******************************************************************************/
-void Setting::editionMenu(const uint8_t id)
+void Setting::actionMenu(const uint8_t id)
 {
   _idValue = id;
   setValueFromId();
   navigationEngine();
 }
+
+void Setting::actionMenu(const uint8_t id, const char label[], char arrayValue[],
+			 const uint8_t sizeOfArrayValue, float *value, const char unit[],
+			 const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition)
+{
+  _idValue = id;
+  _tmpId = id; // todo delete this
+  setValues(label, arrayValue,  sizeOfArrayValue, value, unit,  actionBar,
+	    sizeActionBar,  AB_LinePosition);
+  navigationEngine();
+}
+
 
 /******************************************************************************
  * brief   : Assign value and action
@@ -576,6 +588,17 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
   _index = 0;
+
+#ifdef DEBUG
+  Serial.println("***********************");
+  Serial.print("_label          : "); Serial.println(_label);
+  Serial.print("p_arrayValue    : "); Serial.println(p_arrayValue);
+  Serial.print("p_floatingValue : "); Serial.println(*p_floatingValue);
+  Serial.print("_sizeBuffValue  : "); Serial.println(_sizeBuffValue);
+  Serial.print("_unit           : "); Serial.println(_unit);
+  Serial.print("_actionBar      : "); Serial.println(_actionBar);
+  Serial.println("***********************");
+#endif
 }
 
 
@@ -733,11 +756,16 @@ bool Setting::selectedAction(uint8_t wordSize)
 {
   char tmp_word[wordSize+1] = {0};
 
+  Serial.print("_tmpId: "); Serial.println(_tmpId);
+
+  // Numbers
   if(isNumber(_actionBar, _index))
     {
       editValue(_index);
       return CONTINU;
     }
+
+  // Words
   else if(isWord(_actionBar, _index, wordSize, tmp_word))
     {
       if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
@@ -768,12 +796,29 @@ bool Setting::selectedAction(uint8_t wordSize)
 	return EXIT;
       else return 0;
     }
+
+  // Icons
   else
     {
       switch (_actionBar[_index])
       {
-	case ICONLEFT[0] : break;
-	case ICONRIGHT[0] :{update(); return EXIT; break;}
+	case ICONLEFT[0] :
+	{
+	  if(_tmpId == id_MOVE_CARRIAGE || _tmpId == id_MOVE_COIL){
+	      moving(C_CLOCK); return EXIT;
+	  }
+	  break;
+	}
+	case ICONRIGHT[0] :
+	{
+	  if(_tmpId == id_MOVE_CARRIAGE || _tmpId == id_MOVE_COIL){
+	      moving(CLOCK); return EXIT;
+	  }
+	  else{
+	      update(); return EXIT;
+	  }
+	  break;
+	}
       }
     }
   return 0;
@@ -854,4 +899,21 @@ void Setting::RAZ_All()
 {
   readAll();
   _Display->loadBar();
+}
+
+
+void Setting::moving(bool direction)
+{
+  update();
+
+  // Message displacement.
+  _Display->engineMoving(*p_floatingValue, _unit, direction);
+
+  // set and start displacement.
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, MaxSpeed);
+
+  if(_tmpId == id_MOVE_CARRIAGE) { _Coil->runOnlyCarriage(direction, *p_floatingValue);}
+  else {_Coil->runOnlyCoil(direction, *p_floatingValue);}
+
+  _Coil->disableMotors();
 }

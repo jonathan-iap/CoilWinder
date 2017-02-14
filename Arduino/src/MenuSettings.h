@@ -82,8 +82,10 @@ private:
   uint8_t _tmpId;
 
 public:
-  void editionMenu(const uint8_t id);
-
+  void actionMenu(const uint8_t id);
+  void actionMenu(const uint8_t id, const char label[], char arrayValue[],
+		  const uint8_t sizeOfArrayValue,float *value, const char unit[],
+		  const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition);
 private:
   void setValueFromId();
   void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
@@ -106,6 +108,7 @@ private:
   void saveCurrent();
   void resetAll();
   void RAZ_All();
+  void moving(bool direction);
 
   /*End Dev----------------------------------------------------------------*/
 };

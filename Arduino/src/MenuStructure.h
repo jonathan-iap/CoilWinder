@@ -65,7 +65,7 @@ bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_WIRESIZE);
+      setting.actionMenu(id_WIRESIZE);
     }
   return true;
 }
@@ -74,7 +74,7 @@ bool editLength(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_COILLENGTH);
+      setting.actionMenu(id_COILLENGTH);
     }
   return true;
 }
@@ -83,7 +83,7 @@ bool editTurns(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_TURNS);
+      setting.actionMenu(id_TURNS);
     }
   return true;
 }
@@ -119,7 +119,7 @@ bool editMaxSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_MAX_SPEED);
+      setting.actionMenu(id_MAX_SPEED);
     }
   return true;
 }
@@ -128,7 +128,7 @@ bool editMinSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_MIN_SPEED);
+      setting.actionMenu(id_MIN_SPEED);
     }
   return true;
 }
@@ -137,7 +137,7 @@ bool editAccTime(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_ACC_DELAY);
+      setting.actionMenu(id_ACC_DELAY);
     }
   return true;
 }
@@ -146,7 +146,12 @@ bool menuMovCarriage(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.moveCarriage();
+      char tmp_buffDistance[] = INIT_MOV_CAR;
+      uint8_t tmp_buffSize = COUNTOF(tmp_buffDistance);
+      float tmp_distance = 0.00;
+
+      setting.actionMenu(id_MOVE_CARRIAGE, MSG_MOVE, tmp_buffDistance, tmp_buffSize,
+			 &tmp_distance, UNIT_MM, ACTIONBAR_MOVE, SIZE_AB_MOVE, LCD_LINES);
     }
   return true;
 }
@@ -155,7 +160,13 @@ bool menuMovCoil(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.moveCoil();
+      char tmp_buffDistance[] = INIT_MOV_COIL;
+      uint8_t tmp_buffSize = COUNTOF(tmp_buffDistance);
+      float tmp_distance = 0.00;
+
+      setting.actionMenu(id_MOVE_COIL, MSG_MOVE, tmp_buffDistance, tmp_buffSize,
+			 &tmp_distance, UNIT_TR, ACTIONBAR_MOVE, SIZE_AB_MOVE, LCD_LINES);
+
     }
   return true;
 }
@@ -164,7 +175,7 @@ bool menuReset(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_RESET);
+      setting.actionMenu(id_RESET);
     }
   return true;
 }
@@ -173,7 +184,7 @@ bool menuRAZ(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_RAZ);
+      setting.actionMenu(id_RAZ);
     }
   return true;
 }
@@ -182,7 +193,7 @@ bool reworkTest(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.editionMenu(id_WIRESIZE);
+      setting.actionMenu(id_WIRESIZE);
     }
   return true;
 }
