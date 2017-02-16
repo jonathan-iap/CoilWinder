@@ -174,18 +174,8 @@ bool Memory::isSet()
   return buffercmp((char*)MSG_IS_SET, set, BUFFSIZE_DEFAULT);
 }
 
-/* PRIVATE -------------------------------------------------------------------*/
-// convert and format float to data
-void Memory::writeFloatToData(float data, char buffer[], const uint8_t bufferSize)
-{
-  dtostrf(data, (bufferSize-1), 2, buffer);
-
-  for(uint8_t i=bufferSize; i>0; i--)
-    {
-      buffer[i] == ' ' ? buffer[i] = '0' : false;
-    }
-}
-
+/* Debug -------------------------------------------------------------------*/
+#ifdef DEBUGoff
 void Memory::ReadAddresses()
 {
   Serial.print("adress wire: "); Serial.println(_addr_WireSize);
@@ -220,3 +210,4 @@ void Memory::ReadArrayValue()
   EEPROM.readBlock<char>(_addr_DefaultSettings, _buff_DefaultSettings, BUFFSIZE_DEFAULT);
   Serial.print("array default: "); Serial.println(_buff_DefaultSettings);
 }
+#endif

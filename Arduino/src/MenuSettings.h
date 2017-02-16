@@ -46,33 +46,13 @@ private:
   Display *_Display;
   Coil *_Coil;
 
-  int8_t _speedPercent;
-  uint8_t _speed;
-  uint8_t _buffSize;
-
-  void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value);
-  void idToValue();
-  void getFloatingValue();
-  void engine(bool save);
-  void selectCharacter(int8_t *index, int8_t *last, const char arrayValue[] ,
-		       uint8_t buffSize, uint8_t offset, bool cursoJumpEnd);
-  void selectCharacter(int8_t *index, int8_t *last);
-  int8_t IgnoreChar(int8_t index, int8_t last, const char value[], int arraySize,
-		    bool jumpEnd);
-  void editValue(char arrayValue[], uint8_t buffSize, int8_t index,
-		 ClickEncoder::Button buttonState);
-  void saveValue_old(float value);
-  uint16_t ajustSpeed(bool initSpeed, int8_t *speedInPercent);
-  uint8_t menuSuspend();
-
-  /*Dev----------------------------------------------------------------*/
-private:
   uint8_t _idValue;
   char _label[MIN_LCD];
 
   char *p_arrayValue;
   uint8_t _sizeBuffValue;
   float *p_floatingValue;
+  int8_t _speedPercent;
   char _unit[3];
 
   char _actionBar[LCD_CHARS+1];
@@ -82,6 +62,7 @@ private:
   uint8_t _minIndex;
 
 public:
+
   void actionMenu(const uint8_t id);
   void actionMenu(const uint8_t id, const char label[], char arrayValue[],
 		  const uint8_t sizeOfArrayValue,float *value, const char unit[],
@@ -89,6 +70,7 @@ public:
   bool runWinding(bool isFirstLunch, bool isNewCoil, uint8_t *tmp_id);
 
 private:
+
   void setValueFromId();
   void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
 		 float *value, const char unit[], const char actionBar[],
@@ -104,7 +86,8 @@ private:
 		      uint8_t *wordSize, unsigned long *lastTime);
   void editValue(int8_t index);
   bool selectedAction(uint8_t wordSize, uint8_t *tmp_id);
-  //CallBacks
+
+  // CallBacks _______________________________________________________________
   void update();
   void retry();
   void setSave(uint8_t *tmp_id);
@@ -115,9 +98,6 @@ private:
   void setWinding(bool isfirstLunch);
   void adjustSpeed();
   void setSuspendMenu(uint8_t *tmp_id);
-
-
-  /*End Dev----------------------------------------------------------------*/
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

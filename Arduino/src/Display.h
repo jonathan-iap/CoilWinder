@@ -25,6 +25,7 @@
 #define ICONRIGHT	"\x03"
 #define ICONSTOP	"\x04"
 #define ICONRESUME	"\x05"
+#define ICONBACK	"\x06"
 
 /* Units ______________________________________________________________*/
 #define UNIT_MM		"mm"
@@ -38,6 +39,9 @@
 #define MSG_MAX_SPEED		"MAX speed in " UNIT_US
 #define MSG_MIN_SPEED		"MIN speed in " UNIT_US
 #define MSG_ACC_DELAY		"Acc delay in " UNIT_US
+#define MSG_EDIT		"Edit"
+#define MSG_SAVE		"Save? "
+#define SIZE_MSG_EDIT 		COUNTOF(MSG_EDIT)
 #define MSG_NEW_COIL		"Start new Coil ?"
 #define MSG_RESUME		"Resume current ?"
 #define MSG_RESUME_SAVED	"Resume saved ?"
@@ -47,7 +51,7 @@
 #define MSG_CLOCK		"Clk "
 #define MSG_C_CLOCK		"CClk "
 #define MSG_FOR_STOP		"Click to stop"
-#define MSG_SPEED_		"Winding speed :" // todo change name
+#define MSG_SPEED		"Winding speed :" // todo change name
 #define MSG_SAVE_CURRENT	"Save session ?"
 
 /* Keywords ___________________________________________________________*/
@@ -73,21 +77,6 @@
 #define ACTIONBAR_SUSPEND	KEYWORD_SPEED "/" KEYWORD_SAVE "/" ICONSTOP "/" ICONRESUME
 #define SIZE_AB_SUSPEND		COUNTOF(ACTIONBAR_SUSPEND)
 
-#define MSG_SPEED		"Speed"
-#define SIZE_MSG_SPEED 		COUNTOF(MSG_SPEED)
-#define MSG_EXIT		"Exit"
-#define SIZE_MSG_EXIT 		COUNTOF(MSG_EXIT)
-#define CURSOR_EXIT		(((LCD_CHARS-(SIZE_MSG_SAVE+SIZE_MSG_SAVE+SIZE_MSG_EXIT))/2)+SIZE_MSG_SPEED)
-#define MSG_SAVE		"Save"
-#define SIZE_MSG_SAVE 		COUNTOF(MSG_SAVE)
-#define MSG_EDIT		"Edit"
-#define SIZE_MSG_EDIT 		COUNTOF(MSG_EDIT)
-#define MSG_CHOICE_SAVE		"Save/"
-#define SIZE_MSG_CHOICE_SAVE	COUNTOF(MSG_CHOICE_SAVE)
-#define MSG_CHOICE 		"Y/N"
-#define SIZE_MSG_CHOICE		COUNTOF(MSG_CHOICE)
-#define MSG_DIRECTION 		"</>/N"
-#define SIZE_MSG_DIRECTION	COUNTOF(MSG_DIRECTION)
 
 class Display
 {
@@ -149,6 +138,16 @@ public :
       0b00000
   };
 
+  byte back[8] = {
+  	0b00111,
+  	0b00001,
+  	0b00001,
+  	0b00101,
+  	0b01101,
+  	0b11111,
+  	0b01100,
+  	0b00100
+  };
 
   // Public functions -----------------------------------------------------------
 public:
@@ -159,10 +158,8 @@ public:
   const void version();
   const void clear();
   const void blank(uint8_t size);
-  const void blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset);
   const void blinkSelection(uint8_t index, char actionBar[], uint8_t sizeAB,
 			    uint8_t positionAB, uint8_t wordSize, bool editMode); // New
-  const void blinkWorld(uint8_t index);
   const void loadBar();
 
   // Render menu item
@@ -171,20 +168,14 @@ public:
   const void renderIconChild();
 
   // MenuSetting
-  const void engineHome(char label[], char arrayValue[]);
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
-  const void engineEditMode(bool setMode);
   const void engineEditMode(uint8_t positionAB); //New
-  const void engineSave(float value);
   const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB); //New
-  const void engineResetConfirm(bool razValues);
-  const void engineMoveDirection(float value, bool turns);
   const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
 
   // Winding
   const void windingTurns(uint16_t coilTurns,uint16_t counter);
-  const void windingSelectAction();
   const void windingSetSpeed(uint16_t speed);
 
   const void engine_setValue(char label[], char actionBar[], uint8_t positionAB);

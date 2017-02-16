@@ -45,7 +45,6 @@
 #define id_RESUME_SAVE		27
 #define id_SUSPEND		28
 
-#define id_TEST		50
 
 class Memory
 {
@@ -62,11 +61,14 @@ public :
   bool isSet();
 
   // for debug
+#ifdef DEBUGoff
   void ReadAddresses();
   void ReadFloatValue();
   void ReadArrayValue();
+#endif
 
 protected :
+
   float WireSize;
   float CoilLength;
   float Turns;
@@ -93,8 +95,6 @@ private :
   uint8_t _addr_DefaultSettings;
   uint8_t _addr_TotalSteps;
   uint8_t _addr_LayerSteps;
-
-  void writeFloatToData(float Data, char buffer[], const uint8_t bufferSize);
 };
 
 #endif /* SRC_SAVE_H_ */

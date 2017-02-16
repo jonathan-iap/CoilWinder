@@ -22,6 +22,8 @@ const void Display::begin()
   _lcd.createChar(ICONRIGHT[0], right);
   _lcd.createChar(ICONSTOP[0], stop);
   _lcd.createChar(ICONRESUME[0], resume);
+  _lcd.createChar(ICONBACK[0], back);
+
 
   // Quick 3 blinks of back-light
   for(uint8_t i=3; i>0; i--)
@@ -52,33 +54,6 @@ const void Display::clear()
 const void Display::blank(uint8_t size)
 {
   for(int i=size; i>0; i--) _lcd.print(" ");
-}
-
-// blink value on current cursor
-const void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset)
-{
-  static bool basculeSet = true;
-
-  if(basculeSet)
-    {
-      if(_index > _arraySize)
-	{
-	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.write(ICONRIGHT);
-	}
-      else
-	{
-	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.print(value[_index]);
-	}
-      basculeSet = false;
-    }
-  else
-    {
-      _lcd.setCursor((_index+offset), LCD_LINES);
-      _blank ? _lcd.print(" ") : _lcd.write(ICONBLOCK);
-      basculeSet = true;
-    }
 }
 
 
@@ -122,33 +97,6 @@ const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t size
     }
 }
 
-const void Display::blinkWorld(uint8_t index)
-{
-  static bool basculeSet = true;
-
-  if(basculeSet)
-    {
-      switch (index)
-      {
-	case 1 : { _lcd.setCursor(0, 0); blank(SIZE_MSG_SPEED); break; }
-	case 2 : { _lcd.setCursor(CURSOR_EXIT, 0); blank(SIZE_MSG_EXIT); break; }
-	case 3 : { _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0); blank(SIZE_MSG_SAVE); break; }
-	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); blank(1); break; }
-      }
-      basculeSet = false;
-    }
-  else
-    {
-      switch (index)
-      {
-	case 1 : { _lcd.setCursor(0, 0); _lcd.print(MSG_SPEED); break; }
-	case 2 : { _lcd.setCursor(CURSOR_EXIT, 0); _lcd.print(MSG_EXIT); break; }
-	case 3 : { _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0); _lcd.print(MSG_SAVE); break; }
-	case 4 : { _lcd.setCursor((LCD_CHARS-1), LCD_LINES); _lcd.write(ICONLEFT); break; }
-      }
-      basculeSet = true;
-    }
-}
 
 // Print an animation load bar
 const void Display::loadBar()
@@ -183,17 +131,6 @@ const void Display::renderIconChild()
 }
 
 // Engine menu setting ----------------------------------------------------------
-const void Display::engineHome(char label[], char arrayValue[])
-{
-  _lcd.clear();
-  _lcd.setCursor(0, 0);
-  _lcd.print(label);
-  _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(arrayValue);
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE_SAVE),LCD_LINES);
-  _lcd.print(MSG_CHOICE_SAVE); _lcd.write(ICONRIGHT);
-}
-
 const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
 				   const char arrayValue[], uint8_t offset)
 {
@@ -203,25 +140,6 @@ const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
 
       (index<last && index == buffSize-2) ?
 	  _lcd.write(ICONRIGHT) : _lcd.print(arrayValue[last]);
-    }
-}
-
-
-const void Display::engineEditMode(bool setMode)
-{
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE_SAVE), LCD_LINES);
-  if(setMode)
-    {
-      for(uint8_t i=SIZE_MSG_CHOICE_SAVE; i>0; i--)
-	{
-	  _lcd.print(' ');
-	}
-      _lcd.setCursor((LCD_CHARS-SIZE_MSG_EDIT+1), LCD_LINES);
-      _lcd.print(MSG_EDIT);
-    }
-  else
-    {
-      _lcd.print(MSG_CHOICE_SAVE); _lcd.write(ICONRIGHT);
     }
 }
 
@@ -241,21 +159,6 @@ const void Display::engineEditMode( uint8_t positionAB)
 }
 
 
-const void Display::engineSave(float value)
-{
-  _lcd.clear();
-  _lcd.setCursor(0,0);
-  _lcd.print("Save ?");
-  if(value > 0)
-    {
-      _lcd.setCursor(0,LCD_LINES);
-      _lcd.print(value);
-    }
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
-  _lcd.print(MSG_CHOICE);
-}
-
-
 /******************************************************************************
  * brief   : Displays the backup message
  * details : When you click on "save"
@@ -264,31 +167,12 @@ const void Display::engineSave(float value, char unit[], char actionBar[], uint8
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
-  _lcd.print("Save? "); _lcd.print(value); _lcd.print(unit);
+  _lcd.print(MSG_SAVE); _lcd.print(value); _lcd.print(unit);
 
   _lcd.setCursor(0,positionAB);
   _lcd.print(actionBar);
 }
 
-const void Display::engineResetConfirm(bool razValues)
-{
-  _lcd.clear();
-  _lcd.setCursor(0,0);
-  razValues ? _lcd.print(MSG_RAZ) : _lcd.print(MSG_RESET);
-  _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(MSG_CHOICE);
-}
-
-const void Display::engineMoveDirection(float value, bool turns)
-{
-  _lcd.clear();
-  _lcd.setCursor(0,0);
-  _lcd.print("Direction : ");
-  _lcd.setCursor(0,LCD_LINES);
-  turns ?(_lcd.print((uint16_t)value),_lcd.print("Tr")) : (_lcd.print(value), _lcd.print("mm"));
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_DIRECTION+1), LCD_LINES);
-  _lcd.print(MSG_DIRECTION);
-}
 
 const void Display::engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns)
 {
@@ -321,19 +205,6 @@ const void Display::windingTurns(uint16_t coilTurns,uint16_t counter)
 {
   _lcd.setCursor(0,1);
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
-}
-
-
-const void Display::windingSelectAction()
-{
-  _lcd.setCursor(0,0);
-  _lcd.print(MSG_SPEED);
-  _lcd.setCursor(CURSOR_EXIT, 0);
-  _lcd.print(MSG_EXIT);
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_SAVE+1), 0);
-  _lcd.print(MSG_SAVE);
-  _lcd.setCursor((LCD_CHARS-1), LCD_LINES);
-  _lcd.write(ICONLEFT);
 }
 
 
@@ -396,7 +267,7 @@ const void Display::engineAjustSpeed(bool refresh, int8_t percent)
     {
       _lcd.clear();
       _lcd.setCursor(0,0);
-      _lcd.print(MSG_SPEED_);
+      _lcd.print(MSG_SPEED);
     }
 
   _lcd.setCursor(0,LCD_LINES);

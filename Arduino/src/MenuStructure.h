@@ -18,7 +18,7 @@
 #define state_EDIT	3
 #define state_BACK	4
 
-#define BACK	"Back" ICONLEFT
+#define BACK	"Back" ICONBACK
 
 extern ClickEncoder Encoder;
 extern Menu::Engine *engine;
@@ -208,11 +208,11 @@ MenuItem(miStart, "4.Start new", miResume, miTurns, miWinding, Menu::NullItem, r
 MenuItem(miResume, "Resume current", miSaved, miStart, miWinding, Menu::NullItem, runResume);
 MenuItem(miSaved, "Resume saved", miBack1, miResume, miWinding, Menu::NullItem, runSaved);
 MenuItem(miBack1, BACK, Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
-// Sub-menu 2.1 -> 2.?
+// Sub-menu 2.1 -> 2.3
 MenuItem(miMovCarriage, "Move carriage", miMovCoil, Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);
 MenuItem(miMovCoil, "Move coil", miBack2, miMovCarriage, miMoves, Menu::NullItem, menuMovCoil);
 MenuItem(miBack2, BACK, Menu::NullItem, miMovCoil, miMoves, Menu::NullItem, menuBack);
-// Sub-menu 3.1 -> 3.?
+// Sub-menu 3.1 -> 3.6
 MenuItem(miMaxSpeed, "Max speed", miMinSpeed, Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);
 MenuItem(miMinSpeed, "Min speed", miAccTime, miMaxSpeed, miSettings, Menu::NullItem, editMinSpeed);
 MenuItem(miAccTime, "Acc time", miResetVal, miMinSpeed, miSettings, Menu::NullItem, editAccTime);

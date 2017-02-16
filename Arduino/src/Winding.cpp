@@ -111,8 +111,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _totalStepsCounter(0),
   _layerStepsCounter(0),
 
-  _direction(CLOCK),
-  _isNewCoil(true)
+  _direction(CLOCK)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;

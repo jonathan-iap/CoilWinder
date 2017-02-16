@@ -73,7 +73,6 @@ private:
   unsigned long _layerStepsCounter;
 
   bool _direction;
-  bool _isNewCoil;
 };
 
 #endif
