@@ -384,6 +384,11 @@ const void Display::engineNewWinding(uint16_t coilTurns)
   _lcd.print(coilTurns);  _lcd.print(UNIT_TR);
 }
 
+const void Display::engineResumeWinding(uint16_t coilTurns, uint16_t counter)
+{
+  _lcd.setCursor(0, LCD_LINES);
+  _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+}
 
 const void Display::engineAjustSpeed(bool refresh, int8_t percent)
 {
@@ -405,5 +410,17 @@ const void Display::engineSuspend(char actionBar[], uint8_t positionAB, uint16_t
   _lcd.setCursor(0,positionAB);
   _lcd.print(actionBar);
   _lcd.setCursor(0, LCD_LINES);
+  _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+}
+
+
+const void Display::engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns, uint16_t counter)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SAVE_CURRENT);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+  _lcd.setCursor(0,positionAB);
   _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
 }

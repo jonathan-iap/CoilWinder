@@ -101,7 +101,7 @@ bool runResume(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding_old(1,0);
+      setting.actionMenu(id_RESUME);
     }
   return true;
 }
@@ -110,7 +110,7 @@ bool runSaved(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding_old(0,1);
+      setting.actionMenu(id_RESUME_SAVE);
     }
   return true;
 }

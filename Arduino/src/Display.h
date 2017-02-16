@@ -31,21 +31,25 @@
 #define UNIT_TR		"Tr"
 #define UNIT_US		"us"
 /* Labels _____________________________________________________________*/
-#define MSG_TEST	"Rework nav"
-#define MSG_WIRE_SIZE	"Wire size in " UNIT_MM
-#define MSG_COIL_LENGTH	"Length in " UNIT_MM
-#define MSG_TURNS	"Turns in " UNIT_TR
-#define MSG_MAX_SPEED	"MAX speed in " UNIT_US
-#define MSG_MIN_SPEED	"MIN speed in " UNIT_US
-#define MSG_ACC_DELAY	"Acc delay in " UNIT_US
-#define MSG_NEW_COIL	"Start new Coil ?"
-#define MSG_RESET 	"Reset EEprom ? "
-#define MSG_RAZ 	"Update values ? "
-#define MSG_MOVE	"Move in " UNIT_MM
-#define MSG_CLOCK	"Clk "
-#define MSG_C_CLOCK	"CClk "
-#define MSG_FOR_STOP	"Click to stop"
-#define MSG_SPEED_	"Winding speed :" // todo change name
+#define MSG_TEST		"Rework nav"
+#define MSG_WIRE_SIZE		"Wire size in " UNIT_MM
+#define MSG_COIL_LENGTH		"Length in " UNIT_MM
+#define MSG_TURNS		"Turns in " UNIT_TR
+#define MSG_MAX_SPEED		"MAX speed in " UNIT_US
+#define MSG_MIN_SPEED		"MIN speed in " UNIT_US
+#define MSG_ACC_DELAY		"Acc delay in " UNIT_US
+#define MSG_NEW_COIL		"Start new Coil ?"
+#define MSG_RESUME		"Resume current ?"
+#define MSG_RESUME_SAVED	"Resume saved ?"
+#define MSG_RESET 		"Reset EEprom ? "
+#define MSG_RAZ 		"Update values ? "
+#define MSG_MOVE		"Move in " UNIT_MM
+#define MSG_CLOCK		"Clk "
+#define MSG_C_CLOCK		"CClk "
+#define MSG_FOR_STOP		"Click to stop"
+#define MSG_SPEED_		"Winding speed :" // todo change name
+#define MSG_SAVE_CURRENT	"Save session ?"
+
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_SAVE		"Save"
 #define SIZE_KEYWORD_SAVE 	COUNTOF(KEYWORD_SAVE)
@@ -62,6 +66,8 @@
 #define SIZE_AB_SETVALUE	COUNTOF(ACTIONBAR_SETVALUE)
 #define ACTIONBAR_CHOICE	KEYWORD_YES "/" KEYWORD_NO
 #define SIZE_AB_CHOICE		COUNTOF(ACTIONBAR_CHOICE)
+#define ACTIONBAR_CHOICE_SIMPLE	"Y/N"
+#define SIZE_AB_CHOICE_SIMPLE	COUNTOF(ACTIONBAR_CHOICE_SIMPLE)
 #define ACTIONBAR_MOVE		ICONLEFT "/" ICONRIGHT "|" KEYWORD_EXIT
 #define SIZE_AB_MOVE		COUNTOF(ACTIONBAR_MOVE)
 #define ACTIONBAR_SUSPEND	KEYWORD_SPEED "/" KEYWORD_SAVE "/" ICONSTOP "/" ICONRESUME
@@ -184,9 +190,10 @@ public:
   const void engine_setValue(char label[], char actionBar[], uint8_t positionAB);
   const void engineMoving(float value, char unit[], bool dir);
   const void engineNewWinding(uint16_t coilTurns);
+  const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);
   const void engineAjustSpeed(bool refresh, int8_t percent);
   const void engineSuspend(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
-
+  const void engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
 };
 
 #endif /* SRC_DISPLAY_H_ */

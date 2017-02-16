@@ -24,8 +24,8 @@ public:
   void setSteps(uint32_t totalSteps, uint32_t layerSteps);
   void updateSpeed(uint16_t speed);
 
-  bool runMultiLayer(bool resumeCurrent, bool resumeSaved);
-  void runOneLayer();
+  bool runMultiLayer(bool isNewCoil);
+  bool runOneLayer();
   void runOnlyCarriage(bool dir, float distance);
   void runOnlyCoil(bool dir, float turns);
   bool suspend();

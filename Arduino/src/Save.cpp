@@ -74,7 +74,7 @@ void Memory::save(char buffer[], const uint8_t id)
 	EEPROM.updateBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
 	break;
       }
-    case id_RESUME :
+    case id_RESUME_SAVE :
       {
 	EEPROM.updateLong(_addr_TotalSteps, TotalSteps);
 	EEPROM.updateLong(_addr_LayerSteps, LayerSteps);
@@ -117,13 +117,19 @@ void Memory::read(char buffer[], const uint8_t id)
 	EEPROM.readBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
 	break;
       }
-    case id_RESUME :
+    case id_RESUME_SAVE :
       {
+	Serial.println("read resume saved ok");
 	TotalSteps = EEPROM.readLong(_addr_TotalSteps);
 	LayerSteps = EEPROM.readLong(_addr_LayerSteps);
 	break;
       }
   }
+}
+
+void Memory::getSavedTotalSteps(uint32_t *totalSteps)
+{
+  *totalSteps = EEPROM.readLong(_addr_TotalSteps);
 }
 
 void Memory::readAll()

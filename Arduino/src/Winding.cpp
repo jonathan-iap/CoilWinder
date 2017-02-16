@@ -225,24 +225,25 @@ void Coil::homing(bool dir)
 }
 
 
-bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
+bool Coil::runMultiLayer(bool isNewCoil)
 {
+  Serial.println("Run pass ");
+
   bool isResume = false;
-  bool backHome = true;
+  bool isbackHome = true;
+  bool isSuspend = false;
 
   // Compute all values to make winding.
   computeAll();
 
   // Resume winding
-  if( !_isNewCoil || resumeCurrent || resumeSaved)
+  if( !isNewCoil )
     {
       isResume = true;
-
       // Protection if user click on and winding is finish. Carriage don't move.
-      if(_totalStepsCounter >= TurnToSteps(_coilTurns))
-	{
-	  backHome = false;
-	}
+      if(_totalStepsCounter >= TurnToSteps(_coilTurns)){
+	  isbackHome = false;
+      }
     }
   // New winding
   else
@@ -255,36 +256,40 @@ bool Coil::runMultiLayer(bool resumeCurrent, bool resumeSaved)
   // Display value that are used for current winding.
   _Display->engineWindingValue(_coilLength, _wireSize, _coilTurns, getCurrentTurns());
 
-  _isNewCoil = true;
-
-  while(_totalStepsCounter < TurnToSteps(_coilTurns) && _isNewCoil)
+  while(_totalStepsCounter < TurnToSteps(_coilTurns) && !isSuspend)
     {
-      if(isResume) isResume = false;
+      // For resume winding, we need must finish the layer first.
+      if(isResume)
+	{
+	  isResume = false;
+	}
+      // For each new layer (and after the finished layer of a resume session)
       else
 	{
-	  // initialize for the next loop, only if not a resume action.
+	  // initialize for the next loop.
 	  _layerStepsCounter = 0;
 	  // Invert direction when one layer is finished.
 	  _direction = !_direction;
 	}
       // winding one layer.
-      runOneLayer();
+      isSuspend = runOneLayer();
+
       // refresh turn by layer on lcd.
       _Display->windingTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
     }
 
-  if(_isNewCoil && backHome)
+  if( !isSuspend && isbackHome)
     {
       // Return to the first position, only if winding is finished.
       homing(_direction);
     }
 
   // Become false if we interrupt winding
-  return _isNewCoil;
+  return isSuspend;
 }
 
 
-void Coil::runOneLayer()
+bool Coil::runOneLayer()
 {
   unsigned long delayMotorWinding = _minSpeed;
   unsigned long delayMotorCarriage = _minSpeed;
@@ -293,11 +298,11 @@ void Coil::runOneLayer()
   unsigned long lastMicrosAcc = 0;
 
   while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
-      (_layerStepsCounter < _stepsPerLayer) &&
-      _isNewCoil )
+      (_layerStepsCounter < _stepsPerLayer))
     {
-      // If user click on encoder "_runwindig" become false and break the loop.
-      _isNewCoil = suspend();
+
+      // If user click on encoder, isSuspend become true and break the loop.
+      if( suspend() == true) return true;
 
       unsigned long currentMicros = micros();
 
@@ -325,6 +330,8 @@ void Coil::runOneLayer()
 	  _layerStepsCounter += 1;
 	}
     }
+
+  return false;
 }
 
 
@@ -340,11 +347,11 @@ void Coil::runOnlyCarriage(bool dir, float distance)
   unsigned long lastMicrosAcc = 0;
 
   unsigned long stepsCounter = 0;
-  bool stop = true;
+  bool isStop = false;
 
-  while(stop && stepsCounter < _stepsPerLayer )
+  while( !isStop && stepsCounter < _stepsPerLayer )
     {
-      stop = suspend();
+      isStop = suspend();
 
       unsigned long currentMicros = micros();
 
@@ -353,7 +360,7 @@ void Coil::runOnlyCarriage(bool dir, float distance)
 	  if(stepsCounter < _stepsTravel)
 	    {
 	      // Acceleration
-	      acceleration(ACCELERATION, &delayMotor, _maxSpeed);
+	      acceleration(ACCELERATION, &delayMotor, _speed);
 	    }
 	  else
 	    {
@@ -381,11 +388,11 @@ void Coil::runOnlyCoil(bool dir, float turns)
   unsigned long lastMicrosAcc = 0;
 
   unsigned long stepsCounter = 0;
-  bool stop = true;
+  bool isStop = false;
 
-  while( stop && stepsCounter < TurnToSteps(turns))
+  while( !isStop && stepsCounter < TurnToSteps(turns))
     {
-      stop = suspend();
+      isStop = suspend();
       unsigned long currentMicros = micros();
 
       if(timer(currentMicros, &lastMicrosAcc, _accDelay))
@@ -393,7 +400,7 @@ void Coil::runOnlyCoil(bool dir, float turns)
 	  if(stepsCounter < _stepsTravel)
 	    {
 	      // Acceleration
-	      acceleration(ACCELERATION, &delayMotor, _maxSpeed);
+	      acceleration(ACCELERATION, &delayMotor, _speed);
 	    }
 	  else
 	    {
@@ -413,16 +420,12 @@ void Coil::runOnlyCoil(bool dir, float turns)
 // Check if button was pressed
 bool Coil::suspend()
 {
-  bool state = true;
-
-  ClickEncoder::Button buttonState = _Encoder->getButton();
-  if( buttonState == ClickEncoder::Clicked )
+  if( _Encoder->getButton() == ClickEncoder::Clicked )
     {
-      return state = false;
+      return true;
     }
-  else return state;
+  else return false;
 }
-
 
 
 void Coil::disableMotors()

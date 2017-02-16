@@ -46,7 +46,8 @@ private:
   Display *_Display;
   Coil *_Coil;
 
-  int8_t speedPercent;
+  int8_t _speedPercent;
+  uint8_t _speed;
   uint8_t _buffSize;
 
   void affectValues(const char label[], char arrayValue[],uint8_t buffSize ,float *value);
@@ -85,7 +86,7 @@ public:
   void actionMenu(const uint8_t id, const char label[], char arrayValue[],
 		  const uint8_t sizeOfArrayValue,float *value, const char unit[],
 		  const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition);
-  bool runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id);
+  bool runWinding(bool isFirstLunch, bool isNewCoil, uint8_t *tmp_id);
 
 private:
   void setValueFromId();
@@ -111,8 +112,8 @@ private:
   void resetAll();
   void RAZ_All();
   void moving(bool direction);
-  void setWinding();
-  uint16_t ajustSpeed(int8_t *speedInPercent);
+  void setWinding(bool isfirstLunch);
+  void adjustSpeed();
   void setSuspendMenu(uint8_t *tmp_id);
 
 

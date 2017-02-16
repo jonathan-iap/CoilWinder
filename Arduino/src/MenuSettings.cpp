@@ -7,7 +7,8 @@
 #include "MenuSettings.h"
 
 Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
-:  speedPercent(100),
+:  _speedPercent(100),
+   _speed(0),
    _buffSize(0),
    _idValue(0),
    p_arrayValue(0),
@@ -426,7 +427,7 @@ void Setting::runWinding_old(bool resumeCurrent, bool resumeSaved)
 
   // Pass all values for winding.
   _Coil->setWinding(CoilLength, WireSize, Turns);
-  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(start_MSG, &speedPercent));
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(start_MSG, &_speedPercent));
   if(resumeSaved)
     {
       _idValue = id_RESUME;
@@ -437,7 +438,7 @@ void Setting::runWinding_old(bool resumeCurrent, bool resumeSaved)
   while(isRun)
     {
       // Start winding with "runMultiLayer()"
-      if(_Coil->runMultiLayer(resumeCurrent, resumeSaved)) // "runMultiLayer()" return true if winding is finished.
+      if(_Coil->runMultiLayer(resumeCurrent)) // "runMultiLayer()" return true if winding is finished.
 	{
 	  _Coil->disableMotors();
 	  isRun = false;
@@ -452,7 +453,7 @@ void Setting::runWinding_old(bool resumeCurrent, bool resumeSaved)
 	  {
 	    case SET_CURRENT_SPEED :
 	      {
-		_Coil->updateSpeed(ajustSpeed(false, &speedPercent));
+		_Coil->updateSpeed(ajustSpeed(false, &_speedPercent));
 		break;
 	      }
 	    case EXIT_WINDING :
@@ -561,6 +562,16 @@ void Setting::setValueFromId()
 	setValues(MSG_NEW_COIL, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
 	break;
       }
+    case id_RESUME :
+      {
+	setValues(MSG_RESUME, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
+    case id_RESUME_SAVE :
+      {
+	setValues(MSG_RESUME_SAVED, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
   }
 }
 
@@ -609,8 +620,6 @@ void Setting::setValues(const char label[], const char actionBar[],
   strcpy(_label, label);
   // Action bar
   setActionBar(0, 0, actionBar, sizeActionBar, AB_LinePosition);
-
-  // _index = 0;
 }
 
 
@@ -688,9 +697,16 @@ void Setting::displaying()
 
   switch(_idValue)
   {
-    case id_NEW 	: {_Display->engineNewWinding(Turns); break;}
-    case id_RESUME 	: {_Display->engineNewWinding(Turns); break;}
-    case id_RESUME_SAVE : {_Display->engineNewWinding(Turns); break;}
+    case id_NEW		: {_Display->engineNewWinding(Turns); break;}
+    case id_RESUME	: {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
+    case id_RESUME_SAVE:
+      {
+	uint32_t tmp_totalSteps = 0;
+	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
+	Serial.print("getSaved : "); Serial.println(tmp_totalSteps);
+	Serial.print("calcul getSaved : "); Serial.println(tmp_totalSteps/M1_STEPS_PER_TR);
+	_Display->engineResumeWinding(Turns, (tmp_totalSteps/M1_STEPS_PER_TR)); break;
+      }
   }
 }
 
@@ -778,6 +794,9 @@ void Setting::editValue(int8_t index)
  ******************************************************************************/
 bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 {
+  Serial.print("iD : "); Serial.println(_idValue);
+  Serial.print("tmp_iD : "); Serial.println(*tmp_id);
+
   char tmp_word[wordSize+1] = {0};
 
   // Numbers
@@ -790,31 +809,58 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
   // Words
   else if(isWord(_actionBar, _index, wordSize, tmp_word))
     {
+      // SAVE _________________________________________________________________
       if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
 	{
 	  setSave(tmp_id); // Set tmp_id, display and update values
 	  return CONTINU;
 	}
+      // YES __________________________________________________________________
       else if(buffercmp((char*)KEYWORD_YES, tmp_word, SIZE_KEYWORD_YES))
 	{
 	  switch (*tmp_id)
 	  {
-	    case id_SAVE : {saveCurrent(); return EXIT; break;}
-	    case id_RESET: {resetAll(); return EXIT; break;}
-	    case id_RAZ  : {RAZ_All(); return EXIT; break;}
-	    case id_NEW	 : {return runWinding(false, false, tmp_id); break;}
+	    case id_SAVE : {
+	      saveCurrent();
+
+	      if(_idValue == id_RESUME){ setSuspendMenu(tmp_id); return CONTINU;}
+	      else{return EXIT;}
+
+	      break;
+	    }
+	    case id_RESET	: {resetAll(); return EXIT; break;}
+	    case id_RAZ  	: {RAZ_All(); return EXIT; break;}
+	    case id_NEW	 	: {return runWinding(true, true, tmp_id); break;}
+	    case id_RESUME 	: {return runWinding(true, false, tmp_id); break;}
+	    case id_RESUME_SAVE : {return runWinding(true, false, tmp_id); break;}
 	  }
 	}
+      // NO ___________________________________________________________________
       else if(buffercmp((char*)KEYWORD_NO, tmp_word, SIZE_KEYWORD_NO))
 	{
 	  switch (*tmp_id)
 	  {
-	    case id_SAVE : {retry(); return CONTINU; break;}
-	    case id_RESET || id_RAZ : {return EXIT; break;}
+	    case id_SAVE	: {
+	      if(_idValue == id_RESUME){ setSuspendMenu(tmp_id); return CONTINU;}
+	      else{ retry(); return CONTINU;}
+	      break;
+	    }
+	    case id_RESET	: {return EXIT; break;}
+	    case id_RAZ		: {return EXIT; break;}
+	    case id_NEW		: {return EXIT; break;}
 	  }
 	}
+      // SPEED _________________________________________________________________
       else if(buffercmp((char*)KEYWORD_SPEED, tmp_word, SIZE_KEYWORD_SPEED))
-	return EXIT;
+	{
+	  if(id_SUSPEND){
+	      adjustSpeed();
+	      setSuspendMenu(tmp_id);
+	      return CONTINU;
+	  }
+	  else return EXIT;
+	}
+      // EXIT __________________________________________________________________
       else if(buffercmp((char*)KEYWORD_EXIT, tmp_word, SIZE_KEYWORD_EXIT))
 	return EXIT;
       else return 0;
@@ -825,6 +871,7 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
     {
       switch (_actionBar[_index])
       {
+	// LEFT ________________________________________________________________
 	case ICONLEFT[0] :
 	{
 	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
@@ -832,6 +879,7 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 	  }
 	  break;
 	}
+	// RIGHT _______________________________________________________________
 	case ICONRIGHT[0] :
 	{
 	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
@@ -840,6 +888,18 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 	  else{
 	      update(); return EXIT;
 	  }
+	  break;
+	}
+	// RESUME ______________________________________________________________
+	case ICONRESUME[0] :
+	{
+	  if(*tmp_id == id_SUSPEND){ return runWinding(false, false, tmp_id);}
+	  break;
+	}
+	// STOP ________________________________________________________________
+	case ICONSTOP[0] :
+	{
+	  return EXIT;
 	  break;
 	}
       }
@@ -886,6 +946,13 @@ void Setting::setSave(uint8_t *tmp_id)
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
     }
+  else
+    {
+      TotalSteps = _Coil->getTotalStepsCounter();
+      LayerSteps = _Coil->getLayerStepsCounter();
+      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+    }
 }
 
 
@@ -895,7 +962,9 @@ void Setting::setSave(uint8_t *tmp_id)
  ******************************************************************************/
 void Setting::saveCurrent()
 {
-  save(p_arrayValue, _idValue);
+  if(_idValue == id_RESUME) save(p_arrayValue, id_RESUME_SAVE);
+  else save(p_arrayValue, _idValue);
+
   _Display->loadBar();
 }
 
@@ -932,12 +1001,13 @@ void Setting::moving(bool direction)
 {
   update();
 
+  // set speed.
+  adjustSpeed();
+
   // Message displacement.
   _Display->engineMoving(*p_floatingValue, _unit, direction);
 
-  // set and start displacement.
-  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, MaxSpeed);
-
+  // Start
   if(_idValue == id_MOVE_CARRIAGE) { _Coil->runOnlyCarriage(direction, *p_floatingValue);}
   else {_Coil->runOnlyCoil(direction, *p_floatingValue);}
 
@@ -949,13 +1019,15 @@ void Setting::moving(bool direction)
  * brief   : Main winding function
  * details : Set all value for winding
  ******************************************************************************/
-bool Setting::runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id)
+bool Setting::runWinding(bool isFirstLunch, bool isNewCoil, uint8_t *tmp_id)
 {
+  Serial.println("runWinding : pass");
+
   // Pass values
-  setWinding();
+  setWinding(isFirstLunch);
 
   // Start winding with "runMultiLayer()"
-  if(_Coil->runMultiLayer(resumeCurrent, resumeSaved))
+  if( _Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
     {
       _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
       return EXIT;
@@ -963,6 +1035,7 @@ bool Setting::runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id)
   else
     {
       setSuspendMenu(tmp_id);
+      Serial.println("after suspend pass");
       return CONTINU;
     }
 }
@@ -972,18 +1045,22 @@ bool Setting::runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id)
  * brief   : Set value for lunch the winding.
  * details : Read eeprom if we lunch a saved session.
  ******************************************************************************/
-void Setting::setWinding()
+void Setting::setWinding(bool isFirstLunch)
 {
+  // Adjust speed sub-menu for the first use
+  if(isFirstLunch) adjustSpeed();
+
   _Coil->setWinding(CoilLength, WireSize, Turns);
-  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(&speedPercent));
 
   // Resume a saved session
   if(_idValue == id_RESUME_SAVE)
     {
-      _idValue = id_RESUME;
-      read(0, _idValue); // Read the value of all steps in eeprom
+      read(0, id_RESUME_SAVE); // Read the value of all steps in eeprom
       _Coil->setSteps(TotalSteps, LayerSteps);
+      _idValue = id_RESUME;
     }
+
+  Serial.println("setWinding : pass");
 }
 
 
@@ -991,28 +1068,32 @@ void Setting::setWinding()
  * brief   : Adjust speed winding
  * details : Set the speed of current winding.
  ******************************************************************************/
-uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
+void Setting::adjustSpeed()
 {
   bool refresh = true;
-  int8_t oldSpeed = 0;
+  int16_t oldSpeed = 0;
 
-  _Display->engineAjustSpeed( !refresh, *speedInPercent);
+  _Display->engineAjustSpeed( !refresh, _speedPercent);
 
   while( _Encoder->getButton() != ClickEncoder::Clicked) // Click for exit
     {
       // Value increase when you turn encoder
-      *speedInPercent += _Encoder->getValue();
+      _speedPercent += _Encoder->getValue();
       // Clamp to 1% at 100%
-      clampValue(speedInPercent, 1, 100);
+      clampValue(&_speedPercent, 1, 100);
       // Refresh LCD only if value change
-      if(*speedInPercent != oldSpeed){
-	  _Display->engineAjustSpeed(refresh, *speedInPercent);
+      if(_speedPercent != oldSpeed){
+	  _Display->engineAjustSpeed(refresh, _speedPercent);
       }
 
-      oldSpeed = *speedInPercent;
+      oldSpeed = _speedPercent;
     }
 
-  return map(*speedInPercent, 0, 100, MinSpeed, MaxSpeed);
+  oldSpeed = map(_speedPercent, 0, 100, MinSpeed, MaxSpeed);
+
+  Serial.print("speed : "); Serial.println(oldSpeed);
+
+  _Coil->setSpeed(AccDelay, MaxSpeed, MinSpeed, oldSpeed);
 }
 
 
@@ -1022,7 +1103,9 @@ uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
  ******************************************************************************/
 void Setting::setSuspendMenu(uint8_t *tmp_id)
 {
-  _idValue = id_RESUME; // todo For recovery the current winding
+  Serial.println("suspend pass");
+
+  _idValue = id_RESUME; // For recovery the current winding
   *tmp_id = id_SUSPEND; // For execute menuSuspend();
 
   setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
