@@ -35,12 +35,15 @@
 #define id_MIN_SPEED	5
 #define id_ACC_DELAY	6
 // Actions
-#define id_RESUME		20
-#define id_SAVE			21
-#define id_RESET		22
-#define id_RAZ			23
-#define id_MOVE_CARRIAGE	24
-#define id_MOVE_COIL		25
+#define id_SAVE			20
+#define id_RESET		21
+#define id_RAZ			22
+#define id_MOVE_CARRIAGE	23
+#define id_MOVE_COIL		24
+#define id_NEW			25
+#define id_RESUME		26
+#define id_RESUME_SAVE		27
+#define id_SUSPEND		28
 
 #define id_TEST		50
 

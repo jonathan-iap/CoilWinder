@@ -37,7 +37,7 @@ public :
   void resetAction(bool razValues);
   void moveCarriage();
   void moveCoil();
-  void runWinding(bool resumeCurrent, bool resumeSaved);
+  void runWinding_old(bool resumeCurrent, bool resumeSaved);
 
 
 private:
@@ -79,36 +79,42 @@ private:
 
   int8_t _index;
   uint8_t _minIndex;
-  uint8_t _tmpId;
 
 public:
   void actionMenu(const uint8_t id);
   void actionMenu(const uint8_t id, const char label[], char arrayValue[],
 		  const uint8_t sizeOfArrayValue,float *value, const char unit[],
 		  const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition);
+  bool runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id);
+
 private:
   void setValueFromId();
   void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
 		 float *value, const char unit[], const char actionBar[],
 		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
-  void setValues(const char label[], uint8_t _tmpId, const char actionBar[],
+  void setValues(const char label[], const char actionBar[],
 		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
   void setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
 		    const char actionBar[], const uint8_t sizeActionBar,
 		    uint8_t AB_LinePosition);
   void navigationEngine();
+  void displaying();
   void cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
 		      uint8_t *wordSize, unsigned long *lastTime);
   void editValue(int8_t index);
-  bool selectedAction(uint8_t wordSize);
+  bool selectedAction(uint8_t wordSize, uint8_t *tmp_id);
   //CallBacks
   void update();
   void retry();
-  void setSave();
+  void setSave(uint8_t *tmp_id);
   void saveCurrent();
   void resetAll();
   void RAZ_All();
   void moving(bool direction);
+  void setWinding();
+  uint16_t ajustSpeed(int8_t *speedInPercent);
+  void setSuspendMenu(uint8_t *tmp_id);
+
 
   /*End Dev----------------------------------------------------------------*/
 };

@@ -92,7 +92,7 @@ bool runWinding(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding(0,0);
+      setting.actionMenu(id_NEW);
     }
   return true;
 }
@@ -101,7 +101,7 @@ bool runResume(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding(1,0);
+      setting.runWinding_old(1,0);
     }
   return true;
 }
@@ -110,7 +110,7 @@ bool runSaved(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.runWinding(0,1);
+      setting.runWinding_old(0,1);
     }
   return true;
 }
@@ -189,14 +189,6 @@ bool menuRAZ(const Menu::Action_t a)
   return true;
 }
 
-bool reworkTest(const Menu::Action_t a)
-{
-  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
-    {
-      setting.actionMenu(id_WIRESIZE);
-    }
-  return true;
-}
 
 // Framework for menu ---------------------------------------------------------
 
@@ -227,11 +219,6 @@ MenuItem(miAccTime, "Acc time", miResetVal, miMinSpeed, miSettings, Menu::NullIt
 MenuItem(miResetVal, "Raz all Values", miResetEEp, miAccTime, miSettings, Menu::NullItem, menuRAZ);
 MenuItem(miResetEEp, "Reset EEprom", miBack3, miResetVal, miSettings, Menu::NullItem, menuReset);
 MenuItem(miBack3, BACK, Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
-
-/*** TEST ***/
-// Uncomment item "Winding" after
-//MenuItem(miWinding, "TEST", miMoves, Menu::NullItem, miExit,  Menu::NullItem, reworkTest);
-/************/
 
 // ----------------------------------------------------------------------------
 

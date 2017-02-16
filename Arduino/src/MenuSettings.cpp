@@ -15,8 +15,7 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
    p_floatingValue(0),
    _positionAB(0),
    _index(0),
-   _minIndex(0),
-   _tmpId(0)
+   _minIndex(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -398,12 +397,11 @@ void Setting::moveCoil()
 uint16_t Setting::ajustSpeed(bool initSpeed, int8_t *speedInPercent)
 {
   bool refresh = true;
-  bool run = true;
   int8_t oldSpeed = 0;
 
   _Display->engineAjustSpeed( !refresh, initSpeed, *speedInPercent);
 
-  while(run)
+  while(_Encoder->getButton() != ClickEncoder::Clicked) // Click for exit
     {
       // Value increase when you turn encoder
       *speedInPercent += _Encoder->getValue();
@@ -413,19 +411,16 @@ uint16_t Setting::ajustSpeed(bool initSpeed, int8_t *speedInPercent)
       if(*speedInPercent != oldSpeed) _Display->engineAjustSpeed(refresh, !initSpeed, *speedInPercent);
 
       oldSpeed = *speedInPercent;
-
-      // Click for exit
-      ClickEncoder::Button buttonState = _Encoder->getButton();
-      if( buttonState == ClickEncoder::Clicked ) run = EXIT;
-
     }
 
   return map(*speedInPercent, 0, 100, MinSpeed, MaxSpeed);
 }
 
 
-void Setting::runWinding(bool resumeCurrent, bool resumeSaved)
+void Setting::runWinding_old(bool resumeCurrent, bool resumeSaved)
 {
+  //todo run
+
   bool start_MSG = true;
   bool isRun = true;
 
@@ -495,12 +490,12 @@ void Setting::actionMenu(const uint8_t id)
   navigationEngine();
 }
 
+
 void Setting::actionMenu(const uint8_t id, const char label[], char arrayValue[],
 			 const uint8_t sizeOfArrayValue, float *value, const char unit[],
 			 const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition)
 {
   _idValue = id;
-  _tmpId = id; // todo delete this
   setValues(label, arrayValue,  sizeOfArrayValue, value, unit,  actionBar,
 	    sizeActionBar,  AB_LinePosition);
   navigationEngine();
@@ -553,12 +548,17 @@ void Setting::setValueFromId()
       }
     case id_RESET :
       {
-	setValues(MSG_RESET, id_RESET, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	setValues(MSG_RESET, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
 	break;
       }
     case id_RAZ :
       {
-	setValues(MSG_RAZ, id_RAZ, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	setValues(MSG_RAZ, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
+    case id_NEW :
+      {
+	setValues(MSG_NEW_COIL, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
 	break;
       }
   }
@@ -587,7 +587,8 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   strcpy(_unit, unit);
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
-  _index = 0;
+
+  //_index = 0;
 
 #ifdef DEBUG
   Serial.println("***********************");
@@ -602,14 +603,14 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
 }
 
 
-void Setting::setValues(const char label[], uint8_t tmpId, const char actionBar[],
+void Setting::setValues(const char label[], const char actionBar[],
 			const uint8_t sizeActionBar, uint8_t AB_LinePosition)
 {
   strcpy(_label, label);
-  _tmpId = tmpId;
   // Action bar
   setActionBar(0, 0, actionBar, sizeActionBar, AB_LinePosition);
-  _index = 0;
+
+  // _index = 0;
 }
 
 
@@ -624,7 +625,7 @@ void Setting::setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
 			   const char actionBar[], const uint8_t sizeActionBar,
 			   uint8_t AB_LinePosition)
 {
-  uint8_t offset = LCD_CHARS - sizeActionBar;
+  uint8_t offset = LCD_CHARS - (sizeActionBar-1);
 
   arrayValue == 0 ? _minIndex = offset : _minIndex = 0;
 
@@ -632,12 +633,13 @@ void Setting::setActionBar(char arrayValue[], const uint8_t sizeOfArrayValue,
   for (uint8_t i=0; i<LCD_CHARS; i++)
     {
       if (i < (sizeOfArrayValue-1)) _actionBar[i] = *arrayValue++;
-      else if ( i <= offset) _actionBar[i] = ' ';
+      else if ( i < offset) _actionBar[i] = ' ';
       else _actionBar[i] = *actionBar++;
     }
 
-  _actionBar[LCD_CHARS+1]= 0; // End of array (null character)
+  _actionBar[LCD_CHARS+1] = 0; // End of array (null character)
 
+  _index = 0;
   _positionAB = AB_LinePosition; // Display position
 }
 
@@ -655,18 +657,41 @@ void Setting::navigationEngine()
   uint8_t wordSize = 0;
   unsigned long lastTime;
 
-  _Display->engine_setValue(_label, _actionBar, _positionAB);
+  uint8_t tmp_id = _idValue;
+
+  // Display all information related to the id
+  displaying();
 
   while(run)
     {
       cursorMovement(&lastIndex, &lastSense, &wordSize, &lastTime);
 
-      ClickEncoder::Button buttonState = _Encoder->getButton();
-      if( buttonState == ClickEncoder::Clicked )
+      if( _Encoder->getButton() == ClickEncoder::Clicked)
 	{
-	  run = selectedAction(wordSize);
+	  run = selectedAction(wordSize, &tmp_id);
+	  // Allow to recognize the first word of new action bar (if changed).
+	  lastIndex = 0;
+	  lastSense = 0;
+	  wordSize = 0;
 	}
     }
+}
+
+
+/******************************************************************************
+ * brief   : Display message.
+ * details : Display the first message when user enter in menu.
+ ******************************************************************************/
+void Setting::displaying()
+{
+  _Display->engine_setValue(_label, _actionBar, _positionAB);
+
+  switch(_idValue)
+  {
+    case id_NEW 	: {_Display->engineNewWinding(Turns); break;}
+    case id_RESUME 	: {_Display->engineNewWinding(Turns); break;}
+    case id_RESUME_SAVE : {_Display->engineNewWinding(Turns); break;}
+  }
 }
 
 
@@ -706,7 +731,7 @@ void Setting::cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
   // Blinking of the selected character
   if(timer(currentTime, lastTime, DelayTimeBlock) || motion>0 )
     {
-      _Display->blinkSelection(_index, _actionBar, *wordSize, false);
+      _Display->blinkSelection(_index, _actionBar, _minIndex, _positionAB,*wordSize, false);
     }
 
   // To determine the direction of the next movement.
@@ -722,14 +747,13 @@ void Setting::cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
 void Setting::editValue(int8_t index)
 {
   // Erase icons or words to show we are in the edit mode
-  _Display->engineEditMode();
+  _Display->engineEditMode(_positionAB);
 
   // Set the value as long as the user does not click
   int8_t count = _actionBar[index];
   unsigned long lastTimeSet;
 
-  ClickEncoder::Button btnState = _Encoder->getButton();
-  while((btnState = _Encoder->getButton()) != ClickEncoder::Clicked)
+  while(_Encoder->getButton() != ClickEncoder::Clicked)
     {
       unsigned long currentTimeSet = millis();
 
@@ -741,7 +765,7 @@ void Setting::editValue(int8_t index)
       // Blinking value
       if(timer(currentTimeSet, &lastTimeSet, DelayTimeBlank))
 	{
-	  _Display->blinkSelection(index, _actionBar, 0, true);
+	  _Display->blinkSelection(index, _actionBar, _minIndex, _positionAB, 0, true);
 	}
     }
 }
@@ -752,11 +776,9 @@ void Setting::editValue(int8_t index)
  * details : Depending where the cursor is placed, it's identified which action
  * to be taken. Work with call backs.
  ******************************************************************************/
-bool Setting::selectedAction(uint8_t wordSize)
+bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 {
   char tmp_word[wordSize+1] = {0};
-
-  Serial.print("_tmpId: "); Serial.println(_tmpId);
 
   // Numbers
   if(isNumber(_actionBar, _index))
@@ -770,21 +792,22 @@ bool Setting::selectedAction(uint8_t wordSize)
     {
       if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
 	{
-	  setSave(); // Display and update values
+	  setSave(tmp_id); // Set tmp_id, display and update values
 	  return CONTINU;
 	}
       else if(buffercmp((char*)KEYWORD_YES, tmp_word, SIZE_KEYWORD_YES))
 	{
-	  switch (_tmpId)
+	  switch (*tmp_id)
 	  {
 	    case id_SAVE : {saveCurrent(); return EXIT; break;}
 	    case id_RESET: {resetAll(); return EXIT; break;}
 	    case id_RAZ  : {RAZ_All(); return EXIT; break;}
+	    case id_NEW	 : {return runWinding(false, false, tmp_id); break;}
 	  }
 	}
       else if(buffercmp((char*)KEYWORD_NO, tmp_word, SIZE_KEYWORD_NO))
 	{
-	  switch (_tmpId)
+	  switch (*tmp_id)
 	  {
 	    case id_SAVE : {retry(); return CONTINU; break;}
 	    case id_RESET || id_RAZ : {return EXIT; break;}
@@ -804,14 +827,14 @@ bool Setting::selectedAction(uint8_t wordSize)
       {
 	case ICONLEFT[0] :
 	{
-	  if(_tmpId == id_MOVE_CARRIAGE || _tmpId == id_MOVE_COIL){
+	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
 	      moving(C_CLOCK); return EXIT;
 	  }
 	  break;
 	}
 	case ICONRIGHT[0] :
 	{
-	  if(_tmpId == id_MOVE_CARRIAGE || _tmpId == id_MOVE_COIL){
+	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
 	      moving(CLOCK); return EXIT;
 	  }
 	  else{
@@ -846,17 +869,16 @@ void Setting::update()
 void Setting::retry()
 {
   setValueFromId();
-  _Display->engine_setValue(_label, _actionBar, _positionAB);
+  _Display->engine_setValue(_label, _actionBar,_positionAB);
 }
 
 /******************************************************************************
  * brief   : Sub menu save
  * details : Print current value and ask save? if yes save in eeprom memory.
  ******************************************************************************/
-void Setting::setSave()
+void Setting::setSave(uint8_t *tmp_id)
 {
-  _tmpId = id_SAVE;
-  _index = 0; // Need when action bar is changed
+  *tmp_id = id_SAVE;
 
   if(_idValue != id_RESUME)
     {
@@ -902,6 +924,10 @@ void Setting::RAZ_All()
 }
 
 
+/******************************************************************************
+ * brief   : Prepare and lunch movement on coil or carriage
+ * details : Update all values needed for moving coil or carriage.
+ ******************************************************************************/
 void Setting::moving(bool direction)
 {
   update();
@@ -912,8 +938,93 @@ void Setting::moving(bool direction)
   // set and start displacement.
   _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, MaxSpeed);
 
-  if(_tmpId == id_MOVE_CARRIAGE) { _Coil->runOnlyCarriage(direction, *p_floatingValue);}
+  if(_idValue == id_MOVE_CARRIAGE) { _Coil->runOnlyCarriage(direction, *p_floatingValue);}
   else {_Coil->runOnlyCoil(direction, *p_floatingValue);}
 
   _Coil->disableMotors();
+}
+
+
+/******************************************************************************
+ * brief   : Main winding function
+ * details : Set all value for winding
+ ******************************************************************************/
+bool Setting::runWinding(bool resumeCurrent, bool resumeSaved, uint8_t *tmp_id)
+{
+  // Pass values
+  setWinding();
+
+  // Start winding with "runMultiLayer()"
+  if(_Coil->runMultiLayer(resumeCurrent, resumeSaved))
+    {
+      _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
+      return EXIT;
+    }
+  else
+    {
+      setSuspendMenu(tmp_id);
+      return CONTINU;
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Set value for lunch the winding.
+ * details : Read eeprom if we lunch a saved session.
+ ******************************************************************************/
+void Setting::setWinding()
+{
+  _Coil->setWinding(CoilLength, WireSize, Turns);
+  _Coil->setSpeed(AccDelay,MaxSpeed, MinSpeed, ajustSpeed(&speedPercent));
+
+  // Resume a saved session
+  if(_idValue == id_RESUME_SAVE)
+    {
+      _idValue = id_RESUME;
+      read(0, _idValue); // Read the value of all steps in eeprom
+      _Coil->setSteps(TotalSteps, LayerSteps);
+    }
+}
+
+
+/******************************************************************************
+ * brief   : Adjust speed winding
+ * details : Set the speed of current winding.
+ ******************************************************************************/
+uint16_t Setting::ajustSpeed(int8_t *speedInPercent)
+{
+  bool refresh = true;
+  int8_t oldSpeed = 0;
+
+  _Display->engineAjustSpeed( !refresh, *speedInPercent);
+
+  while( _Encoder->getButton() != ClickEncoder::Clicked) // Click for exit
+    {
+      // Value increase when you turn encoder
+      *speedInPercent += _Encoder->getValue();
+      // Clamp to 1% at 100%
+      clampValue(speedInPercent, 1, 100);
+      // Refresh LCD only if value change
+      if(*speedInPercent != oldSpeed){
+	  _Display->engineAjustSpeed(refresh, *speedInPercent);
+      }
+
+      oldSpeed = *speedInPercent;
+    }
+
+  return map(*speedInPercent, 0, 100, MinSpeed, MaxSpeed);
+}
+
+
+/******************************************************************************
+ * brief   : Menu suspend
+ * details : Enter in menu suspend if user click on encoder during winding.
+ ******************************************************************************/
+void Setting::setSuspendMenu(uint8_t *tmp_id)
+{
+  _idValue = id_RESUME; // todo For recovery the current winding
+  *tmp_id = id_SUSPEND; // For execute menuSuspend();
+
+  setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
+  _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
 }
