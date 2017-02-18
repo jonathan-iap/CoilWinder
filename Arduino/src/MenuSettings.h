@@ -83,7 +83,7 @@ private:
   void navigationEngine();
   void displaying();
   void cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
-		      uint8_t *wordSize, unsigned long *lastTime);
+		      uint8_t *wordSize, uint32_t *lastTime);
   void editValue(int8_t index);
   bool selectedAction(uint8_t wordSize, uint8_t *tmp_id);
 

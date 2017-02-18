@@ -31,9 +31,9 @@ void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
  * delay, delay before you do instructions.
  * return  : True when time reach.
  ******************************************************************************/
-bool timer(unsigned long currentTime, unsigned long *oldTime, unsigned long delay)
+bool timer(uint32_t currentTime, uint32_t *oldTime, uint16_t delay)
 {
-  if (currentTime - *oldTime >= delay)
+  if ((currentTime - *oldTime) > delay)
     {
       *oldTime = currentTime;
       return true;

@@ -51,7 +51,7 @@
 #define MSG_CLOCK		"Clk "
 #define MSG_C_CLOCK		"CClk "
 #define MSG_FOR_STOP		"Click to stop"
-#define MSG_SPEED		"Winding speed :" // todo change name
+#define MSG_SPEED		"Winding speed :"
 #define MSG_SAVE_CURRENT	"Save session ?"
 
 /* Keywords ___________________________________________________________*/

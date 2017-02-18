@@ -148,6 +148,11 @@ void loop()
 	  }
 	break;
       }
+    case ClickEncoder::Pressed:{break;}
+    case ClickEncoder::Held:{break;}
+    case ClickEncoder::Released:{break;}
+    case ClickEncoder::Closed:{break;}
+    case ClickEncoder::Open:{break;}
   }
 
   // update LCD

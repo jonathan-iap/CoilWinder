@@ -19,20 +19,21 @@ public:
   Coil(ClickEncoder *p_Encoder, Display *p_Display);
   ~Coil();
 
-  void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
-  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed, uint16_t speed);
+  void setWinding(float coilLength, float wireSize, uint32_t coilTurns);
+  void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed);
   void setSteps(uint32_t totalSteps, uint32_t layerSteps);
   void updateSpeed(uint16_t speed);
 
   bool runMultiLayer(bool isNewCoil);
   bool runOneLayer();
   void runOnlyCarriage(bool dir, float distance);
-  void runOnlyCoil(bool dir, float turns);
+  void runOnlyCoil(bool dir, uint32_t turns);
+
   bool suspend();
   void disableMotors();
 
-  uint16_t getTurns();
-  uint16_t getCurrentTurns();
+  uint32_t getTurns();
+  uint32_t getCurrentTurns();
   uint32_t getTotalStepsCounter();
   uint32_t getLayerStepsCounter();
 
@@ -57,22 +58,22 @@ private:
   // wire size in mm.
   float _wireSize;
   //coil turn in turn.
-  unsigned long _coilTurns;
+  uint32_t _coilTurns;
 
-  unsigned long _accDelay;
-  unsigned long _maxSpeed;
-  unsigned long _minSpeed;
-  unsigned long _speed;
+  uint16_t _accDelay;
+  uint16_t _maxSpeed;
+  uint16_t _minSpeed;
+  uint16_t _speed;
 
   // reduction ratio for motor.
   float _ratio;
-  // steps for one layer.
-  unsigned long _stepsPerLayer;
-  unsigned long _stepsTravel;
-  unsigned long _totalStepsCounter;
-  unsigned long _layerStepsCounter;
-
   bool _direction;
+  // steps for one layer.
+  uint32_t _stepsPerLayer;
+  uint32_t _stepsTravel;
+  uint32_t _totalStepsCounter;
+  uint32_t _layerStepsCounter;
+
 };
 
 #endif

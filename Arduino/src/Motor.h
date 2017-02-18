@@ -8,7 +8,7 @@ class Motor
 public:
 
   Motor();
-  Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint8_t stepPerTr);
+  Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint16_t stepPerTr);
 
   ~Motor();
 

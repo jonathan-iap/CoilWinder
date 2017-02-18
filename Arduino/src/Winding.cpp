@@ -19,7 +19,7 @@
  * delayMotor, delay on the motor who is the reference.
  * return  : delay value.
  ******************************************************************************/
-static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
+static unsigned long ratioToDelay(float ratio, uint16_t delayMotor)
 {
   unsigned long result;
 
@@ -39,12 +39,12 @@ static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
  * ratio, reduction ratio between motors.
  * delayMotorB, delay that will be applied on carriage motor.
  ******************************************************************************/
-static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long limitSpeed,
-			 float ratio, unsigned long *delayMotorB)
+static void acceleration(bool acc, uint16_t *delayMotorA, uint16_t limitSpeed,
+			 float ratio, uint16_t *delayMotorB)
 {
   // if ratio is >= 1
-  unsigned long *delayMotor_x = delayMotorA;
-  unsigned long *delayMotor_y = delayMotorB;
+  uint16_t *delayMotor_x = delayMotorA;
+  uint16_t *delayMotor_y = delayMotorB;
   // else invert delay motor.
   if(ratio < 1)
     {
@@ -73,7 +73,7 @@ static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long lim
 }
 
 // For one motor only.
-static void acceleration(bool acc, unsigned long *delayMotor, unsigned long limitSpeed)
+static void acceleration(bool acc, uint16_t *delayMotor, uint16_t limitSpeed)
 {
   //Acceleration.
   if(acc && (*delayMotor > limitSpeed))
@@ -106,12 +106,12 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _speed(0),
 
   _ratio(0),
+  _direction(CLOCK),
+
   _stepsPerLayer(0),
   _stepsTravel(0),
   _totalStepsCounter(0),
-  _layerStepsCounter(0),
-
-  _direction(CLOCK)
+  _layerStepsCounter(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -123,7 +123,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
+void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns)
 {
   _coilLength = coilLength;
   _wireSize   = wireSize;
@@ -131,7 +131,7 @@ void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
 }
 
 
-void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed, uint16_t speed)
+void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed)
 {
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
@@ -218,7 +218,7 @@ void Coil::homing(bool dir)
   // Convert step into distance.
   dist = (dist*LEAD_SCREW_PITCH) / M2_STEPS_PER_TR;
 
-  // Little delay to mark end, and back to the start position.
+  // Little delay to mark the end, and back to the start position.
   delay(800);
   runOnlyCarriage(dir, dist);
 }
@@ -290,43 +290,44 @@ bool Coil::runMultiLayer(bool isNewCoil)
 
 bool Coil::runOneLayer()
 {
-  unsigned long delayMotorWinding = _minSpeed;
-  unsigned long delayMotorCarriage = _minSpeed;
-  unsigned long lastMicrosMotorWinding = 0;
-  unsigned long lastMicrosMotorCarriage = 0;
-  unsigned long lastMicrosAcc = 0;
+  uint16_t delayMotorWinding = _minSpeed;
+  uint16_t delayMotorCarriage = _minSpeed;
+  uint32_t lastMicrosMotorWinding = 0;
+  uint32_t lastMicrosMotorCarriage = 0;
+  uint32_t lastMicrosAcc = 0;
 
   while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
       (_layerStepsCounter < _stepsPerLayer))
     {
-
       // If user click on encoder, isSuspend become true and break the loop.
       if( suspend() == true) return true;
+      else
+	{
+	  uint32_t currentMicros = micros();
 
-      unsigned long currentMicros = micros();
-
-      if(timer(currentMicros, &lastMicrosAcc, _accDelay))
-	{
-	  if(_layerStepsCounter < _stepsTravel)
+	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
 	    {
-	      // Acceleration
-	      acceleration(true, &delayMotorWinding, _speed, _ratio, &delayMotorCarriage);
+	      if(_layerStepsCounter < _stepsTravel)
+		{
+		  // Acceleration
+		  acceleration(true, &delayMotorWinding, _speed, _ratio, &delayMotorCarriage);
+		}
+	      else
+		{
+		  // Deceleration
+		  acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
+		}
 	    }
-	  else
+	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
 	    {
-	      // Deceleration
-	      acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
+	      motorWinding.oneStep(C_CLOCK);
+	      _totalStepsCounter ++;
 	    }
-	}
-      if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
-	{
-	  motorWinding.oneStep(C_CLOCK);
-	  _totalStepsCounter += 1;
-	}
-      if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
-	{
-	  motorCarriage.oneStep(_direction);
-	  _layerStepsCounter += 1;
+	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
+	    {
+	      motorCarriage.oneStep(_direction);
+	      _layerStepsCounter ++;
+	    }
 	}
     }
 
@@ -341,11 +342,11 @@ void Coil::runOnlyCarriage(bool dir, float distance)
   // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(_stepsPerLayer);
 
-  unsigned long delayMotor = _minSpeed;
-  unsigned long lastMicrosMotor = 0;
-  unsigned long lastMicrosAcc = 0;
+  uint16_t delayMotor = _minSpeed;
+  uint32_t lastMicrosMotor = 0;
+  uint32_t lastMicrosAcc = 0;
 
-  unsigned long stepsCounter = 0;
+  uint32_t stepsCounter = 0;
   bool isStop = false;
 
   while( !isStop && stepsCounter < _stepsPerLayer )
@@ -377,16 +378,16 @@ void Coil::runOnlyCarriage(bool dir, float distance)
 }
 
 
-void Coil::runOnlyCoil(bool dir, float turns)
+void Coil::runOnlyCoil(bool dir, uint32_t turns)
 {
   // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(TurnToSteps(turns));
 
-  unsigned long delayMotor = _minSpeed;
-  unsigned long lastMicrosMotor = 0;
-  unsigned long lastMicrosAcc = 0;
+  uint16_t delayMotor = _minSpeed;
+  uint32_t lastMicrosMotor = 0;
+  uint32_t lastMicrosAcc = 0;
 
-  unsigned long stepsCounter = 0;
+  uint32_t stepsCounter = 0;
   bool isStop = false;
 
   while( !isStop && stepsCounter < TurnToSteps(turns))
@@ -434,13 +435,13 @@ void Coil::disableMotors()
 }
 
 
-uint16_t Coil::getTurns()
+uint32_t Coil::getTurns()
 {
   return _coilTurns;
 }
 
 
-uint16_t Coil::getCurrentTurns()
+uint32_t Coil::getCurrentTurns()
 {
   return StepsToTurns(_totalStepsCounter);
 }

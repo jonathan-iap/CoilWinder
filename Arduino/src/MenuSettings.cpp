@@ -207,7 +207,7 @@ void Setting::navigationEngine()
   int8_t  lastIndex = 0;
   uint8_t lastSense = 0;
   uint8_t wordSize = 0;
-  unsigned long lastTime;
+  uint32_t lastTime;
 
   uint8_t tmp_id = _idValue;
 
@@ -257,9 +257,9 @@ void Setting::displaying()
  * details : Manages the displacement of cursor and as well as being displayed.
  ******************************************************************************/
 void Setting::cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
-			     uint8_t *wordSize, unsigned long *lastTime)
+			     uint8_t *wordSize, uint32_t *lastTime)
 {
-  unsigned long currentTime = millis();
+  uint32_t currentTime = millis();
 
   // Get encoder movement, clamp returned value and detect sense of motion
   _index += _Encoder->getValue();
@@ -308,11 +308,11 @@ void Setting::editValue(int8_t index)
 
   // Set the value as long as the user does not click
   int8_t count = _actionBar[index];
-  unsigned long lastTimeSet;
+  uint32_t lastTimeSet;
 
   while(_Encoder->getButton() != ClickEncoder::Clicked)
     {
-      unsigned long currentTimeSet = millis();
+      uint32_t currentTimeSet = millis();
 
       count+= _Encoder->getValue();
       clampValue(&count, '0', '9');
