@@ -26,8 +26,10 @@
 
 // Microsteps
 //-------------------------
+// If you change micros steps you need to change MaxSpeed !
 #define FULL_STEPS	1
 #define HALF_STEPS	2
+// Use with caution, not work properly for high speed MaxSpeed is limited to 250.
 #define QUARTER_STEPS	4
 #define EIGHTH_STEPS	8
 #define SIXTEENTH_STEPS 16
@@ -38,14 +40,14 @@
 #define M1_STEP	9
 #define M1_EN	8
 #define M1_initialStepPerTr 200
-#define M1_STEPS_PER_TR (M1_initialStepPerTr * EIGHTH_STEPS)
+#define M1_STEPS_PER_TR (M1_initialStepPerTr * HALF_STEPS)
 
 // Mode for carriage
 #define M2_DIR	7
 #define M2_STEP	6
 #define M2_EN	5
 #define M2_initialStepPerTr 200
-#define M2_STEPS_PER_TR (M2_initialStepPerTr * EIGHTH_STEPS)
+#define M2_STEPS_PER_TR (M2_initialStepPerTr * HALF_STEPS)
 
 //#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
 
@@ -66,7 +68,7 @@
 #define INIT_WIRE	"0.00"
 #define INIT_COIL	"000.00"
 #define INIT_TURNS	"00000"
-#define INIT_MAXSPEED	"0080" // ...us Is limited by micros() function. If you go futher steps are no longer counted correctly
+#define INIT_MAXSPEED	"0200" // Not below 190 (it's the max loop execution time)
 #define INIT_MINSPEED	"1100"
 #define INIT_ACC_DELAY	"0400"
 

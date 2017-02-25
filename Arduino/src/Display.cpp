@@ -174,7 +174,7 @@ const void Display::engineSave(float value, char unit[], char actionBar[], uint8
 }
 
 
-const void Display::engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns)
+const void Display::engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
@@ -201,7 +201,7 @@ const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
 
 
 
-const void Display::windingTurns(uint16_t coilTurns,uint16_t counter)
+const void Display::windingTurns(uint32_t coilTurns, uint32_t counter)
 {
   _lcd.setCursor(0,1);
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");

@@ -171,11 +171,11 @@ public:
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   const void engineEditMode(uint8_t positionAB); //New
   const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB); //New
-  const void engineWindingValue(float coilLength, float wireSize, unsigned long coilTurns, uint16_t currentTurns);
+  const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
 
   // Winding
-  const void windingTurns(uint16_t coilTurns,uint16_t counter);
+  const void windingTurns(uint32_t coilTurns,uint32_t counter);
   const void windingSetSpeed(uint16_t speed);
 
   const void engine_setValue(char label[], char actionBar[], uint8_t positionAB);

@@ -33,7 +33,7 @@ void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
  ******************************************************************************/
 bool timer(uint32_t currentTime, uint32_t *oldTime, uint16_t delay)
 {
-  if ((currentTime - *oldTime) > delay)
+  if ((currentTime - *oldTime) >= delay)
     {
       *oldTime = currentTime;
       return true;

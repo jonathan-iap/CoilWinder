@@ -152,10 +152,19 @@ void Coil::updateSpeed(uint16_t speed)
   _speed = speed;
 }
 
-
+// Steps for motor who move carriage.
 void Coil::computeStepPerLayer(float length)
 {
   _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
+
+#ifdef DEBUGoff
+  Serial.println("__________________");
+  Serial.print("length : "); Serial.println(length);
+  Serial.print("M2_STEPS_PER_TR : "); Serial.println(M2_STEPS_PER_TR);
+  Serial.print("LEAD_SCREW_PITCH : "); Serial.println(LEAD_SCREW_PITCH);
+  Serial.print("_stepsPerLayer : "); Serial.println(_stepsPerLayer);
+  Serial.println("__________________");
+#endif
 }
 
 
@@ -183,26 +192,21 @@ void Coil::computeStepsTravel(float totalSteps)
   stepsAcc += (T/_minSpeed);
 
   // 3. Determine steps travel before start deceleration.
-  _stepsTravel = totalSteps - (unsigned long)stepsAcc;
+  _stepsTravel = totalSteps - (uint32_t)stepsAcc;
 }
 void Coil::computeAll()
 {
   computeRatio();
   computeStepsTravel(_stepsPerLayer);
 
-#ifdef DEBUGOFF
-  Serial.print("MaxSpeed : ");
-  Serial.println(_maxSpeed);
-  Serial.print("MinSpeed : ");
-  Serial.println(_minSpeed);
-  Serial.print("AccDelay : ");
-  Serial.println(_accDelay);
-  Serial.print("_ratio : ");
-  Serial.println(_ratio);
-  Serial.print("_stepPerLayer : ");
-  Serial.println(_stepsPerLayer);
-  Serial.print("_stepsTravel : ");
-  Serial.println(_stepsTravel);
+#ifdef DEBUGoff
+  Serial.print("MaxSpeed : "); Serial.println(_maxSpeed);
+  Serial.print("MinSpeed : "); Serial.println(_minSpeed);
+  Serial.print("AccDelay : "); Serial.println(_accDelay);
+  Serial.print("_ratio : "); Serial.println(_ratio);
+  Serial.print("_stepPerLayer : "); Serial.println(_stepsPerLayer);
+  Serial.print("turnPerLayer : "); Serial.println(StepsToTurns(_stepsPerLayer * _ratio));
+  Serial.print("_stepsTravel : "); Serial.println(_stepsTravel);
   delay(1000);
 #endif
 }
@@ -270,6 +274,7 @@ bool Coil::runMultiLayer(bool isNewCoil)
 	  // Invert direction when one layer is finished.
 	  _direction = !_direction;
 	}
+
       // winding one layer.
       isSuspend = runOneLayer();
 
@@ -291,13 +296,18 @@ bool Coil::runMultiLayer(bool isNewCoil)
 bool Coil::runOneLayer()
 {
   uint16_t delayMotorWinding = _minSpeed;
-  uint16_t delayMotorCarriage = _minSpeed;
+  uint16_t delayMotorCarriage = (_minSpeed * _ratio);
   uint32_t lastMicrosMotorWinding = 0;
   uint32_t lastMicrosMotorCarriage = 0;
   uint32_t lastMicrosAcc = 0;
 
+  // Control to give the exact number of steps on coil and on carriage.
+  uint32_t coilLayerSteps = (_stepsPerLayer * _ratio);
+  uint32_t counterCoilLayerSteps = 0;
+
+
   while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
-      (_layerStepsCounter < _stepsPerLayer))
+      ((_layerStepsCounter < _stepsPerLayer) || (counterCoilLayerSteps < coilLayerSteps)))
     {
       // If user click on encoder, isSuspend become true and break the loop.
       if( suspend() == true) return true;
@@ -307,23 +317,29 @@ bool Coil::runOneLayer()
 
 	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
 	    {
-	      if(_layerStepsCounter < _stepsTravel)
-		{
-		  // Acceleration
-		  acceleration(true, &delayMotorWinding, _speed, _ratio, &delayMotorCarriage);
-		}
-	      else
+	      if((_layerStepsCounter >= _stepsTravel) ||
+		  (_totalStepsCounter >= TurnToSteps((_coilTurns-2))))
 		{
 		  // Deceleration
 		  acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
 		}
+	      else
+		{
+		  // Acceleration
+		  acceleration(true, &delayMotorWinding, _speed, _ratio, &delayMotorCarriage);
+		}
 	    }
-	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding))
+
+	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding)&&
+	      (counterCoilLayerSteps < coilLayerSteps))
 	    {
 	      motorWinding.oneStep(C_CLOCK);
 	      _totalStepsCounter ++;
+	      counterCoilLayerSteps++;
 	    }
-	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage))
+
+	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage)&&
+	      (_layerStepsCounter < _stepsPerLayer))
 	    {
 	      motorCarriage.oneStep(_direction);
 	      _layerStepsCounter ++;
