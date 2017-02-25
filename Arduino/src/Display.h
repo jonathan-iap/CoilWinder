@@ -53,7 +53,6 @@
 #define MSG_FOR_STOP		"Click to stop"
 #define MSG_SPEED		"Winding speed :"
 #define MSG_SAVE_CURRENT	"Save session ?"
-
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_SAVE		"Save"
 #define SIZE_KEYWORD_SAVE 	COUNTOF(KEYWORD_SAVE)

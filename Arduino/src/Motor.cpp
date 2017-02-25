@@ -1,14 +1,8 @@
 #include "Motor.h"
 #include "Configuration.h"
+#include "fastio.h"
 
-Motor::Motor() : _dirPin(0),_stepPin(0),_enablePin(0),_stepsPerTr(0)
-{}
-
-Motor::Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint16_t stepPerTr)
-: _dirPin (dirPin),
-  _stepPin (stepPin),
-  _enablePin (enablePin),
-  _stepsPerTr (stepPerTr)
+Motor::Motor()
 {}
 
 Motor::~Motor()
@@ -16,49 +10,72 @@ Motor::~Motor()
 
 void Motor::begin()
 {
-  pinMode(_dirPin, OUTPUT);
-  pinMode(_stepPin, OUTPUT);
-  pinMode(_enablePin, OUTPUT);
+  SET_OUTPUT(M1_DIR);
+  SET_OUTPUT(M1_STEP);
+  SET_OUTPUT(M1_EN);
 
-  digitalWrite(_enablePin, DISABLE);
+  SET_OUTPUT(M2_DIR);
+  SET_OUTPUT(M2_STEP);
+  SET_OUTPUT(M2_EN);
+
+  coil_disable();
+  carriage_disable();
 }
 
-
-void Motor::enable()
+/******************************************************************************
+ * brief   : Enable stepper
+ ******************************************************************************/
+void Motor::coil_enable()
 {
-  digitalWrite(_enablePin, ENABLE);
+  WRITE(M1_EN, ENABLE);
 }
 
-
-void Motor::disable()
+void Motor::carriage_enable()
 {
-  digitalWrite(_enablePin, DISABLE);
+  WRITE(M2_EN, ENABLE);
+}
+
+/******************************************************************************
+ * brief   : Disable stepper
+ ******************************************************************************/
+void Motor::coil_disable()
+{
+  WRITE(M1_EN, DISABLE);
+}
+
+void Motor::carriage_disable()
+{
+  WRITE(M2_EN, DISABLE);
 }
 
 /******************************************************************************
  * brief   : Motor advance.
  * details : Verified that enable pin is ok and make one step in the direction
  * you want.
- * _enablePin, pin of motor that you want drive.
- * direction, set direction.
- * _stepPin, pin of motor that you want drive.
- * return  : nothing.
  ******************************************************************************/
-void Motor::oneStep(bool direction)
+void Motor::coil_oneStep(bool direction)
 {
-  if(digitalRead(_enablePin) != ENABLE)
-    {
-      enable();
-    }
+  if(READ(M1_EN) != ENABLE) coil_enable();
 
-  if(digitalRead(_dirPin) != direction)
-    {
-      digitalWrite(_dirPin, direction);
-    }
+  if(READ(M1_DIR) != direction) WRITE(M1_DIR, direction);
 
-  digitalWrite(_stepPin, HIGH);
+  WRITE(M1_STEP, HIGH);
 #ifdef  DELAY_DRIVER
   delayMicroseconds(DELAY_DRIVER);
 #endif
-  digitalWrite(_stepPin, LOW);
+  WRITE(M1_STEP, LOW);
 }
+
+void Motor::carriage_oneStep(bool direction)
+{
+  if(READ(M2_EN) != ENABLE) carriage_enable();
+
+  if(READ(M2_DIR) != direction) WRITE(M2_DIR, direction);
+
+  WRITE(M2_STEP, HIGH);
+#ifdef  DELAY_DRIVER
+  delayMicroseconds(DELAY_DRIVER);
+#endif
+  WRITE(M2_STEP, LOW);
+}
+

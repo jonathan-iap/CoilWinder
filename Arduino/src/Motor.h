@@ -8,22 +8,17 @@ class Motor
 public:
 
   Motor();
-  Motor(uint8_t dirPin, uint8_t stepPin, uint8_t enablePin, uint16_t stepPerTr);
-
   ~Motor();
 
   void begin();
-  void enable();
-  void disable();
-  void oneStep(bool direction);
 
-private:
+  void coil_enable();
+  void coil_disable();
+  void coil_oneStep(bool direction);
 
-  uint8_t _dirPin;
-  uint8_t _stepPin;
-  uint8_t _enablePin;
-  uint8_t _stepsPerTr;
-
+  void carriage_enable();
+  void carriage_disable();
+  void carriage_oneStep(bool direction);
 };
 
 #endif

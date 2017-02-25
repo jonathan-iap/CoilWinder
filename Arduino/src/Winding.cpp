@@ -93,10 +93,7 @@ static void acceleration(bool acc, uint16_t *delayMotor, uint16_t limitSpeed)
 /*_____ CONSTRUCTOR _____ */
 
 Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
-: motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
-  motorCarriage (M2_DIR, M2_STEP, M2_EN, M2_STEPS_PER_TR),
-
-  _coilLength(0),
+: _coilLength(0),
   _wireSize(0),
   _coilTurns(0),
 
@@ -115,8 +112,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
-  motorCarriage.begin();
-  motorWinding.begin();
+  stepper.begin();
 }
 
 
@@ -333,7 +329,7 @@ bool Coil::runOneLayer()
 	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding)&&
 	      (counterCoilLayerSteps < coilLayerSteps))
 	    {
-	      motorWinding.oneStep(C_CLOCK);
+	      stepper.coil_oneStep(C_CLOCK);
 	      _totalStepsCounter ++;
 	      counterCoilLayerSteps++;
 	    }
@@ -341,9 +337,11 @@ bool Coil::runOneLayer()
 	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage)&&
 	      (_layerStepsCounter < _stepsPerLayer))
 	    {
-	      motorCarriage.oneStep(_direction);
+	      stepper.carriage_oneStep(_direction);
 	      _layerStepsCounter ++;
 	    }
+//	  uint32_t test = micros();
+//	  Serial.print("time : "); Serial.println(test-currentMicros);
 	}
     }
 
@@ -364,6 +362,7 @@ void Coil::runOnlyCarriage(bool dir, float distance)
 
   uint32_t stepsCounter = 0;
   bool isStop = false;
+
 
   while( !isStop && stepsCounter < _stepsPerLayer )
     {
@@ -387,7 +386,7 @@ void Coil::runOnlyCarriage(bool dir, float distance)
 
       if(timer(currentMicros, &lastMicrosMotor, delayMotor))
 	{
-	  motorCarriage.oneStep(dir);
+	  stepper.carriage_oneStep(dir);
 	  stepsCounter ++;
 	}
     }
@@ -427,7 +426,7 @@ void Coil::runOnlyCoil(bool dir, uint32_t turns)
 
       if(timer(currentMicros, &lastMicrosMotor, delayMotor))
 	{
-	  motorWinding.oneStep(!dir);
+	  stepper.coil_oneStep(!dir);
 	  stepsCounter ++;
 	}
     }
@@ -446,8 +445,8 @@ bool Coil::suspend()
 
 void Coil::disableMotors()
 {
-  motorWinding.disable();
-  motorCarriage.disable();
+  stepper.coil_disable();
+  stepper.carriage_disable();
 }
 
 

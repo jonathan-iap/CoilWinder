@@ -29,7 +29,7 @@
 // If you change micros steps you need to change MaxSpeed !
 #define FULL_STEPS	1
 #define HALF_STEPS	2
-// Use with caution, not work properly for high speed MaxSpeed is limited to 250.
+// Use with caution, not work properly for high speed MaxSpeed is limited to 100us.
 #define QUARTER_STEPS	4
 #define EIGHTH_STEPS	8
 #define SIXTEENTH_STEPS 16
@@ -68,7 +68,7 @@
 #define INIT_WIRE	"0.00"
 #define INIT_COIL	"000.00"
 #define INIT_TURNS	"00000"
-#define INIT_MAXSPEED	"0200" // Not below 190 (it's the max loop execution time)
+#define INIT_MAXSPEED	"0200" // Not below 100us (it's the max loop execution time)
 #define INIT_MINSPEED	"1100"
 #define INIT_ACC_DELAY	"0400"
 
