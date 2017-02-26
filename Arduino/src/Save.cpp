@@ -169,7 +169,7 @@ void Memory::readAll()
   read(_buff_WinSense, id_W_SENSE);
   read(_buff_CarSense, id_C_SENSE);
 
-  // Convert value within array in a float value.
+  // Convert value within array in a float or numeric value.
   WireSize 	= atof(_buff_WireSize);
   CoilLength 	= atof(_buff_CoilLength);
   Turns 	= atof(_buff_Turns);
@@ -207,7 +207,7 @@ bool Memory::isSet()
 }
 
 /* Debug -------------------------------------------------------------------*/
-#ifdef DEBUG
+#ifdef DEBUGoff
 void Memory::ReadAddresses()
 {
   Serial.print("adress wire: "); Serial.println(_addr_WireSize);

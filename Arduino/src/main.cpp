@@ -130,7 +130,7 @@ void loop()
 	else
 	  {
 	    // enter settings menu
-	    engine->navigate(&miWinding);
+	    engine->navigate(&miSetWinding);
 
 	    systemState = state_MOVE;
 	    previousSystemState = systemState;

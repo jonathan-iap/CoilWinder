@@ -127,7 +127,7 @@ const void Display::renderIconChild()
 {
   _lcd.write(20);
   _lcd.write(ICONRIGHT);
-  blank(7);
+  blank(LCD_CHARS);
 }
 
 // Engine menu setting ----------------------------------------------------------

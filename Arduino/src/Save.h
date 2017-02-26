@@ -64,7 +64,7 @@ public :
   bool isSet();
 
   // for debug
-#ifdef DEBUG
+#ifdef DEBUGoff
   void ReadAddresses();
   void ReadFloatValue();
   void ReadArrayValue();

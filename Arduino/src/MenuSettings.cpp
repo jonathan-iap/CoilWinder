@@ -29,10 +29,6 @@ Setting::~Setting(){}
  ******************************************************************************/
 void Setting::actionMenu(const uint8_t id)
 {
-  ReadAddresses();
-  ReadFloatValue();
-  ReadArrayValue();
-
   _idValue = id;
   setValueFromId();
   navigationEngine();
