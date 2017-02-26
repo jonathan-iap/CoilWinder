@@ -29,6 +29,10 @@ Setting::~Setting(){}
  ******************************************************************************/
 void Setting::actionMenu(const uint8_t id)
 {
+  ReadAddresses();
+  ReadFloatValue();
+  ReadArrayValue();
+
   _idValue = id;
   setValueFromId();
   navigationEngine();
@@ -586,7 +590,7 @@ void Setting::setWinding(bool isFirstLunch)
   // Adjust speed sub-menu for the first use
   if(isFirstLunch) adjustSpeed();
 
-  _Coil->setWinding(CoilLength, WireSize, Turns);
+  _Coil->setWinding(CoilLength, WireSize, Turns, WinSense, CarSense);
 
   // Resume a saved session
   if(_idValue == id_RESUME_SAVE)

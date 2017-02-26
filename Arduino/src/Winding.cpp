@@ -97,6 +97,9 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _wireSize(0),
   _coilTurns(0),
 
+  _windingSense(0),
+  _carriageStartSense(0),
+
   _accDelay (400),
   _maxSpeed (30),
   _minSpeed (1400),
@@ -119,11 +122,13 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns)
+void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense)
 {
-  _coilLength = coilLength;
-  _wireSize   = wireSize;
-  _coilTurns  = coilTurns;
+  _coilLength		= coilLength;
+  _wireSize   		= wireSize;
+  _coilTurns  		= coilTurns;
+  _windingSense 	= windSense;
+  _carriageStartSense 	= startSense;
 }
 
 
@@ -340,8 +345,8 @@ bool Coil::runOneLayer()
 	      stepper.carriage_oneStep(_direction);
 	      _layerStepsCounter ++;
 	    }
-//	  uint32_t test = micros();
-//	  Serial.print("time : "); Serial.println(test-currentMicros);
+	  //	  uint32_t test = micros();
+	  //	  Serial.print("time : "); Serial.println(test-currentMicros);
 	}
     }
 

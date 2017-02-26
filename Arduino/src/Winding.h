@@ -19,7 +19,7 @@ public:
   Coil(ClickEncoder *p_Encoder, Display *p_Display);
   ~Coil();
 
-  void setWinding(float coilLength, float wireSize, uint32_t coilTurns);
+  void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed);
   void setSteps(uint32_t totalSteps, uint32_t layerSteps);
   void updateSpeed(uint16_t speed);
@@ -55,20 +55,22 @@ private:
 
   // Coil length in mm.
   float _coilLength;
-  // wire size in mm.
+  // Wire size in mm.
   float _wireSize;
-  //coil turn in turn.
+  // Coil turn in turn.
   uint32_t _coilTurns;
-
+  // Winding sense.
+  bool _windingSense;
+  bool _carriageStartSense;
+  // Speed.
   uint16_t _accDelay;
   uint16_t _maxSpeed;
   uint16_t _minSpeed;
   uint16_t _speed;
-
-  // reduction ratio for motor.
+  // Reduction ratio for motor.
   float _ratio;
   bool _direction;
-  // steps for one layer.
+  // Steps for one layer.
   uint32_t _stepsPerLayer;
   uint32_t _stepsTravel;
   uint32_t _totalStepsCounter;
