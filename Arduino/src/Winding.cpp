@@ -231,8 +231,6 @@ void Coil::homing(bool dir)
 
 bool Coil::runMultiLayer(bool isNewCoil)
 {
-  Serial.println("Run pass ");
-
   bool isResume = false;
   bool isbackHome = true;
   bool isSuspend = false;
@@ -319,7 +317,7 @@ bool Coil::runOneLayer()
 	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
 	    {
 	      if((_layerStepsCounter >= _stepsTravel) ||
-		  (_totalStepsCounter >= TurnToSteps((_coilTurns-2))))
+		  (_totalStepsCounter >= TurnToSteps((_coilTurns-2)))) // -2Tr is to give deceleration when winding is finished
 		{
 		  // Deceleration
 		  acceleration(false, &delayMotorWinding, _minSpeed, _ratio, &delayMotorCarriage);
@@ -345,8 +343,6 @@ bool Coil::runOneLayer()
 	      stepper.carriage_oneStep(_direction);
 	      _layerStepsCounter ++;
 	    }
-	  //	  uint32_t test = micros();
-	  //	  Serial.print("time : "); Serial.println(test-currentMicros);
 	}
     }
 
@@ -354,7 +350,7 @@ bool Coil::runOneLayer()
 }
 
 
-void Coil::runOnlyCarriage(bool dir, float distance)
+bool Coil::runOnlyCarriage(bool dir, float distance)
 {
   // Number of steps for this distance, set "_stepsPerLayer" !
   computeStepPerLayer(distance);
@@ -366,39 +362,41 @@ void Coil::runOnlyCarriage(bool dir, float distance)
   uint32_t lastMicrosAcc = 0;
 
   uint32_t stepsCounter = 0;
-  bool isStop = false;
 
-
-  while( !isStop && stepsCounter < _stepsPerLayer )
+  while(stepsCounter < _stepsPerLayer )
     {
-      isStop = suspend();
-
-      unsigned long currentMicros = micros();
-
-      if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+      // If user click on encoder, isSuspend become true and break the loop.
+      if( suspend() == true) return true;
+      else
 	{
-	  if(stepsCounter < _stepsTravel)
-	    {
-	      // Acceleration
-	      acceleration(ACCELERATION, &delayMotor, _speed);
-	    }
-	  else
-	    {
-	      // Deceleration
-	      acceleration(DECELERATION, &delayMotor, _minSpeed);
-	    }
-	}
+	  unsigned long currentMicros = micros();
 
-      if(timer(currentMicros, &lastMicrosMotor, delayMotor))
-	{
-	  stepper.carriage_oneStep(dir);
-	  stepsCounter ++;
+	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+	    {
+	      if(stepsCounter < _stepsTravel)
+		{
+		  // Acceleration
+		  acceleration(ACCELERATION, &delayMotor, _speed);
+		}
+	      else
+		{
+		  // Deceleration
+		  acceleration(DECELERATION, &delayMotor, _minSpeed);
+		}
+	    }
+
+	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
+	    {
+	      stepper.carriage_oneStep(dir);
+	      stepsCounter ++;
+	    }
 	}
     }
+  return false;
 }
 
 
-void Coil::runOnlyCoil(bool dir, uint32_t turns)
+bool Coil::runOnlyCoil(bool dir, uint32_t turns)
 {
   // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(TurnToSteps(turns));
@@ -412,29 +410,34 @@ void Coil::runOnlyCoil(bool dir, uint32_t turns)
 
   while( !isStop && stepsCounter < TurnToSteps(turns))
     {
-      isStop = suspend();
-      unsigned long currentMicros = micros();
-
-      if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+      // If user click on encoder, isSuspend become true and break the loop.
+      if( suspend() == true) return true;
+      else
 	{
-	  if(stepsCounter < _stepsTravel)
-	    {
-	      // Acceleration
-	      acceleration(ACCELERATION, &delayMotor, _speed);
-	    }
-	  else
-	    {
-	      // Deceleration
-	      acceleration(DECELERATION, &delayMotor, _minSpeed);
-	    }
-	}
+	  unsigned long currentMicros = micros();
 
-      if(timer(currentMicros, &lastMicrosMotor, delayMotor))
-	{
-	  stepper.coil_oneStep(!dir);
-	  stepsCounter ++;
+	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+	    {
+	      if(stepsCounter < _stepsTravel)
+		{
+		  // Acceleration
+		  acceleration(ACCELERATION, &delayMotor, _speed);
+		}
+	      else
+		{
+		  // Deceleration
+		  acceleration(DECELERATION, &delayMotor, _minSpeed);
+		}
+	    }
+
+	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
+	    {
+	      stepper.coil_oneStep(!dir);
+	      stepsCounter ++;
+	    }
 	}
     }
+  return false;
 }
 
 // Check if button was pressed

@@ -200,22 +200,6 @@ const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
 }
 
 
-
-const void Display::windingTurns(uint32_t coilTurns, uint32_t counter)
-{
-  _lcd.setCursor(0,1);
-  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
-}
-
-
-const void Display::windingSetSpeed(uint16_t speed)
-{
-  _lcd.clear();
-  _lcd.setCursor(0,0);
-  _lcd.print(speed);
-}
-
-
 /******************************************************************************
  * brief   : Print all informations to set current value.
  * Exemple :
@@ -224,7 +208,7 @@ const void Display::windingSetSpeed(uint16_t speed)
  * |0.00      Save/>|  |     actionBar  | <- position is position of action bar.
  * ------------------  ------------------
  ******************************************************************************/
-const void Display::engine_setValue(char label[], char actionBar[], uint8_t positionAB)
+const void Display::engineSetValue(char label[], char actionBar[], uint8_t positionAB)
 {
   _lcd.clear();
   _lcd.setCursor(0, 0);
@@ -294,4 +278,19 @@ const void Display::engineSaveCurrent(char actionBar[], uint8_t positionAB, uint
   _lcd.print(actionBar);
   _lcd.setCursor(0,positionAB);
   _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+}
+
+
+const void Display::windingTurns(uint32_t coilTurns, uint32_t counter)
+{
+  _lcd.setCursor(0,1);
+  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
+}
+
+
+const void Display::windingSetSpeed(uint16_t speed)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(speed);
 }

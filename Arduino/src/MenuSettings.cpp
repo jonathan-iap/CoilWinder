@@ -8,13 +8,15 @@
 
 Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
 :  _idValue(0),
+   _tmp_id(0),
    p_arrayValue(0),
    _sizeBuffValue(0),
    p_floatingValue(0),
    _speedPercent(100),
    _positionAB(0),
    _index(0),
-   _minIndex(0)
+   _minIndex(0),
+   _homePosition(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -30,18 +32,21 @@ Setting::~Setting(){}
 void Setting::actionMenu(const uint8_t id)
 {
   _idValue = id;
+  _tmp_id = id;
+
   setValueFromId();
   navigationEngine();
 }
 
 
-void Setting::actionMenu(const uint8_t id, const char label[], char arrayValue[],
-			 const uint8_t sizeOfArrayValue, float *value, const char unit[],
-			 const char actionBar[], const uint8_t sizeActionBar, uint8_t AB_LinePosition)
+void Setting::actionMenu(const uint8_t id, char tmp_buffValue[], float *tmp_valFromBuff)
 {
   _idValue = id;
-  setValues(label, arrayValue,  sizeOfArrayValue, value, unit,  actionBar,
-	    sizeActionBar,  AB_LinePosition);
+
+  p_arrayValue     = tmp_buffValue;
+  p_floatingValue  = tmp_valFromBuff;
+
+  setValueFromId();
   navigationEngine();
 }
 
@@ -54,6 +59,11 @@ void Setting::setValueFromId()
 {
   switch (_idValue)
   {
+    case id_HOME :
+      {
+	setValues(MSG_HOMING, ACTIONBAR_SETHOME, SIZE_AB_SETHOME, LCD_LINES);
+	break;
+      }
     case id_WIRESIZE :
       {
 	setValues(MSG_WIRE_SIZE, _buff_WireSize, BUFFSIZE_WIRE, &WireSize, UNIT_MM,
@@ -88,6 +98,18 @@ void Setting::setValueFromId()
       {
 	setValues(MSG_ACC_DELAY, _buff_AccDelay, BUFFSIZE_ACC_DELAY, &AccDelay, UNIT_US,
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
+    case id_MOVE_CARRIAGE :
+      {
+	setValues(MSG_MOVE, COUNTOF(INIT_MOV_CAR), UNIT_MM, ACTIONBAR_MOVE, SIZE_AB_MOVE,
+		  LCD_LINES);
+	break;
+      }
+    case id_MOVE_COIL :
+      {
+	setValues(MSG_MOVE, COUNTOF(INIT_MOV_COIL), UNIT_TR, ACTIONBAR_MOVE, SIZE_AB_MOVE,
+		  LCD_LINES);
 	break;
       }
     case id_RESET :
@@ -135,14 +157,12 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   // Displayed on left top.
   strcpy(_label, label);
   // Pass values saved from memory.
-  p_arrayValue 		= arrayValue;
-  _sizeBuffValue	= sizeOfArrayValue;
-  p_floatingValue 	= value;
+  p_arrayValue     = arrayValue;
+  _sizeBuffValue   = sizeOfArrayValue;
+  p_floatingValue  = value;
   strcpy(_unit, unit);
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
-
-  //_index = 0;
 
 #ifdef DEBUGoff
   Serial.println("***********************");
@@ -154,6 +174,20 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   Serial.print("_actionBar      : "); Serial.println(_actionBar);
   Serial.println("***********************");
 #endif
+}
+
+
+void Setting::setValues(const char label[], const uint8_t sizeOfArrayValue,
+			const char unit[], const char actionBar[],
+			const uint8_t sizeActionBar, uint8_t AB_LinePosition)
+{
+  // Displayed on left top.
+  strcpy(_label, label);
+  // Pass values saved from memory.
+  _sizeBuffValue   = sizeOfArrayValue;
+  strcpy(_unit, unit);
+  // Action bar
+  setActionBar(p_arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
 }
 
 
@@ -206,25 +240,24 @@ void Setting::navigationEngine()
 
   int8_t  lastIndex = 0;
   uint8_t lastSense = 0;
-  uint8_t wordSize = 0;
+  uint8_t wordSize  = 0;
   uint32_t lastTime;
-
-  uint8_t tmp_id = _idValue;
 
   // Display all information related to the id
   displaying();
 
   while(run)
     {
+      // Navigate into action bar
       cursorMovement(&lastIndex, &lastSense, &wordSize, &lastTime);
 
       if( _Encoder->getButton() == ClickEncoder::Clicked)
 	{
-	  run = selectedAction(wordSize, &tmp_id);
+	  run = selectedAction(wordSize);
 	  // Allow to recognize the first word of new action bar (if changed).
 	  lastIndex = 0;
 	  lastSense = 0;
-	  wordSize = 0;
+	  wordSize  = 0;
 	}
     }
 }
@@ -236,12 +269,12 @@ void Setting::navigationEngine()
  ******************************************************************************/
 void Setting::displaying()
 {
-  _Display->engine_setValue(_label, _actionBar, _positionAB);
+  _Display->engineSetValue(_label, _actionBar, _positionAB);
 
   switch(_idValue)
   {
-    case id_NEW		: {_Display->engineNewWinding(Turns); break;}
-    case id_RESUME	: {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
+    case id_NEW         : {_Display->engineNewWinding(Turns); break;}
+    case id_RESUME      : {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
     case id_RESUME_SAVE:
       {
 	uint32_t tmp_totalSteps = 0;
@@ -333,7 +366,7 @@ void Setting::editValue(int8_t index)
  * details : Depending where the cursor is placed, it's identified which action
  * to be taken. Work with call backs.
  ******************************************************************************/
-bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
+bool Setting::selectedAction(uint8_t wordSize)
 {
   char tmp_word[wordSize+1] = {0};
 
@@ -347,45 +380,59 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
   // Words
   else if(isWord(_actionBar, _index, wordSize, tmp_word))
     {
-      // SAVE _________________________________________________________________
-      if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
+      // MOVE _________________________________________________________________
+      if(buffercmp((char*)KEYWORD_MOVE, tmp_word, SIZE_KEYWORD_MOVE))
 	{
-	  setSave(tmp_id); // Set tmp_id, display and update values
+	  set_AB_MoveCar();
+	  return CONTINU;
+	}
+      // SET __________________________________________________________________
+      else if(buffercmp((char*)KEYWORD_SET, tmp_word, SIZE_KEYWORD_SET))
+	{
+	  set_AB_SetHome();
+	  return CONTINU;
+	}
+      // SAVE _________________________________________________________________
+      else if(buffercmp((char*)KEYWORD_SAVE, tmp_word, SIZE_KEYWORD_SAVE))
+	{
+	  set_AB_Save(); // Set tmp_id, display and update values
 	  return CONTINU;
 	}
       // YES __________________________________________________________________
       else if(buffercmp((char*)KEYWORD_YES, tmp_word, SIZE_KEYWORD_YES))
 	{
-	  switch (*tmp_id)
+	  switch (_tmp_id)
 	  {
 	    case id_SAVE : {
 	      saveCurrent();
 
-	      if(_idValue == id_RESUME){ setSuspendMenu(tmp_id); return CONTINU;}
+	      if(_idValue == id_RESUME){ set_AB_SuspendMenu(); return CONTINU;}
 	      else{return EXIT;}
 
 	      break;
 	    }
-	    case id_RESET	: {resetAll(); return EXIT; break;}
-	    case id_RAZ  	: {RAZ_All(); return EXIT; break;}
-	    case id_NEW	 	: {return runWinding(true, true, tmp_id); break;}
-	    case id_RESUME 	: {return runWinding(true, false, tmp_id); break;}
-	    case id_RESUME_SAVE : {return runWinding(true, false, tmp_id); break;}
+	    case id_HOME        : {setHomePosition(); return EXIT; break;}
+	    case id_RESET       : {resetAll(); return EXIT; break;}
+	    case id_RAZ         : {RAZ_All(); return EXIT; break;}
+	    case id_NEW         : {return runWinding(FIRST_LUNCH, NEW	); break;}
+	    case id_RESUME      : {return runWinding(FIRST_LUNCH, RESUME); break;}
+	    case id_RESUME_SAVE : {return runWinding(FIRST_LUNCH, RESUME); break;}
 	  }
 	}
       // NO ___________________________________________________________________
       else if(buffercmp((char*)KEYWORD_NO, tmp_word, SIZE_KEYWORD_NO))
 	{
-	  switch (*tmp_id)
+	  switch (_tmp_id)
 	  {
 	    case id_SAVE	: {
-	      if(_idValue == id_RESUME){ setSuspendMenu(tmp_id); return CONTINU;}
+	      if(_idValue == id_RESUME){ set_AB_SuspendMenu(); return CONTINU;}
 	      else{ retry(); return CONTINU;}
 	      break;
 	    }
-	    case id_RESET	: {return EXIT; break;}
-	    case id_RAZ		: {return EXIT; break;}
-	    case id_NEW		: {return EXIT; break;}
+	    case id_HOME  : {return EXIT; break;}
+	    case id_RESET : {return EXIT; break;}
+	    case id_RAZ   : {return EXIT; break;}
+	    case id_NEW   : {return EXIT; break;}
 	  }
 	}
       // SPEED _________________________________________________________________
@@ -393,16 +440,29 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 	{
 	  if(id_SUSPEND){
 	      adjustSpeed();
-	      setSuspendMenu(tmp_id);
+	      set_AB_SuspendMenu();
 	      return CONTINU;
 	  }
 	  else return EXIT;
 	}
       // EXIT __________________________________________________________________
-      else if(buffercmp((char*)KEYWORD_EXIT, tmp_word, SIZE_KEYWORD_EXIT))
-	return EXIT;
+      else if(buffercmp((char*)KEYWORD_EXIT, tmp_word, SIZE_KEYWORD_EXIT)){
+	  return EXIT;}
+      // NEXT __________________________________________________________________
+      else if(buffercmp((char*)KEYWORD_NEXT, tmp_word, SIZE_KEYWORD_NEXT)){
+	  return CONTINU;}
+      // BACK __________________________________________________________________
+      else if(buffercmp((char*)KEYWORD_BACK, tmp_word, SIZE_KEYWORD_BACK)){
+	  if(_idValue == id_HOME)
+	    {
+	      set_AB_Home();
+	      return CONTINU;
+	    }
+      }
+      // Not found______________________________________________________________
       else return 0;
     }
+
 
   // Icons
   else
@@ -412,16 +472,16 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 	// LEFT ________________________________________________________________
 	case ICONLEFT[0] :
 	{
-	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
-	      moving(C_CLOCK); return EXIT;
+	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL){
+	      moving(C_CLOCK); return CONTINU;
 	  }
 	  break;
 	}
 	// RIGHT _______________________________________________________________
 	case ICONRIGHT[0] :
 	{
-	  if(*tmp_id == id_MOVE_CARRIAGE || *tmp_id == id_MOVE_COIL){
-	      moving(CLOCK); return EXIT;
+	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL){
+	      moving(CLOCK); return CONTINU;
 	  }
 	  else{
 	      update(); return EXIT;
@@ -431,7 +491,7 @@ bool Setting::selectedAction(uint8_t wordSize, uint8_t *tmp_id)
 	// RESUME ______________________________________________________________
 	case ICONRESUME[0] :
 	{
-	  if(*tmp_id == id_SUSPEND){ return runWinding(false, false, tmp_id);}
+	  if(_tmp_id == id_SUSPEND){ return runWinding(RESUME, RESUME);}
 	  break;
 	}
 	// STOP ________________________________________________________________
@@ -467,16 +527,52 @@ void Setting::update()
 void Setting::retry()
 {
   setValueFromId();
-  _Display->engine_setValue(_label, _actionBar,_positionAB);
+  _Display->engineSetValue(_label, _actionBar,_positionAB);
 }
+
+
+/******************************************************************************
+ * brief   : Set action bar to move carriage
+ ******************************************************************************/
+void Setting::set_AB_MoveCar()
+{
+  _tmp_id = id_MOVE_CARRIAGE;
+  setValues(MSG_MOVE, COUNTOF(INIT_MOV_CAR), UNIT_MM, ACTIONBAR_MOVE_BACK, SIZE_AB_MOVE_BACK,
+	    LCD_LINES);
+  displaying();
+}
+
+
+/******************************************************************************
+ * brief   : If user click on "Back" after set carriage position.
+ ******************************************************************************/
+void Setting::set_AB_Home()
+{
+  setValues(MSG_HOMING, ACTIONBAR_SETHOME, SIZE_AB_SETHOME, LCD_LINES);
+  displaying();
+}
+
+
+/******************************************************************************
+ * brief   : Sub-menu setHome
+ * details :
+ ******************************************************************************/
+void Setting::set_AB_SetHome()
+{
+  _tmp_id = id_HOME;
+
+  setValues(MSG_CONFIRM, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+  displaying();
+}
+
 
 /******************************************************************************
  * brief   : Sub menu save
  * details : Print current value and ask save? if yes save in eeprom memory.
  ******************************************************************************/
-void Setting::setSave(uint8_t *tmp_id)
+void Setting::set_AB_Save()
 {
-  *tmp_id = id_SAVE;
+  _tmp_id = id_SAVE;
 
   if(_idValue != id_RESUME)
     {
@@ -491,6 +587,16 @@ void Setting::setSave(uint8_t *tmp_id)
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
+}
+
+
+/******************************************************************************
+ * brief   : Set the homing position
+ ******************************************************************************/
+void Setting::setHomePosition()
+{
+  _homePosition = 0;
+  _Display->loadBar();
 }
 
 
@@ -550,6 +656,7 @@ void Setting::moving(bool direction)
   else {_Coil->runOnlyCoil(direction, *p_floatingValue);}
 
   _Coil->disableMotors();
+  displaying();
 }
 
 
@@ -557,7 +664,7 @@ void Setting::moving(bool direction)
  * brief   : Main winding function
  * details : Set all value for winding
  ******************************************************************************/
-bool Setting::runWinding(bool isFirstLunch, bool isNewCoil, uint8_t *tmp_id)
+bool Setting::runWinding(bool isFirstLunch, bool isNewCoil)
 {
 
   // Pass values
@@ -571,7 +678,7 @@ bool Setting::runWinding(bool isFirstLunch, bool isNewCoil, uint8_t *tmp_id)
     }
   else
     {
-      setSuspendMenu(tmp_id);
+      set_AB_SuspendMenu();
       return CONTINU;
     }
 }
@@ -633,10 +740,10 @@ void Setting::adjustSpeed()
  * brief   : Menu suspend
  * details : Enter in menu suspend if user click on encoder during winding.
  ******************************************************************************/
-void Setting::setSuspendMenu(uint8_t *tmp_id)
+void Setting::set_AB_SuspendMenu()
 {
   _idValue = id_RESUME; // For recovery the current winding
-  *tmp_id = id_SUSPEND; // For execute menuSuspend();
+  _tmp_id = id_SUSPEND; // For execute menuSuspend();
 
   setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
   _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());

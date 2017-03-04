@@ -26,8 +26,8 @@ public:
 
   bool runMultiLayer(bool isNewCoil);
   bool runOneLayer();
-  void runOnlyCarriage(bool dir, float distance);
-  void runOnlyCoil(bool dir, uint32_t turns);
+  bool runOnlyCarriage(bool dir, float distance);
+  bool runOnlyCoil(bool dir, uint32_t turns);
 
   bool suspend();
   void disableMotors();

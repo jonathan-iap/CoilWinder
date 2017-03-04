@@ -18,35 +18,36 @@
 // String to check if EEprom memory is initialize
 #define MSG_IS_SET "is set"
 // Size to store memory
-#define BUFFSIZE_WIRE    	(COUNTOF(INIT_WIRE))
-#define BUFFSIZE_COIL    	(COUNTOF(INIT_COIL))
-#define BUFFSIZE_TURNS  	(COUNTOF(INIT_TURNS))
-#define BUFFSIZE_MAX_SPEED	(COUNTOF(INIT_MAXSPEED))
-#define BUFFSIZE_MIN_SPEED	(COUNTOF(INIT_MINSPEED))
-#define BUFFSIZE_ACC_DELAY	(COUNTOF(INIT_ACC_DELAY))
-#define BUFFSIZE_SENSE		(COUNTOF(MSG_CLOCK))
-#define BUFFSIZE_DEFAULT 	(COUNTOF(MSG_IS_SET))
+#define BUFFSIZE_WIRE       (COUNTOF(INIT_WIRE))
+#define BUFFSIZE_COIL       (COUNTOF(INIT_COIL))
+#define BUFFSIZE_TURNS      (COUNTOF(INIT_TURNS))
+#define BUFFSIZE_MAX_SPEED  (COUNTOF(INIT_MAXSPEED))
+#define BUFFSIZE_MIN_SPEED  (COUNTOF(INIT_MINSPEED))
+#define BUFFSIZE_ACC_DELAY  (COUNTOF(INIT_ACC_DELAY))
+#define BUFFSIZE_SENSE      (COUNTOF(MSG_CLOCK))
+#define BUFFSIZE_DEFAULT    (COUNTOF(MSG_IS_SET))
 
 /* ID _________________________________________________________________*/
 // Values
-#define id_WIRESIZE	1
-#define id_COILLENGTH	2
-#define id_TURNS	3
-#define id_MAX_SPEED	4
-#define id_MIN_SPEED	5
-#define id_ACC_DELAY	6
-#define id_W_SENSE	7
-#define id_C_SENSE	8
+#define id_WIRESIZE    1
+#define id_COILLENGTH  2
+#define id_TURNS       3
+#define id_MAX_SPEED   4
+#define id_MIN_SPEED   5
+#define id_ACC_DELAY   6
+#define id_W_SENSE     7
+#define id_C_SENSE     8
 // Actions
-#define id_SAVE			20
-#define id_RESET		21
-#define id_RAZ			22
-#define id_MOVE_CARRIAGE	23
-#define id_MOVE_COIL		24
-#define id_NEW			25
-#define id_RESUME		26
-#define id_RESUME_SAVE		27
-#define id_SUSPEND		28
+#define id_SAVE           20
+#define id_RESET          21
+#define id_RAZ            22
+#define id_MOVE_CARRIAGE  23
+#define id_MOVE_COIL      24
+#define id_NEW            25
+#define id_RESUME         26
+#define id_RESUME_SAVE    27
+#define id_SUSPEND        28
+#define id_HOME           29
 
 
 class Memory
