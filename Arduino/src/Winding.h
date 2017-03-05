@@ -21,7 +21,7 @@ public:
 
   void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed);
-  void setSteps(uint32_t totalSteps, uint32_t layerSteps);
+  void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
   void updateSpeed(uint16_t speed);
 
   bool runMultiLayer(bool isNewCoil);
@@ -36,6 +36,7 @@ public:
   uint32_t getCurrentTurns();
   uint32_t getTotalStepsCounter();
   uint32_t getLayerStepsCounter();
+  uint32_t getLayerCoilStepsCounter();
 
 private:
 
@@ -72,9 +73,11 @@ private:
   bool _direction;
   // Steps for one layer.
   uint32_t _stepsPerLayer;
+  uint32_t _stepsCoilPerLayer;
   uint32_t _stepsTravel;
   uint32_t _totalStepsCounter;
   uint32_t _layerStepsCounter;
+  uint32_t _layerCoilStepsCounter;
 
 };
 

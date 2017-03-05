@@ -11,6 +11,7 @@
 #define TurnToSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
 #define StepsToTurns(coilSteps) coilSteps / M1_STEPS_PER_TR
 
+
 /******************************************************************************
  * brief   : Convert reduction ratio into delay.
  * details : If the ratio is inferior to 1 we need to convert delay
@@ -100,18 +101,20 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _windingSense(0),
   _carriageStartSense(0),
 
-  _accDelay (400),
-  _maxSpeed (30),
-  _minSpeed (1400),
+  _accDelay (0),
+  _maxSpeed (0),
+  _minSpeed (0),
   _speed(0),
 
   _ratio(0),
   _direction(CLOCK),
 
   _stepsPerLayer(0),
+  _stepsCoilPerLayer(0),
   _stepsTravel(0),
   _totalStepsCounter(0),
-  _layerStepsCounter(0)
+  _layerStepsCounter(0),
+  _layerCoilStepsCounter(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -141,10 +144,11 @@ void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uin
 }
 
 
-void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps)
+void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps)
 {
-  _totalStepsCounter = totalSteps;
-  _layerStepsCounter = layerSteps;
+  _totalStepsCounter     = totalSteps;
+  _layerStepsCounter     = layerSteps;
+  _layerCoilStepsCounter = coilSteps;
 }
 
 
@@ -157,6 +161,8 @@ void Coil::updateSpeed(uint16_t speed)
 void Coil::computeStepPerLayer(float length)
 {
   _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
+  // To give the exact number of steps on coil and on carriage.
+  _stepsCoilPerLayer = (_stepsPerLayer * _ratio);
 
 #ifdef DEBUGoff
   Serial.println("__________________");
@@ -250,9 +256,10 @@ bool Coil::runMultiLayer(bool isNewCoil)
   // New winding
   else
     {
-      _direction = C_CLOCK; // To start left to right.
-      _totalStepsCounter = 0;
-      _layerStepsCounter = 0;
+      _direction             = C_CLOCK; // To start left to right.
+      _totalStepsCounter     = 0;
+      _layerStepsCounter     = 0;
+      _layerCoilStepsCounter = 0;
     }
 
   // Display value that are used for current winding.
@@ -269,7 +276,8 @@ bool Coil::runMultiLayer(bool isNewCoil)
       else
 	{
 	  // initialize for the next loop.
-	  _layerStepsCounter = 0;
+	  _layerStepsCounter     = 0;
+	  _layerCoilStepsCounter = 0;
 	  // Invert direction when one layer is finished.
 	  _direction = !_direction;
 	}
@@ -300,13 +308,8 @@ bool Coil::runOneLayer()
   uint32_t lastMicrosMotorCarriage = 0;
   uint32_t lastMicrosAcc = 0;
 
-  // Control to give the exact number of steps on coil and on carriage.
-  uint32_t coilLayerSteps = (_stepsPerLayer * _ratio);
-  uint32_t counterCoilLayerSteps = 0;
-
-
   while((_totalStepsCounter < TurnToSteps(_coilTurns)) &&
-      ((_layerStepsCounter < _stepsPerLayer) || (counterCoilLayerSteps < coilLayerSteps)))
+      ((_layerStepsCounter < _stepsPerLayer) || (_layerCoilStepsCounter < _stepsCoilPerLayer)))
     {
       // If user click on encoder, isSuspend become true and break the loop.
       if( suspend() == true) return true;
@@ -330,11 +333,11 @@ bool Coil::runOneLayer()
 	    }
 
 	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding)&&
-	      (counterCoilLayerSteps < coilLayerSteps))
+	      (_layerCoilStepsCounter < _stepsCoilPerLayer))
 	    {
 	      stepper.coil_oneStep(C_CLOCK);
 	      _totalStepsCounter ++;
-	      counterCoilLayerSteps++;
+	      _layerCoilStepsCounter++;
 	    }
 
 	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage)&&
@@ -479,4 +482,10 @@ uint32_t Coil::getTotalStepsCounter()
 uint32_t Coil::getLayerStepsCounter()
 {
   return _layerStepsCounter;
+}
+
+
+uint32_t Coil::getLayerCoilStepsCounter()
+{
+  return _layerCoilStepsCounter;
 }

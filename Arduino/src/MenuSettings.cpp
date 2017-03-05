@@ -582,8 +582,9 @@ void Setting::set_AB_Save()
     }
   else
     {
-      TotalSteps = _Coil->getTotalStepsCounter();
-      LayerSteps = _Coil->getLayerStepsCounter();
+      TotalSteps     = _Coil->getTotalStepsCounter();
+      LayerSteps     = _Coil->getLayerStepsCounter();
+      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
@@ -699,7 +700,7 @@ void Setting::setWinding(bool isFirstLunch)
   if(_idValue == id_RESUME_SAVE)
     {
       read(0, id_RESUME_SAVE); // Read the value of all steps in eeprom
-      _Coil->setSteps(TotalSteps, LayerSteps);
+      _Coil->setSteps(TotalSteps, LayerSteps, LayerCoilSteps);
       _idValue = id_RESUME;
     }
 }

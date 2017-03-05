@@ -85,6 +85,7 @@ protected :
 
   uint32_t TotalSteps;
   uint32_t LayerSteps;
+  uint32_t LayerCoilSteps;
 
   char _buff_WireSize[BUFFSIZE_WIRE+1];
   char _buff_CoilLength[BUFFSIZE_COIL+1];
@@ -107,6 +108,7 @@ private :
   uint8_t _addr_DefaultSettings;
   uint8_t _addr_TotalSteps;
   uint8_t _addr_LayerSteps;
+  uint8_t _addr_LayerCoilSteps;
 };
 
 #endif /* SRC_SAVE_H_ */

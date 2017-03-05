@@ -19,7 +19,8 @@ Memory::Memory()
   CarSense(0),
 
   TotalSteps(0),
-  LayerSteps(0)
+  LayerSteps(0),
+  LayerCoilSteps(0)
 {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
@@ -36,6 +37,7 @@ Memory::Memory()
   _addr_DefaultSettings	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
   _addr_TotalSteps	= EEPROM.getAddress(sizeof(uint32_t));
   _addr_LayerSteps	= EEPROM.getAddress(sizeof(uint32_t));
+  _addr_LayerCoilSteps	= EEPROM.getAddress(sizeof(uint32_t));
 
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
@@ -94,6 +96,7 @@ void Memory::save(char buffer[], const uint8_t id)
       {
 	EEPROM.updateLong(_addr_TotalSteps, TotalSteps);
 	EEPROM.updateLong(_addr_LayerSteps, LayerSteps);
+	EEPROM.updateLong(_addr_LayerCoilSteps, LayerCoilSteps);
 	break;
       }
   }
@@ -147,6 +150,7 @@ void Memory::read(char buffer[], const uint8_t id)
       {
 	TotalSteps = EEPROM.readLong(_addr_TotalSteps);
 	LayerSteps = EEPROM.readLong(_addr_LayerSteps);
+	LayerCoilSteps= EEPROM.readLong(_addr_LayerCoilSteps);
 	break;
       }
   }
@@ -195,6 +199,7 @@ void Memory::reset()
 
   EEPROM.writeLong(_addr_TotalSteps, 0);
   EEPROM.writeLong(_addr_LayerSteps, 0);
+  EEPROM.writeLong(_addr_LayerCoilSteps, 0);
 }
 
 bool Memory::isSet()
