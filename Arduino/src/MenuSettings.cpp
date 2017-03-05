@@ -102,12 +102,14 @@ void Setting::setValueFromId()
       }
     case id_MOVE_CARRIAGE :
       {
+	_tmp_id = id_MOVE_CARRIAGE;
 	setValues(MSG_MOVE, COUNTOF(INIT_MOV_CAR), UNIT_MM, ACTIONBAR_MOVE, SIZE_AB_MOVE,
 		  LCD_LINES);
 	break;
       }
     case id_MOVE_COIL :
       {
+	_tmp_id = id_MOVE_COIL;
 	setValues(MSG_MOVE, COUNTOF(INIT_MOV_COIL), UNIT_TR, ACTIONBAR_MOVE, SIZE_AB_MOVE,
 		  LCD_LINES);
 	break;
@@ -653,8 +655,14 @@ void Setting::moving(bool direction)
   _Display->engineMoving(*p_floatingValue, _unit, direction);
 
   // Start
-  if(_idValue == id_MOVE_CARRIAGE) { _Coil->runOnlyCarriage(direction, *p_floatingValue);}
-  else {_Coil->runOnlyCoil(direction, *p_floatingValue);}
+  if(_idValue == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_CARRIAGE)
+    {
+      _Coil->runOnlyCarriage(direction, *p_floatingValue);
+    }
+  else
+    {
+      _Coil->runOnlyCoil(direction, *p_floatingValue);
+    }
 
   _Coil->disableMotors();
   displaying();
