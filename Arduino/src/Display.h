@@ -94,110 +94,110 @@
 
 class Display
 {
-  // Public variables -----------------------------------------------------------
+	// Public variables -----------------------------------------------------------
 public :
 
-  uint8_t block[8] = {
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111
-  };
+	uint8_t block[8] = {
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111
+	};
 
-  uint8_t left[8] = {
-      0b00010,
-      0b00110,
-      0b01110,
-      0b11110,
-      0b01110,
-      0b00110,
-      0b00010,
-      0b00000
-  };
+	uint8_t left[8] = {
+			0b00010,
+			0b00110,
+			0b01110,
+			0b11110,
+			0b01110,
+			0b00110,
+			0b00010,
+			0b00000
+	};
 
-  uint8_t right[8] = {
-      0b01000,
-      0b01100,
-      0b01110,
-      0b01111,
-      0b01110,
-      0b01100,
-      0b01000,
-      0b00000
-  };
+	uint8_t right[8] = {
+			0b01000,
+			0b01100,
+			0b01110,
+			0b01111,
+			0b01110,
+			0b01100,
+			0b01000,
+			0b00000
+	};
 
-  uint8_t stop[8] = {
-      0b00000,
-      0b00000,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b11111,
-      0b00000
-  };
+	uint8_t stop[8] = {
+			0b00000,
+			0b00000,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b11111,
+			0b00000
+	};
 
-  uint8_t resume[8] = {
-      0b00000,
-      0b00000,
-      0b10100,
-      0b10110,
-      0b10111,
-      0b10110,
-      0b10100,
-      0b00000
-  };
+	uint8_t resume[8] = {
+			0b00000,
+			0b00000,
+			0b10100,
+			0b10110,
+			0b10111,
+			0b10110,
+			0b10100,
+			0b00000
+	};
 
-  byte back[8] = {
-      0b00111,
-      0b00001,
-      0b00001,
-      0b00101,
-      0b01101,
-      0b11111,
-      0b01100,
-      0b00100
-  };
+	byte back[8] = {
+			0b00111,
+			0b00001,
+			0b00001,
+			0b00101,
+			0b01101,
+			0b11111,
+			0b01100,
+			0b00100
+	};
 
-  // Public functions -----------------------------------------------------------
+	// Public functions -----------------------------------------------------------
 public:
-  Display();
-  ~Display();
+	Display();
+	~Display();
 
-  const void begin();
-  const void version();
-  const void clear();
-  const void blank(uint8_t size);
-  const void blinkSelection(uint8_t index, char actionBar[], uint8_t sizeAB,
-			    uint8_t positionAB, uint8_t wordSize, bool editMode);
-  const void loadBar();
+	const void begin();
+	const void version();
+	const void clear();
+	const void blank(uint8_t size);
+	const void blinkSelection(uint8_t index, char actionBar[], uint8_t sizeAB,
+			uint8_t positionAB, uint8_t wordSize, bool editMode);
+	const void loadBar();
 
-  // Render menu item
-  const void renderIconOn(uint8_t pos, bool currentItem);
-  const void renderItem(const char item[]);
-  const void renderIconChild();
+	// Render menu item
+	const void renderIconOn(uint8_t pos, bool currentItem);
+	const void renderItem(const char item[]);
+	const void renderIconChild();
 
-  // MenuSetting
-  const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
-  const void engineEditMode(uint8_t positionAB);
-  const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB);
-  const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
-  const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
-  const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
-  const void engineMoving(float value, char unit[], bool dir);
-  const void engineNewWinding(uint16_t coilTurns);
-  const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);
-  const void engineAjustSpeed(bool refresh, int8_t percent);
-  const void engineSuspend(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
-  const void engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
+	// MenuSetting
+	const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
+	const void engineEditMode(uint8_t positionAB);
+	const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB);
+	const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
+	const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
+	const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
+	const void engineMoving(float value, char unit[], bool dir);
+	const void engineNewWinding(uint16_t coilTurns);
+	const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);
+	const void engineAjustSpeed(bool refresh, int8_t percent);
+	const void engineSuspend(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
+	const void engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
 
-  // Winding
-  const void windingTurns(uint32_t coilTurns,uint32_t counter);
-  const void windingSetSpeed(uint16_t speed);
+	// Winding
+	const void windingTurns(uint32_t coilTurns,uint32_t counter);
+	const void windingSetSpeed(uint16_t speed);
 };
 
 #endif /* SRC_DISPLAY_H_ */

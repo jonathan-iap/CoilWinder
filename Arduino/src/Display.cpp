@@ -17,6 +17,8 @@ const void Display::begin()
 {
   _lcd.begin(LCD_CHARS,LCD_LINES);
 
+  Wire.setClock(400000); // change i2c speed to 400Khz
+
   _lcd.createChar(ICONBLOCK[0], block);
   _lcd.createChar(ICONLEFT[0], left);
   _lcd.createChar(ICONRIGHT[0], right);
@@ -230,9 +232,7 @@ const void Display::engineMoving(float value, char unit[], bool dir)
   _lcd.print(MSG_FOR_STOP);
 }
 
-/******************************************************************************
- * brief   : Ask if user want to start a new winding
- ******************************************************************************/
+
 const void Display::engineNewWinding(uint16_t coilTurns)
 {
   _lcd.setCursor(0, LCD_LINES);
