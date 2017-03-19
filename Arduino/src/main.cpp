@@ -15,7 +15,7 @@
 
 
 // Declare objects ------------------------------------------------------------
-ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
+ClickEncoder Encoder;
 Menu::Engine *engine;
 Display display;
 
@@ -138,20 +138,7 @@ void loop()
 	  }
 	break;
       }
-    case ClickEncoder::DoubleClicked:
-      {
-	// Back to previous item
-	if (systemState == state_MOVE)
-	  {
-	    engine->navigate(engine->getParent());
-	    updateMenu = true;
-	  }
-	break;
-      }
-    case ClickEncoder::Pressed:{break;}
     case ClickEncoder::Held:{break;}
-    case ClickEncoder::Released:{break;}
-    case ClickEncoder::Closed:{break;}
     case ClickEncoder::Open:{break;}
   }
 

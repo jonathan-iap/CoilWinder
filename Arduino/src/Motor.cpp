@@ -1,6 +1,6 @@
 #include "Motor.h"
 #include "Configuration.h"
-#include "fastio.h"
+#include "Fastio.h"
 
 Motor::Motor()
 {}

@@ -15,7 +15,7 @@
 // Rotary encoder properties --------------------------------------------------
 #define ENC_PIN_A	3 // The order declaration(pin A, B) determine the direction.
 #define ENC_PIN_B	2 //
-#define ENC_PIN_SW	4 // Click switch
+#define ENC_PIN_BTN	4 // Click switch
 #define ENC_STEP	2 // How many you increase value, when you make one step
 
 // Motors settings ------------------------------------------------------------
