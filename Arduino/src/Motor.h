@@ -2,23 +2,21 @@
 #define MOTOR_H
 
 #include "Arduino.h"
+#include "Configuration.h"
+#include "Fastio.h"
+#include "TimerOne.h"
 
-class Motor
-{
-public:
+#define COIL      1
+#define CARRIAGE  2
 
-  Motor();
-  ~Motor();
+void motorsInit();
+void motorsStart();
+void motorsStop();
+void engineMotors();
 
-  void begin();
+uint16_t getMotorCoilTr();
 
-  void coil_enable();
-  void coil_disable();
-  void coil_oneStep(bool direction);
-
-  void carriage_enable();
-  void carriage_disable();
-  void carriage_oneStep(bool direction);
-};
+void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir);
+void oneStep(bool M_coil, bool M_carr);
 
 #endif

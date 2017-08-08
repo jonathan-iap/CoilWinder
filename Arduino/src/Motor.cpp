@@ -1,81 +1,125 @@
 #include "Motor.h"
-#include "Configuration.h"
-#include "Fastio.h"
 
-Motor::Motor()
-{}
+#define NB_TR 50
 
-Motor::~Motor()
-{}
+#define MAX_SPEED 3
+#define ACC 1000
 
-void Motor::begin()
+struct motor
 {
-  SET_OUTPUT(M1_DIR);
-  SET_OUTPUT(M1_STEP);
-  SET_OUTPUT(M1_EN);
+	bool en = DISABLE;
+	bool dir = CLOCK;
+	uint16_t stepPerTr = 0;
+	uint16_t tr = 0;
+	uint16_t stepTic = 0;
+	uint16_t speed = 0;
+};
+struct motor coil, carriage;
 
-  SET_OUTPUT(M2_DIR);
-  SET_OUTPUT(M2_STEP);
-  SET_OUTPUT(M2_EN);
+uint16_t speedSet = MAX_SPEED;
+uint16_t tic = 0;
 
-  coil_disable();
-  carriage_disable();
+void motorsInit()
+{
+	Timer1.initialize(10);
+	Timer1.attachInterrupt(engineMotors);
+	Timer1.stop();
+
+	pinMode(M1_DIR , OUTPUT);
+	pinMode(M1_STEP, OUTPUT);
+	pinMode(M1_EN  , OUTPUT);
+
+	pinMode(M2_DIR , OUTPUT);
+	pinMode(M2_STEP, OUTPUT);
+	pinMode(M2_EN  , OUTPUT);
+
+	digitalWrite(M1_EN, DISABLE);
+	digitalWrite(M2_EN, DISABLE);
 }
 
-/******************************************************************************
- * brief   : Enable stepper
- ******************************************************************************/
-void Motor::coil_enable()
+void motorsStart()
 {
-  WRITE(M1_EN, ENABLE);
+	tic=0;
+
+	coil.stepTic = 0;
+	coil.stepPerTr = 0;
+	coil.tr = 0;
+	coil.speed = 50;
+
+	WRITE(M1_EN, ENABLE);
+	Timer1.start();
 }
 
-void Motor::carriage_enable()
+void motorsStop()
 {
-  WRITE(M2_EN, ENABLE);
+	Timer1.stop();
+	WRITE(M1_EN, DISABLE);
 }
 
-/******************************************************************************
- * brief   : Disable stepper
- ******************************************************************************/
-void Motor::coil_disable()
+void engineMotors()
 {
-  WRITE(M1_EN, DISABLE);
+	tic++;
+	coil.stepTic++;
+
+	if(coil.tr != NB_TR)
+	{
+		if(tic == ACC && coil.speed!=speedSet)
+		{
+			coil.speed--;
+			tic=0;
+		}
+
+		if(coil.stepTic >= coil.speed)
+		{
+			coil.stepTic=0;
+
+			oneStep(COIL, 0);
+
+			if(coil.stepPerTr != M1_STEPS_PER_TR)
+			{
+				coil.stepPerTr++;
+			}
+			else
+			{
+				coil.stepPerTr = 0;
+				coil.tr++;
+			}
+		}
+	}
+	else motorsStop();
 }
 
-void Motor::carriage_disable()
+
+void oneStep(bool M_coil, bool M_carr)
 {
-  WRITE(M2_EN, DISABLE);
+	if(M_coil && M_carr)
+	{
+		WRITE(M1_STEP, HIGH);
+		WRITE(M1_STEP, LOW);
+		WRITE(M2_STEP, HIGH);
+		WRITE(M2_STEP, LOW);
+	}
+	else if(M_coil)
+	{
+		WRITE(M1_STEP, HIGH);
+		WRITE(M1_STEP, LOW);
+	}
+	else
+	{
+		WRITE(M2_STEP, HIGH);
+		WRITE(M2_STEP, LOW);
+	}
 }
 
-/******************************************************************************
- * brief   : Motor advance.
- * details : Verified that enable pins are ok and make one step in the direction
- * you want.
- ******************************************************************************/
-void Motor::coil_oneStep(bool direction)
+
+
+// GET and SET functions________________________________________________________
+uint16_t getMotorCoilTr()
 {
-  if(READ(M1_EN) != ENABLE) coil_enable();
-
-  if(READ(M1_DIR) != direction) WRITE(M1_DIR, direction);
-
-  WRITE(M1_STEP, HIGH);
-#ifdef  DELAY_DRIVER
-  delayMicroseconds(DELAY_DRIVER);
-#endif
-  WRITE(M1_STEP, LOW);
+	return coil.tr;
 }
 
-void Motor::carriage_oneStep(bool direction)
+void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 {
-  if(READ(M2_EN) != ENABLE) carriage_enable();
 
-  if(READ(M2_DIR) != direction) WRITE(M2_DIR, direction);
-
-  WRITE(M2_STEP, HIGH);
-#ifdef  DELAY_DRIVER
-  delayMicroseconds(DELAY_DRIVER);
-#endif
-  WRITE(M2_STEP, LOW);
 }
-

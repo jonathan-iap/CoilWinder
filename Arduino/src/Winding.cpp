@@ -118,7 +118,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
-  stepper.begin();
+  //stepper.begin();
 }
 
 
@@ -335,7 +335,7 @@ bool Coil::runOneLayer()
 	  if(timer(currentMicros, &lastMicrosMotorWinding, delayMotorWinding)&&
 	      (_layerCoilStepsCounter < _stepsCoilPerLayer))
 	    {
-	      stepper.coil_oneStep(C_CLOCK);
+	      //stepper.coil_oneStep(C_CLOCK);
 	      _totalStepsCounter ++;
 	      _layerCoilStepsCounter++;
 	    }
@@ -343,7 +343,7 @@ bool Coil::runOneLayer()
 	  if(timer(currentMicros, &lastMicrosMotorCarriage, delayMotorCarriage)&&
 	      (_layerStepsCounter < _stepsPerLayer))
 	    {
-	      stepper.carriage_oneStep(_direction);
+	      //stepper.carriage_oneStep(_direction);
 	      _layerStepsCounter ++;
 	    }
 	}
@@ -390,7 +390,7 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 
 	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
 	    {
-	      stepper.carriage_oneStep(dir);
+	      //stepper.carriage_oneStep(dir);
 	      stepsCounter ++;
 	    }
 	}
@@ -435,7 +435,7 @@ bool Coil::runOnlyCoil(bool dir, uint32_t turns)
 
 	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
 	    {
-	      stepper.coil_oneStep(!dir);
+	      //stepper.coil_oneStep(!dir);
 	      stepsCounter ++;
 	    }
 	}
@@ -456,8 +456,8 @@ bool Coil::suspend()
 
 void Coil::disableMotors()
 {
-  stepper.coil_disable();
-  stepper.carriage_disable();
+  //stepper.coil_disable();
+  //stepper.carriage_disable();
 }
 
 
