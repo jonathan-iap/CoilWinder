@@ -50,7 +50,7 @@ void Motor::carriage_disable()
 
 /******************************************************************************
  * brief   : Motor advance.
- * details : Verified that enable pin is ok and make one step in the direction
+ * details : Verified that enable pins are ok and make one step in the direction
  * you want.
  ******************************************************************************/
 void Motor::coil_oneStep(bool direction)
