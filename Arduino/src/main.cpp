@@ -50,19 +50,18 @@ void setup()
 	Serial.print("\n\nbegin\n\n");
 	delay(1000);
 #endif
-
 	// Lcd initialization
 	display.begin();
-
 	// For rotary encoder
 	MsTimer2::set(1, timerEncoder); // 1ms
 	MsTimer2::start();
-
 	// Menu begin
 	engine = new Menu::Engine(&Menu::NullItem);
-
+	// Init timer for motors and pins
+	motorsInit();
 	// Pin initialization
 	pinMode(13, OUTPUT);
+
 }
 
 /* LOOP ----------------------------------------------------------------------*/

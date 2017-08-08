@@ -36,18 +36,18 @@
 //-------------------------
 
 // Motor for winding
-#define M1_DIR	10
-#define M1_STEP	9
-#define M1_EN	8
-#define M1_initialStepPerTr 200
-#define M1_STEPS_PER_TR (M1_initialStepPerTr * HALF_STEPS)
+#define PIN_COIL_DIR	10
+#define PIN_COIL_STEP		9
+#define PIN_COIL_EN			8
+#define PIN_COIL_initialStepPerTr 200
+#define PIN_COIL_STEPS_PER_TR (PIN_COIL_initialStepPerTr * HALF_STEPS)
 
 // Mode for carriage
-#define M2_DIR	7
-#define M2_STEP	6
-#define M2_EN	5
-#define M2_initialStepPerTr 200
-#define M2_STEPS_PER_TR (M2_initialStepPerTr * HALF_STEPS)
+#define PIN_CARR_DIR		7
+#define PIN_CARR_STEP		6
+#define PIN_CARR_EN			5
+#define PIN_CARR_initialStepPerTr 200
+#define PIN_CARR_STEPS_PER_TR (PIN_CARR_initialStepPerTr * HALF_STEPS)
 
 //#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
 

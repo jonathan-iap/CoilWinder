@@ -8,8 +8,8 @@
  * _coilTurns, number of turns that must be winding.
  * return  : Return steps.
  ******************************************************************************/
-#define TurnToSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
-#define StepsToTurns(coilSteps) coilSteps / M1_STEPS_PER_TR
+#define TurnToSteps(coilTurns) coilTurns * PIN_CARR_STEPS_PER_TR
+#define StepsToTurns(coilSteps) coilSteps / PIN_COIL_STEPS_PER_TR
 
 
 /******************************************************************************
@@ -160,14 +160,14 @@ void Coil::updateSpeed(uint16_t speed)
 // Steps for motor who move carriage.
 void Coil::computeStepPerLayer(float length)
 {
-  _stepsPerLayer = (M2_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
+  _stepsPerLayer = (PIN_CARR_STEPS_PER_TR * length) / LEAD_SCREW_PITCH;
   // To give the exact number of steps on coil and on carriage.
   _stepsCoilPerLayer = (_stepsPerLayer * _ratio);
 
 #ifdef DEBUGoff
   Serial.println("__________________");
   Serial.print("length : "); Serial.println(length);
-  Serial.print("M2_STEPS_PER_TR : "); Serial.println(M2_STEPS_PER_TR);
+  Serial.print("CARR_STEPS_PER_TR : "); Serial.println(CARR_STEPS_PER_TR);
   Serial.print("LEAD_SCREW_PITCH : "); Serial.println(LEAD_SCREW_PITCH);
   Serial.print("_stepsPerLayer : "); Serial.println(_stepsPerLayer);
   Serial.println("__________________");
@@ -178,9 +178,9 @@ void Coil::computeStepPerLayer(float length)
 void Coil::computeRatio()
 {
   // Number of steps for "carriage motor" advance, depending wire size and lead screw.
-  float pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
+  float pitchToSteps = (PIN_CARR_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
   // Reduction ratio due, between motors.
-  _ratio = M1_STEPS_PER_TR / pitchToSteps;
+  _ratio = PIN_COIL_STEPS_PER_TR / pitchToSteps;
   // Steps for winding one layer.
   computeStepPerLayer(_coilLength);
 }
@@ -227,7 +227,7 @@ void Coil::homing(bool dir)
   if(dir) dir = !dir;
   else (dist = _stepsPerLayer - _layerStepsCounter);
   // Convert step into distance.
-  dist = (dist*LEAD_SCREW_PITCH) / M2_STEPS_PER_TR;
+  dist = (dist*LEAD_SCREW_PITCH) / PIN_CARR_STEPS_PER_TR;
 
   // Little delay to mark the end, and back to the start position.
   delay(800);
@@ -360,41 +360,42 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
   // Set "_stepsTravel" for start deceleration.
   computeStepsTravel(_stepsPerLayer);
 
-  uint16_t delayMotor = _minSpeed;
-  uint32_t lastMicrosMotor = 0;
-  uint32_t lastMicrosAcc = 0;
 
-  uint32_t stepsCounter = 0;
-
-  while(stepsCounter < _stepsPerLayer )
-    {
-      // If user click on encoder, isSuspend become true and break the loop.
-      if( suspend() == true) return true;
-      else
-	{
-	  unsigned long currentMicros = micros();
-
-	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
-	    {
-	      if(stepsCounter < _stepsTravel)
-		{
-		  // Acceleration
-		  acceleration(ACCELERATION, &delayMotor, _speed);
-		}
-	      else
-		{
-		  // Deceleration
-		  acceleration(DECELERATION, &delayMotor, _minSpeed);
-		}
-	    }
-
-	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
-	    {
-	      //stepper.carriage_oneStep(dir);
-	      stepsCounter ++;
-	    }
-	}
-    }
+//  uint16_t delayMotor = _minSpeed;
+//  uint32_t lastMicrosMotor = 0;
+//  uint32_t lastMicrosAcc = 0;
+//
+//  uint32_t stepsCounter = 0;
+//
+//  while(stepsCounter < _stepsPerLayer )
+//    {
+//      // If user click on encoder, isSuspend become true and break the loop.
+//      if( suspend() == true) return true;
+//      else
+//	{
+//	  unsigned long currentMicros = micros();
+//
+//	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
+//	    {
+//	      if(stepsCounter < _stepsTravel)
+//		{
+//		  // Acceleration
+//		  acceleration(ACCELERATION, &delayMotor, _speed);
+//		}
+//	      else
+//		{
+//		  // Deceleration
+//		  acceleration(DECELERATION, &delayMotor, _minSpeed);
+//		}
+//	    }
+//
+//	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
+//	    {
+//	      //stepper.carriage_oneStep(dir);
+//	      stepsCounter ++;
+//	    }
+//	}
+//    }
   return false;
 }
 

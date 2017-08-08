@@ -25,35 +25,28 @@ void motorsInit()
 	Timer1.attachInterrupt(engineMotors);
 	Timer1.stop();
 
-	pinMode(M1_DIR , OUTPUT);
-	pinMode(M1_STEP, OUTPUT);
-	pinMode(M1_EN  , OUTPUT);
+	pinMode(PIN_COIL_DIR , OUTPUT);
+	pinMode(PIN_COIL_STEP, OUTPUT);
+	pinMode(PIN_COIL_EN  , OUTPUT);
 
-	pinMode(M2_DIR , OUTPUT);
-	pinMode(M2_STEP, OUTPUT);
-	pinMode(M2_EN  , OUTPUT);
+	pinMode(PIN_CARR_DIR , OUTPUT);
+	pinMode(PIN_CARR_STEP, OUTPUT);
+	pinMode(PIN_CARR_EN  , OUTPUT);
 
-	digitalWrite(M1_EN, DISABLE);
-	digitalWrite(M2_EN, DISABLE);
+	digitalWrite(PIN_COIL_EN, DISABLE);
+	digitalWrite(PIN_CARR_EN, DISABLE);
 }
 
 void motorsStart()
 {
-	tic=0;
-
-	coil.stepTic = 0;
-	coil.stepPerTr = 0;
-	coil.tr = 0;
-	coil.speed = 50;
-
-	WRITE(M1_EN, ENABLE);
 	Timer1.start();
 }
 
 void motorsStop()
 {
 	Timer1.stop();
-	WRITE(M1_EN, DISABLE);
+	WRITE(PIN_COIL_EN, DISABLE);
+	WRITE(PIN_CARR_EN, ENABLE);
 }
 
 void engineMotors()
@@ -75,7 +68,7 @@ void engineMotors()
 
 			oneStep(COIL, 0);
 
-			if(coil.stepPerTr != M1_STEPS_PER_TR)
+			if(coil.stepPerTr != PIN_COIL_STEPS_PER_TR)
 			{
 				coil.stepPerTr++;
 			}
@@ -92,22 +85,18 @@ void engineMotors()
 
 void oneStep(bool M_coil, bool M_carr)
 {
-	if(M_coil && M_carr)
+	if(M_coil || M_carr)
 	{
-		WRITE(M1_STEP, HIGH);
-		WRITE(M1_STEP, LOW);
-		WRITE(M2_STEP, HIGH);
-		WRITE(M2_STEP, LOW);
-	}
-	else if(M_coil)
-	{
-		WRITE(M1_STEP, HIGH);
-		WRITE(M1_STEP, LOW);
-	}
-	else
-	{
-		WRITE(M2_STEP, HIGH);
-		WRITE(M2_STEP, LOW);
+		if(M_coil)
+		{
+			WRITE(PIN_COIL_STEP, HIGH);
+			WRITE(PIN_COIL_STEP, LOW);
+		}
+		if(M_carr)
+		{
+			WRITE(PIN_CARR_STEP, HIGH);
+			WRITE(PIN_CARR_STEP, LOW);
+		}
 	}
 }
 
@@ -121,5 +110,20 @@ uint16_t getMotorCoilTr()
 
 void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 {
+	if(M_coil)
+	{
+		WRITE(PIN_COIL_EN, ENABLE);
 
+		if(M_coilDir) coil.dir = CLOCK;
+		else coil.dir = C_CLOCK;
+	}
+	if(M_carr)
+	{
+		WRITE(PIN_CARR_EN, ENABLE);
+
+		if(M_carrDir) carriage.dir = CLOCK;
+		else carriage.dir = C_CLOCK;
+	}
 }
+
+
