@@ -7,19 +7,6 @@
 
 #include "Function.h"
 
-/******************************************************************************
- * brief   : Clamp value on a positive interval
- * details : _val, value that we want clamp is change by pointer.
- * _min, minimal value for _val
- * _max, maximal value for _val
- * return  : nothing
- ******************************************************************************/
-void clampValue(int8_t *_val, uint8_t _min, uint8_t _max)
-{
-  if(*_val > _max){ *_val = _max;}
-  else if (*_val < _min){ *_val = _min;}
-  else;
-}
 
 /******************************************************************************
  * brief   : Run action without delay.

@@ -19,7 +19,6 @@
 #define EXIT false
 #define CONTINU true
 
-void clampValue(int8_t *_val, uint8_t _min, uint8_t _max);
 bool timer(uint32_t currentTime, uint32_t *oldTime, uint16_t delay);
 bool buffercmp(char originArray[], char targetArray[], uint16_t BufferLength);
 void bufferCopy(char originArray[], char targetArray[], int8_t index, uint8_t wordSize);

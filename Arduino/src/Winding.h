@@ -10,7 +10,7 @@
 
 #define ACCELERATION 	true
 #define DECELERATION 	false
-#define UPDATE		true
+#define UPDATE			true
 
 class Coil
 {

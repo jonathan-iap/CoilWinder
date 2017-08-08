@@ -299,7 +299,7 @@ void Setting::cursorMovement(int8_t *lastIndex, uint8_t *lastSense,
   // Get encoder movement, clamp returned value and detect sense of motion
   _index += _Encoder->getValue();
 
-  clampValue(&_index, _minIndex, (LCD_CHARS-1));
+  _index = constrain(_index, _minIndex, (LCD_CHARS-1));
 
   uint8_t motion = motionSense(_index, *lastIndex);
 
@@ -350,7 +350,8 @@ void Setting::editValue(int8_t index)
       uint32_t currentTimeSet = millis();
 
       count+= _Encoder->getValue();
-      clampValue(&count, '0', '9');
+
+      count= constrain(count, '0', '9');
 
       _actionBar[index] = count;
 
@@ -730,7 +731,7 @@ void Setting::adjustSpeed()
       // Value increase when you turn encoder
       _speedPercent += _Encoder->getValue();
       // Clamp to 1% at 100%
-      clampValue(&_speedPercent, 1, 100);
+      _speedPercent = constrain(_speedPercent, 1, 100);
       // Refresh LCD only if value change
       if(_speedPercent != oldSpeed){
 	  _Display->engineAjustSpeed(refresh, _speedPercent);
