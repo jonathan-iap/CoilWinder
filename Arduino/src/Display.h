@@ -198,6 +198,9 @@ public:
 	// Winding
 	const void windingTurns(uint32_t coilTurns,uint32_t counter);
 	const void windingSetSpeed(uint16_t speed);
+
+	// Debug
+	const void print(uint8_t x, uint8_t y, uint32_t value);
 };
 
 #endif /* SRC_DISPLAY_H_ */

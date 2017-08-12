@@ -20,7 +20,7 @@
 #define NOT_SAVE		false
 #define SAVE			true
 #define FIRST_LUNCH		true
-#define NEW			true
+#define NEW				true
 #define RESUME			false
 #define SET_CURRENT_SPEED	2
 #define EXIT_WINDING		3

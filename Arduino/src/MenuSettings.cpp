@@ -281,7 +281,7 @@ void Setting::displaying()
       {
 	uint32_t tmp_totalSteps = 0;
 	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
-	_Display->engineResumeWinding(Turns, (tmp_totalSteps/PIN_COIL_STEPS_PER_TR)); break;
+	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
       }
   }
 }

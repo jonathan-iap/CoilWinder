@@ -1,10 +1,5 @@
 #include "Motor.h"
 
-#define NB_TR 50
-
-#define MAX_SPEED 3
-#define ACC 1000
-
 struct motor
 {
 	bool en = DISABLE;
@@ -16,14 +11,14 @@ struct motor
 };
 struct motor coil, carriage;
 
-uint16_t speedSet = MAX_SPEED;
+uint16_t speedSet = 0;
 uint16_t tic = 0;
+uint16_t targetTurns = 0;
+bool isFinished = false;
 
 void motorsInit()
 {
-	Timer1.initialize(10);
-	Timer1.attachInterrupt(engineMotors);
-	Timer1.stop();
+	Timer1.initialize(MOTOR_INT);
 
 	pinMode(PIN_COIL_DIR , OUTPUT);
 	pinMode(PIN_COIL_STEP, OUTPUT);
@@ -39,14 +34,15 @@ void motorsInit()
 
 void motorsStart()
 {
-	Timer1.start();
+	Timer1.attachInterrupt(engineMotors);
 }
 
 void motorsStop()
 {
-	Timer1.stop();
-	WRITE(PIN_COIL_EN, DISABLE);
-	WRITE(PIN_CARR_EN, ENABLE);
+	Timer1.detachInterrupt();
+
+	digitalWrite(PIN_COIL_EN, DISABLE);
+	digitalWrite(PIN_CARR_EN, DISABLE);
 }
 
 void engineMotors()
@@ -54,21 +50,21 @@ void engineMotors()
 	tic++;
 	coil.stepTic++;
 
-	if(coil.tr != NB_TR)
+	if(coil.tr != targetTurns)
 	{
-		if(tic == ACC && coil.speed!=speedSet)
-		{
-			coil.speed--;
-			tic=0;
-		}
+//		if(tic == ACC && coil.speed!=speedSet)
+//		{
+//			coil.speed--;
+//			tic=0;
+//		}
 
 		if(coil.stepTic >= coil.speed)
 		{
 			coil.stepTic=0;
 
-			oneStep(COIL, 0);
+			oneStep(COIL, CARRIAGE);
 
-			if(coil.stepPerTr != PIN_COIL_STEPS_PER_TR)
+			if(coil.stepPerTr != STEPS_PER_TR)
 			{
 				coil.stepPerTr++;
 			}
@@ -79,7 +75,12 @@ void engineMotors()
 			}
 		}
 	}
-	else motorsStop();
+	else
+	{
+		motorsStop();
+		isFinished = true;
+	}
+
 }
 
 
@@ -108,7 +109,12 @@ uint16_t getMotorCoilTr()
 	return coil.tr;
 }
 
-void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
+bool getWindingStatus()
+{
+	return isFinished;
+}
+
+void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed)
 {
 	if(M_coil)
 	{
@@ -124,6 +130,13 @@ void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 		if(M_carrDir) carriage.dir = CLOCK;
 		else carriage.dir = C_CLOCK;
 	}
+
+	coil.speed = RPM_TO_INT(maxWindingSpeed);
+	Serial.print("RPM : "), Serial.print(coil.speed);
 }
 
+void setDisplacement(uint16_t tr)
+{
+	targetTurns = tr;
+}
 

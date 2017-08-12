@@ -24,32 +24,28 @@
 #define ENABLE		LOW
 #define DISABLE		HIGH
 
-// Microsteps
+// Steps
 //-------------------------
+#define MOTOR_STEPS 200
 // If you change micros steps you need to change MaxSpeed !
-#define FULL_STEPS	1
-#define HALF_STEPS	2
-// Use with caution, not work properly for high speed MaxSpeed is limited to 100us.
+#define FULL_STEPS		1
+#define HALF_STEPS		2
 #define QUARTER_STEPS	4
 #define EIGHTH_STEPS	8
 #define SIXTEENTH_STEPS 16
+// Setting for micros stepping (make FULL_STEP if you don't use micros stepping)
+#define STEPS_PER_TR (MOTOR_STEPS * SIXTEENTH_STEPS)
 //-------------------------
 
 // Motor for winding
-#define PIN_COIL_DIR	10
+#define PIN_COIL_DIR		10
 #define PIN_COIL_STEP		9
 #define PIN_COIL_EN			8
-#define PIN_COIL_initialStepPerTr 200
-#define PIN_COIL_STEPS_PER_TR (PIN_COIL_initialStepPerTr * HALF_STEPS)
 
 // Mode for carriage
 #define PIN_CARR_DIR		7
 #define PIN_CARR_STEP		6
 #define PIN_CARR_EN			5
-#define PIN_CARR_initialStepPerTr 200
-#define PIN_CARR_STEPS_PER_TR (PIN_CARR_initialStepPerTr * HALF_STEPS)
-
-//#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
 
 
 // Machine settings ------------------------------------------------------------
@@ -65,11 +61,11 @@
 #define LEAD_SCREW_PITCH M5 // replace by your own setup.
 
 // Reset value -----------------------------------------------------------------
-#define INIT_WIRE	"0.00"
-#define INIT_COIL	"000.00"
-#define INIT_TURNS	"00000"
-#define INIT_MAXSPEED	"0200" // Not below 100us (it's the max loop execution time)
-#define INIT_MINSPEED	"1100"
+#define INIT_WIRE	"0.00" 		// in mm
+#define INIT_COIL	"000.00"	// in mm
+#define INIT_TURNS	"00000"		// in Tr
+#define INIT_MAXSPEED	"0200"  // in RPM (tr/min)
+#define INIT_MINSPEED	"1100"  // in RPM (tr/min)
 #define INIT_ACC_DELAY	"0400"
 
 // Displacement value ---------------------------------------------------------------
