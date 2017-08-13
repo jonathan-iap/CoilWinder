@@ -182,7 +182,6 @@ void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_
   WRITE(PIN_CARR_DIR, carriage.dir);
 
   speedSet = RPM_TO_INT(maxWindingSpeed);
-  if(speedSet > 65535) speedSet = 65535; // need to be placed into Max setting
 }
 
 void setDisplacement(bool action, uint16_t pass, uint16_t steps)

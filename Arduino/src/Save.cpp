@@ -164,14 +164,14 @@ void Memory::getSavedTotalSteps(uint32_t *totalSteps)
 void Memory::readAll()
 {
   // Read the eeprom memory and set buffers with values saved
-  read(_buff_WireSize,id_WIRESIZE);
-  read(_buff_CoilLength, id_COILLENGTH);
-  read(_buff_Turns, id_TURNS);
-  read(_buff_MaxSpeed,id_MAX_SPEED);
-  read(_buff_MinSpeed, id_MIN_SPEED);
-  read(_buff_AccDelay, id_ACC_DELAY);
-  read(_buff_WinSense, id_W_SENSE);
-  read(_buff_CarSense, id_C_SENSE);
+  read(_buff_WireSize   , id_WIRESIZE);
+  read(_buff_CoilLength , id_COILLENGTH);
+  read(_buff_Turns      , id_TURNS);
+  read(_buff_MaxSpeed   , id_MAX_SPEED);
+  read(_buff_MinSpeed   , id_MIN_SPEED);
+  read(_buff_AccDelay   , id_ACC_DELAY);
+  read(_buff_WinSense   , id_W_SENSE);
+  read(_buff_CarSense   , id_C_SENSE);
 
   // Convert value within array in a float or numeric value.
   WireSize 	= atof(_buff_WireSize);

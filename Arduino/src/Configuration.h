@@ -28,8 +28,8 @@
 //-------------------------
 #define MOTOR_STEPS 200
 // If you change micros steps you need to change MaxSpeed !
-#define FULL_STEPS		1
-#define HALF_STEPS		2
+#define FULL_STEPS	1
+#define HALF_STEPS	2
 #define QUARTER_STEPS	4
 #define EIGHTH_STEPS	8
 #define SIXTEENTH_STEPS 16
@@ -38,14 +38,14 @@
 //-------------------------
 
 // Motor for winding
-#define PIN_COIL_DIR		10
-#define PIN_COIL_STEP		9
-#define PIN_COIL_EN			8
+#define PIN_COIL_DIR	10
+#define PIN_COIL_STEP	9
+#define PIN_COIL_EN	8
 
 // Mode for carriage
-#define PIN_CARR_DIR		7
-#define PIN_CARR_STEP		6
-#define PIN_CARR_EN			5
+#define PIN_CARR_DIR	7
+#define PIN_CARR_STEP	6
+#define PIN_CARR_EN	5
 
 
 // Machine settings ------------------------------------------------------------

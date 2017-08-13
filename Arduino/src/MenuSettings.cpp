@@ -84,13 +84,13 @@ void Setting::setValueFromId()
       }
     case id_MAX_SPEED :
       {
-	setValues(MSG_MAX_SPEED, _buff_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed, UNIT_US,
+	setValues(MSG_MAX_SPEED, _buff_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed, UNIT_RPM,
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
     case id_MIN_SPEED :
       {
-	setValues(MSG_MIN_SPEED, _buff_MinSpeed, BUFFSIZE_MIN_SPEED, &MinSpeed, UNIT_US,
+	setValues(MSG_MIN_SPEED, _buff_MinSpeed, BUFFSIZE_MIN_SPEED, &MinSpeed, UNIT_RPM,
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
@@ -483,12 +483,28 @@ bool Setting::selectedAction(uint8_t wordSize)
 	// RIGHT _______________________________________________________________
 	case ICONRIGHT[0] :
 	{
+	  Serial.println("Icon Right");
 	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL){
 	      moving(CLOCK); return CONTINU;
 	  }
-	  else{
+	  else if(_tmp_id == id_MAX_SPEED)
+	    {
+	      // Check value for motor interrupt
+	      update();
+	      if(RPM_TO_INT(MaxSpeed)<1)
+		{
+		  _Display->engineValueLimit();
+		  return CONTINU;
+		}
+	      else
+		{
+		  return EXIT;
+		}
+	    }
+	  else
+	    {
 	      update(); return EXIT;
-	  }
+	    }
 	  break;
 	}
 	// RESUME ______________________________________________________________

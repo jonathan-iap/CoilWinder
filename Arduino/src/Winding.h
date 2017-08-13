@@ -55,7 +55,7 @@ private:
   ClickEncoder *_Encoder;
   Display *_Display;
 
-//  Motor stepper;
+  //  Motor stepper;
 
   // Coil length in mm.
   float _coilLength;

@@ -15,12 +15,13 @@
 #include "Function.h"
 #include "Save.h"
 #include "Winding.h"
+#include "Motor.h"
 
 #define MIN_LCD			16 // Minimum lcd screen 15 + 1 for null character
 #define NOT_SAVE		false
 #define SAVE			true
 #define FIRST_LUNCH		true
-#define NEW				true
+#define NEW			true
 #define RESUME			false
 #define SET_CURRENT_SPEED	2
 #define EXIT_WINDING		3
