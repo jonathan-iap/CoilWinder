@@ -43,6 +43,8 @@ void motorsStart()
   carriage.stepTic = 0;
   carriage.tr = 0;
 
+  isFinished = false;
+
   Timer1.attachInterrupt(engineMotors);
 }
 
@@ -155,7 +157,7 @@ bool getWindingStatus()
   return isFinished;
 }
 
-void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed)
+void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed)
 {
   if(M_coil)
     {
@@ -181,13 +183,19 @@ void setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_
   WRITE(PIN_CARR_EN, carriage.en);
   WRITE(PIN_CARR_DIR, carriage.dir);
 
-  speedSet = RPM_TO_INT(maxWindingSpeed);
+  M_setSpeed(maxWindingSpeed);
 }
 
-void setDisplacement(bool action, uint16_t pass, uint16_t steps)
+void M_setDisplacement(bool action, uint16_t pass, uint16_t steps)
 {
   engineAction = action;
   targetPass = pass;
   stepsPerPass = steps;
+}
+
+void M_setSpeed(uint16_t speed)
+{
+  float tmp_speedSet = RPM_TO_INT((float)speed);
+  speedSet = (uint16_t)tmp_speedSet;
 }
 

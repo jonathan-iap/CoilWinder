@@ -65,7 +65,7 @@
 #define INIT_COIL	"000.00"	// in mm
 #define INIT_TURNS	"00000"		// in Tr
 #define INIT_MAXSPEED	"0200"  // in RPM (tr/min)
-#define INIT_MINSPEED	"1100"  // in RPM (tr/min)
+#define INIT_MINSPEED	"0001"  // in RPM (tr/min)
 #define INIT_ACC_DELAY	"0400"
 
 // Displacement value ---------------------------------------------------------------

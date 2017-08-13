@@ -10,7 +10,7 @@
 
 #define ACCELERATION 	true
 #define DECELERATION 	false
-#define UPDATE			true
+#define UPDATE		true
 #define MAX_INTEGER 	65535
 
 class Coil
@@ -23,7 +23,7 @@ public:
   void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed);
   void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
-  void updateSpeed(uint16_t speed);
+  void updateSpeed();
 
   bool runMultiLayer(bool isNewCoil);
   bool runOneLayer();

@@ -296,9 +296,8 @@ const void Display::windingTurns(uint32_t coilTurns, uint32_t counter)
 
 const void Display::windingSetSpeed(uint16_t speed)
 {
-  _lcd.clear();
   _lcd.setCursor(0,0);
-  _lcd.print(speed);
+  _lcd.print(speed), _lcd.print(UNIT_RPM), _lcd.print("  ");
 }
 
 const void Display::print(uint8_t x, uint8_t y, uint32_t value)

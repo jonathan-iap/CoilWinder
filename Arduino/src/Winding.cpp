@@ -140,7 +140,7 @@ void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uin
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
-  _speed	  = speed;
+  _speed    = speed;
 }
 
 
@@ -152,9 +152,13 @@ void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps
 }
 
 
-void Coil::updateSpeed(uint16_t speed)
+void Coil::updateSpeed()
 {
-  _speed = speed;
+  int increment = _Encoder->getValue();
+
+  _speed = constrain((_speed+increment), _minSpeed, _maxSpeed);
+
+  M_setSpeed(_speed);
 }
 
 // Steps for motor who move carriage.
@@ -391,72 +395,32 @@ bool Coil::runOneLayer()
 
 bool Coil::runOnlyCarriage(bool dir, float distance)
 {
-  // Number of steps for this distance, set "_stepsPerLayer" !
-  //  computeStepPerLayer(distance);
-  // Set "_stepsTravel" for start deceleration.
-  //  computeStepsTravel(_stepsPerLayer);
-
-  uint16_t pass = 0;
+  uint16_t nbPass = 0;
   uint16_t steps = 0;
 
   _Display->clear();
 
-  computeTravel(distance, &pass, &steps);
+  M_setMotors(0, 0, CARRIAGE, dir, _speed);
 
-  Serial.print("nombre de tr : "), Serial.println(pass);
-  Serial.print("nombre de pas : "), Serial.println(steps);
-
-  setMotors(0, 0, CARRIAGE, dir, 10);
-  setDisplacement(TRAVELING, pass, steps);
-
-  Serial.print("direction : "), Serial.println(dir);
+  computeTravel(distance, &nbPass, &steps);
+  M_setDisplacement(TRAVELING, nbPass, steps);
 
   motorsStart();
-  //
-  //	unsigned long T1 = millis();
-  //
+
   while(!getWindingStatus())
     {
-      _Display->windingTurns(pass, getMotorCoilTr());
+      if( suspend() == true)
+	{
+	  motorsStop();
+	  return true;
+	}
+      else
+	{
+	  updateSpeed();
+	  _Display->windingSetSpeed(_speed);
+	}
     }
 
-  //delay(10000);
-
-  //  uint16_t delayMotor = _minSpeed;
-  //  uint32_t lastMicrosMotor = 0;
-  //  uint32_t lastMicrosAcc = 0;
-  //
-  //  uint32_t stepsCounter = 0;
-  //
-  //  while(stepsCounter < _stepsPerLayer )
-  //    {
-  //      // If user click on encoder, isSuspend become true and break the loop.
-  //      if( suspend() == true) return true;
-  //      else
-  //	{
-  //	  unsigned long currentMicros = micros();
-  //
-  //	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
-  //	    {
-  //	      if(stepsCounter < _stepsTravel)
-  //		{
-  //		  // Acceleration
-  //		  acceleration(ACCELERATION, &delayMotor, _speed);
-  //		}
-  //	      else
-  //		{
-  //		  // Deceleration
-  //		  acceleration(DECELERATION, &delayMotor, _minSpeed);
-  //		}
-  //	    }
-  //
-  //	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
-  //	    {
-  //	      //stepper.carriage_oneStep(dir);
-  //	      stepsCounter ++;
-  //	    }
-  //	}
-  //    }
   return false;
 }
 
