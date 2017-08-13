@@ -11,6 +11,7 @@
 #define ACCELERATION 	true
 #define DECELERATION 	false
 #define UPDATE			true
+#define MAX_INTEGER 	65535
 
 class Coil
 {
@@ -46,6 +47,8 @@ private:
   void computeAll();
 
   void homing(bool dir);
+
+  void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
 
 private:
 

@@ -235,6 +235,42 @@ void Coil::homing(bool dir)
 }
 
 
+
+/******************************************************************************
+ * brief   : Travel computing
+ * details : Decompose the distance in steps per pass.
+ * Allows to use more large and flexible value of displacement.
+ * Values are directly returns by pointers
+ ******************************************************************************/
+void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
+{
+	*nbPass = 1;
+	float tmp_newDistance = distance;
+	float ratio = 0;
+
+	do
+	{
+		// If number of steps will exceed the max value of uint16_t
+		// ratio will be superior to 1 and a pass will be added
+		ratio = ((tmp_newDistance / LEAD_SCREW_PITCH) * STEPS_PER_TR) / MAX_INTEGER;
+
+		if(ratio > 1.0)
+		{
+			*nbPass += 1;
+			tmp_newDistance = distance / *nbPass ;
+		}
+		else
+		{
+			*stepsPerTr = ratio * MAX_INTEGER;
+		}
+	}
+	while(ratio > 1.0);
+}
+
+
+
+
+
 bool Coil::runMultiLayer(bool isNewCoil)
 {
 	bool isResume = false;
@@ -360,23 +396,32 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 	// Set "_stepsTravel" for start deceleration.
 	//  computeStepsTravel(_stepsPerLayer);
 
+	uint16_t pass = 0;
+	uint16_t steps = 0;
+
 	_Display->clear();
-	//	_Display->windingTurns(50, getMotorCoilTr());
-	//	delay(10000);
 
-	setMotors(COIL, CLOCK, CARRIAGE, CLOCK, 170);
-	setDisplacement(10);
+	computeTravel(distance, &pass, &steps);
+
+	Serial.print("nombre de tr : "), Serial.println(pass);
+	Serial.print("nombre de pas : "), Serial.println(steps);
+
+	setMotors(0, 0, CARRIAGE, dir, 180);
+	setDisplacement(TRAVELING, pass, steps);
+
+	Serial.print("direction : "), Serial.println(dir);
+
 	motorsStart();
+	//
+	//	unsigned long T1 = millis();
+	//
+		while(!getWindingStatus())
+		{
+			_Display->windingTurns(pass, getMotorCoilTr());
+		}
 
-	unsigned long T1 = millis();
+		//delay(10000);
 
-	while(!getWindingStatus())
-	{
-		_Display->windingTurns(50, getMotorCoilTr());
-		_Display->print(0,0, ((millis()-T1)/1000));
-	}
-
-	delay(10000);
 	//  uint16_t delayMotor = _minSpeed;
 	//  uint32_t lastMicrosMotor = 0;
 	//  uint32_t lastMicrosAcc = 0;
