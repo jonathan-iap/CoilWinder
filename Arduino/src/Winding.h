@@ -49,7 +49,6 @@ private:
   void homing(bool dir);
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
-  void computeTurns(uint16_t turns, uint16_t *nbPass, uint16_t *stepsPerTr);
 
 private:
 

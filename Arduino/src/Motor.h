@@ -29,8 +29,10 @@ uint16_t M_getCoilTr();
 bool M_getWindingStatus();
 float M_getDisplacement();
 
-void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed);
+void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir);
+void M_setSpeed(uint16_t speed, uint16_t maxSpeed, uint16_t minSpeed, uint16_t acc);
 void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps);
-void M_setSpeed(uint16_t speed);
+
+void M_updateSpeed(uint16_t speed);
 
 #endif

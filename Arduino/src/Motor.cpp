@@ -11,10 +11,17 @@ struct motor
 struct motor coil, carriage;
 
 uint8_t engineAction = 0;
+
 uint16_t speedSet = 0;
 uint16_t tic = 0;
 uint16_t targetPass = 0;
 uint16_t stepsPerPass = 0;
+
+uint16_t Int_maxSpeed = 0;
+uint16_t Int_minSpeed = 0;
+uint16_t Int_acc = 0;
+uint16_t accSpeed = 0;
+
 bool isFinished = false;
 
 void M_init()
@@ -101,6 +108,11 @@ void M_engine()
       {
 	if(coil.tr != targetPass)
 	  {
+//	    if(tic == Int_acc && coil.tic!=speedSet)
+//	      {
+//		//coil.speed--;
+//		tic=0;
+//	      }
 	    if(coil.tic >= speedSet)
 	      {
 		coil.tic=0;
@@ -127,39 +139,6 @@ void M_engine()
 	break;
       }
   }
-
-  //	if(coil.tr != targetTurns)
-  //	{
-  //		//		if(tic == ACC && coil.speed!=speedSet)
-  //		//		{
-  //		//			coil.speed--;
-  //		//			tic=0;
-  //		//		}
-  //
-  //		if(coil.tic >= speedSet)
-  //		{
-  //			coil.tic=0;
-  //
-  //			oneStep(coil.en, (carriage.en = DISABLE));
-  //
-  //			if(coil.steps != STEPS_PER_TR)
-  //			{
-  //				coil.steps++;
-  //			}
-  //			else
-  //			{
-  //				coil.steps = 0;
-  //				coil.tr++;
-  //			}
-  //		}
-  //		else{}
-  //	}
-  //	else
-  //	{
-  //		motorsStop();
-  //		isFinished = true;
-  //	}
-
 }
 
 
@@ -199,7 +178,7 @@ float M_getDisplacement()
 }
 
 
-void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed)
+void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 {
   if(M_coil)
     {
@@ -224,9 +203,16 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint1
 
   WRITE(PIN_CARR_EN, carriage.en);
   WRITE(PIN_CARR_DIR, carriage.dir);
-
-  M_setSpeed(maxWindingSpeed);
 }
+
+void M_setSpeed(uint16_t speed, uint16_t maxSpeed, uint16_t minSpeed, uint16_t acc)
+{
+//speedSet = (float)RPM_TO_INT((float)speed);
+//Serial.print("speedSet : "), Serial.print(speedSet);
+
+M_updateSpeed(speed);
+}
+
 
 void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
 {
@@ -235,9 +221,9 @@ void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
   stepsPerPass = steps;
 }
 
-void M_setSpeed(uint16_t speed)
+
+void M_updateSpeed(uint16_t speed)
 {
   float tmp_speedSet = RPM_TO_INT((float)speed);
   speedSet = (uint16_t)tmp_speedSet;
 }
-

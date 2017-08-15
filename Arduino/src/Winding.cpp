@@ -128,7 +128,7 @@ Coil::~Coil(){}
 /*_____  PUBLIC FUNCTIONS _____*/
 void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense)
 {
-  _coilLength			= coilLength;
+  _coilLength		= coilLength;
   _wireSize   		= wireSize;
   _coilTurns  		= coilTurns;
   _windingSense		= windSense;
@@ -166,7 +166,7 @@ bool Coil::updateSpeed(int8_t oldPercent)
 
       _speed = map(_speedPercent, 0, 100, _minSpeed, _maxSpeed);
 
-      M_setSpeed(_speed);
+      M_updateSpeed(_speed);
 
       _Display->windingGetSpeedPercent(_speedPercent);
       return true;
@@ -283,32 +283,6 @@ void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
     }
   while(ratio > 1.0);
 }
-
-void Coil::computeTurns(uint16_t turns, uint16_t *nbPass, uint16_t *stepsPerTr)
-{
-  *nbPass = 1;
-  float tmp_newDistance = turns;
-  float ratio = 0;
-
-  do
-    {
-      // If number of steps will exceed the max value of uint16_t
-      // ratio will be superior to 1 and a pass will be added
-      ratio = ((tmp_newDistance / LEAD_SCREW_PITCH) * STEPS_PER_TR) / MAX_INTEGER;
-
-      if(ratio > 1.0)
-	{
-	  *nbPass += 1;
-	 // tmp_newDistance = distance / *nbPass ;
-	}
-      else
-	{
-	  *stepsPerTr = ratio * MAX_INTEGER;
-	}
-    }
-  while(ratio > 1.0);
-}
-
 
 
 bool Coil::runMultiLayer(bool isNewCoil)
@@ -437,7 +411,9 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 
   _Display->clear();
 
-  M_setMotors(0, 0, CARRIAGE, dir, _speed);
+  M_setMotors(0, 0, CARRIAGE, dir);
+
+  M_setSpeed(_speed, _maxSpeed, _minSpeed, _accDelay);
 
   computeTravel(distance, &nbPass, &steps);
   M_setDisplacement(TRAVELING, nbPass, steps);
@@ -468,7 +444,9 @@ bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 
   _Display->clear();
 
-  M_setMotors(COIL, dir, 0, 0, _speed);
+  M_setMotors(COIL, dir, 0, 0);
+
+  M_setSpeed(_speed, _maxSpeed, _minSpeed, _accDelay);
 
   M_setDisplacement(ROTATION, turns, STEPS_PER_TR);
 
