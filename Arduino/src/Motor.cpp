@@ -2,20 +2,20 @@
 
 struct motor
 {
-  bool en = DISABLE;
-  bool dir = CLOCK;
-  uint16_t steps = 0;
-  uint16_t tr = 0;
-  uint16_t tic = 0;
+  volatile bool en = DISABLE;
+  volatile bool dir = CLOCK;
+  volatile uint16_t steps = 0;
+  volatile uint16_t tr = 0;
+  volatile uint16_t tic = 0;
 };
 struct motor coil, carriage;
 
 uint8_t engineAction = 0;
 
-uint16_t speedSet = 0;
-uint16_t tic = 0;
-uint16_t targetPass = 0;
-uint16_t stepsPerPass = 0;
+volatile uint16_t speedSet = 0;
+volatile uint16_t tic = 0;
+volatile uint16_t targetPass = 0;
+volatile uint16_t stepsPerPass = 0;
 
 uint16_t Int_maxSpeed = 0;
 uint16_t Int_minSpeed = 0;
@@ -108,11 +108,6 @@ void M_engine()
       {
 	if(coil.tr != targetPass)
 	  {
-//	    if(tic == Int_acc && coil.tic!=speedSet)
-//	      {
-//		//coil.speed--;
-//		tic=0;
-//	      }
 	    if(coil.tic >= speedSet)
 	      {
 		coil.tic=0;
@@ -207,9 +202,9 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 
 void M_setSpeed(uint16_t speed, uint16_t maxSpeed, uint16_t minSpeed, uint16_t acc)
 {
-//speedSet = (float)RPM_TO_INT((float)speed);
-//Serial.print("speedSet : "), Serial.print(speedSet);
-
+Int_maxSpeed = maxSpeed;
+Int_minSpeed = minSpeed;
+Int_acc = acc;
 M_updateSpeed(speed);
 }
 
@@ -224,6 +219,5 @@ void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
 
 void M_updateSpeed(uint16_t speed)
 {
-  float tmp_speedSet = RPM_TO_INT((float)speed);
-  speedSet = (uint16_t)tmp_speedSet;
+  speedSet = RPM_TO_INT((float)speed);
 }

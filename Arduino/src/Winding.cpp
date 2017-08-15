@@ -261,27 +261,33 @@ void Coil::homing(bool dir)
  ******************************************************************************/
 void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
 {
-  *nbPass = 1;
   float tmp_newDistance = distance;
-  float ratio = 0;
+  float tmp_nbPass = 0.00;
+  float tmp_stepsPerTr = 0.00;
+  float ratio = 0.00;
+
+  tmp_nbPass = 1;
 
   do
     {
       // If number of steps will exceed the max value of uint16_t
       // ratio will be superior to 1 and a pass will be added
-      ratio = ((tmp_newDistance / LEAD_SCREW_PITCH) * STEPS_PER_TR) / MAX_INTEGER;
+      ratio = (((tmp_newDistance / (float)LEAD_SCREW_PITCH) * (float)STEPS_PER_TR) / (float)MAX_INTEGER);
 
-      if(ratio > 1.0)
+      if(ratio > 1.00)
 	{
-	  *nbPass += 1;
-	  tmp_newDistance = distance / *nbPass ;
+	  tmp_nbPass += 1;
+	  tmp_newDistance = distance / tmp_nbPass ;
 	}
       else
 	{
-	  *stepsPerTr = ratio * MAX_INTEGER;
+	  tmp_stepsPerTr = ratio * (float)MAX_INTEGER;
 	}
     }
-  while(ratio > 1.0);
+  while(ratio > 1.00);
+
+  *nbPass = (uint16_t)tmp_nbPass;
+  *stepsPerTr = (uint16_t)tmp_stepsPerTr;
 }
 
 
