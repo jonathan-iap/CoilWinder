@@ -58,7 +58,7 @@ void setup()
 	// Menu begin
 	engine = new Menu::Engine(&Menu::NullItem);
 	// Init timer for motors and pins
-	motorsInit();
+	M_init();
 	// Pin initialization
 	pinMode(13, OUTPUT);
 

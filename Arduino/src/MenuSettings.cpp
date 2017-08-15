@@ -738,27 +738,27 @@ void Setting::setWinding(bool isFirstLunch)
 void Setting::adjustSpeed()
 {
   bool refresh = true;
-  int16_t oldSpeed = 0;
+  int16_t tmp_speed = 0;
 
   _Display->engineAjustSpeed( !refresh, _speedPercent);
 
   while( _Encoder->getButton() != ClickEncoder::Clicked) // Click for exit
     {
       // Value increase when you turn encoder
-      _speedPercent += _Encoder->getValue();
+      _speedPercent += (_Encoder->getValue()*5);
       // Clamp to 1% at 100%
       _speedPercent = constrain(_speedPercent, 1, 100);
       // Refresh LCD only if value change
-      if(_speedPercent != oldSpeed){
+      if(_speedPercent != tmp_speed){
 	  _Display->engineAjustSpeed(refresh, _speedPercent);
       }
 
-      oldSpeed = _speedPercent;
+      tmp_speed = _speedPercent;
     }
 
-  oldSpeed = map(_speedPercent, 0, 100, MinSpeed, MaxSpeed);
+  tmp_speed = map(_speedPercent, 0, 100, MinSpeed, MaxSpeed);
 
-  _Coil->setSpeed(AccDelay, MaxSpeed, MinSpeed, oldSpeed);
+  _Coil->setSpeed(AccDelay, MaxSpeed, MinSpeed, tmp_speed, _speedPercent);
 }
 
 

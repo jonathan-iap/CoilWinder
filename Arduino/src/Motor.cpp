@@ -4,20 +4,20 @@ struct motor
 {
   bool en = DISABLE;
   bool dir = CLOCK;
-  uint16_t stepPerTr = 0;
+  uint16_t steps = 0;
   uint16_t tr = 0;
-  uint16_t stepTic = 0;
+  uint16_t tic = 0;
 };
 struct motor coil, carriage;
 
-bool engineAction = WINDING;
+uint8_t engineAction = 0;
 uint16_t speedSet = 0;
 uint16_t tic = 0;
 uint16_t targetPass = 0;
 uint16_t stepsPerPass = 0;
 bool isFinished = false;
 
-void motorsInit()
+void M_init()
 {
   Timer1.initialize(MOTOR_INT);
 
@@ -33,22 +33,22 @@ void motorsInit()
   digitalWrite(PIN_CARR_EN, DISABLE);
 }
 
-void motorsStart()
+void M_start()
 {
-  coil.stepPerTr = 0;
-  coil.stepTic = 0;
+  coil.steps = 0;
+  coil.tic = 0;
   coil.tr = 0;
 
-  carriage.stepPerTr = 0;
-  carriage.stepTic = 0;
+  carriage.steps = 0;
+  carriage.tic = 0;
   carriage.tr = 0;
 
   isFinished = false;
 
-  Timer1.attachInterrupt(engineMotors);
+  Timer1.attachInterrupt(M_engine);
 }
 
-void motorsStop()
+void M_stop()
 {
   Timer1.detachInterrupt();
 
@@ -56,44 +56,77 @@ void motorsStop()
   WRITE(PIN_CARR_EN, DISABLE);
 }
 
-void engineMotors()
+void M_engine()
 {
   tic++;
-  coil.stepTic++;
-  carriage.stepTic++;
+  coil.tic++;
+  carriage.tic++;
 
-  if(engineAction == WINDING)
-    {
+  switch (engineAction)
+  {
+    case WINDING :
+      {
+	break;
+      }
+    case TRAVELING :
+      {
+	if(carriage.tr != targetPass && stepsPerPass > 0)
+	  {
+	    if(carriage.tic >= speedSet)
+	      {
+		carriage.tic=0;
 
-    }
-  else
-    {
-      if(carriage.tr != targetPass && stepsPerPass > 0)
-	{
-	  if(carriage.stepTic >= speedSet)
-	    {
-	      carriage.stepTic=0;
+		oneStep(coil.en, carriage.en);
 
-	      oneStep((coil.en = DISABLE), carriage.en);
+		if(carriage.steps != stepsPerPass)
+		  {
+		    carriage.steps++;
+		  }
+		else
+		  {
+		    carriage.steps = 0;
+		    carriage.tr++;
+		  }
+	      }
+	    else{}
+	  }
+	else
+	  {
+	    M_stop();
+	    isFinished = true;
+	  }
+	break;
+      }
+    case ROTATION :
+      {
+	if(coil.tr != targetPass)
+	  {
+	    if(coil.tic >= speedSet)
+	      {
+		coil.tic=0;
 
-	      if(carriage.stepPerTr != stepsPerPass)
-		{
-		  carriage.stepPerTr++;
-		}
-	      else
-		{
-		  carriage.stepPerTr = 0;
-		  carriage.tr++;
-		}
-	    }
-	  else{}
-	}
-      else
-	{
-	  motorsStop();
-	  isFinished = true;
-	}
-    }
+		oneStep(coil.en , carriage.en);
+
+		if(coil.steps != stepsPerPass)
+		  {
+		    coil.steps++;
+		  }
+		else
+		  {
+		    coil.steps = 0;
+		    coil.tr++;
+		  }
+	      }
+	    else{}
+	  }
+	else
+	  {
+	    M_stop();
+	    isFinished = true;
+	  }
+	break;
+      }
+  }
 
   //	if(coil.tr != targetTurns)
   //	{
@@ -103,19 +136,19 @@ void engineMotors()
   //		//			tic=0;
   //		//		}
   //
-  //		if(coil.stepTic >= speedSet)
+  //		if(coil.tic >= speedSet)
   //		{
-  //			coil.stepTic=0;
+  //			coil.tic=0;
   //
   //			oneStep(coil.en, (carriage.en = DISABLE));
   //
-  //			if(coil.stepPerTr != STEPS_PER_TR)
+  //			if(coil.steps != STEPS_PER_TR)
   //			{
-  //				coil.stepPerTr++;
+  //				coil.steps++;
   //			}
   //			else
   //			{
-  //				coil.stepPerTr = 0;
+  //				coil.steps = 0;
   //				coil.tr++;
   //			}
   //		}
@@ -147,15 +180,24 @@ void oneStep(bool M_coil_en, bool M_carr_en)
 
 
 // GET and SET functions________________________________________________________
-uint16_t getMotorCoilTr()
+uint16_t M_getCoilTr()
 {
-  return coil.tr;
+  return  coil.tr;
 }
 
-bool getWindingStatus()
+bool M_getWindingStatus()
 {
   return isFinished;
 }
+
+float M_getDisplacement()
+{
+  float displacement = (((((float)stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
+      / (float)STEPS_PER_TR) * (float)LEAD_SCREW_PITCH);
+
+  return displacement;
+}
+
 
 void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed)
 {
@@ -186,7 +228,7 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint1
   M_setSpeed(maxWindingSpeed);
 }
 
-void M_setDisplacement(bool action, uint16_t pass, uint16_t steps)
+void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
 {
   engineAction = action;
   targetPass = pass;

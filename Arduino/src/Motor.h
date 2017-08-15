@@ -13,23 +13,24 @@
 
 #define MOTOR_INT 10 // motor interrupt in microseconds
 #define RPM_TO_INT(rpm) ((600000 / rpm) / STEPS_PER_TR * MOTOR_INT)
-#define test(a) (600+a)
 
-#define WINDING		0
-#define TRAVELING	1
+#define WINDING		1
+#define TRAVELING	2
+#define ROTATION	3
 
-void motorsInit();
-void motorsStart();
-void motorsStop();
-void engineMotors();
+void M_init();
+void M_start();
+void M_stop();
+void M_engine();
 
 void oneStep(bool M_coil, bool M_carr);
 
-uint16_t getMotorCoilTr();
-bool getWindingStatus();
+uint16_t M_getCoilTr();
+bool M_getWindingStatus();
+float M_getDisplacement();
 
 void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t maxWindingSpeed);
-void M_setDisplacement(bool action, uint16_t pass, uint16_t steps);
+void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps);
 void M_setSpeed(uint16_t speed);
 
 #endif

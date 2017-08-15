@@ -56,6 +56,7 @@
 #define MSG_SPEED         "Winding speed :"
 #define MSG_SAVE_CURRENT  "Save session ?"
 #define MSG_VALUE_TO_HIGH "Value to high !"
+#define MSG_CURRENT_SPEED "Speed: "
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_MOVE        "Move"
 #define SIZE_KEYWORD_MOVE   COUNTOF(KEYWORD_MOVE)
@@ -198,8 +199,9 @@ public:
   const void engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns,uint16_t counter);
   const void engineValueLimit();
   // Winding
-  const void windingTurns(uint32_t coilTurns,uint32_t counter);
-  const void windingSetSpeed(uint16_t speed);
+  const void windingGetTurns(uint16_t target, uint16_t counter);
+  const void windingGetSpeedPercent(uint16_t speed);
+  const void windingGetDisplacement(float target, float counter);
 
   // Debug
   const void print(uint8_t x, uint8_t y, uint32_t value);

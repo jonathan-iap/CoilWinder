@@ -73,23 +73,23 @@ static void acceleration(bool acc, uint16_t *delayMotorA, uint16_t limitSpeed,
     }
 }
 
-// For one motor only.
-static void acceleration(bool acc, uint16_t *delayMotor, uint16_t limitSpeed)
-{
-  //Acceleration.
-  if(acc && (*delayMotor > limitSpeed))
-    {
-      *delayMotor -= 1;
-    }
-  // Deceleration.
-  else
-    {
-      if(*delayMotor < limitSpeed )
-	{
-	  *delayMotor += 1;
-	}
-    }
-}
+//// For one motor only.
+//static void acceleration(bool acc, uint16_t *delayMotor, uint16_t limitSpeed)
+//{
+//  //Acceleration.
+//  if(acc && (*delayMotor > limitSpeed))
+//    {
+//      *delayMotor -= 1;
+//    }
+//  // Deceleration.
+//  else
+//    {
+//      if(*delayMotor < limitSpeed )
+//	{
+//	  *delayMotor += 1;
+//	}
+//    }
+//}
 
 /*_____ CONSTRUCTOR _____ */
 
@@ -105,6 +105,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _maxSpeed (0),
   _minSpeed (0),
   _speed(0),
+  _speedPercent(0),
 
   _ratio(0),
   _direction(CLOCK),
@@ -135,12 +136,13 @@ void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool
 }
 
 
-void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed)
+void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent)
 {
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
   _speed    = speed;
+  _speedPercent = speedPercent;
 }
 
 
@@ -151,14 +153,25 @@ void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps
   _layerCoilStepsCounter = coilSteps;
 }
 
-
-void Coil::updateSpeed()
+// Allow to update speed during winding or displacement
+bool Coil::updateSpeed(int8_t oldPercent)
 {
-  int increment = _Encoder->getValue();
+  _speedPercent += (_Encoder->getValue()*5);
 
-  _speed = constrain((_speed+increment), _minSpeed, _maxSpeed);
+  if(oldPercent != _speedPercent)
+    {
+      oldPercent = _speedPercent;
 
-  M_setSpeed(_speed);
+      _speedPercent = constrain(_speedPercent, 1, 100);
+
+      _speed = map(_speedPercent, 0, 100, _minSpeed, _maxSpeed);
+
+      M_setSpeed(_speed);
+
+      _Display->windingGetSpeedPercent(_speedPercent);
+      return true;
+    }
+  else return false;
 }
 
 // Steps for motor who move carriage.
@@ -271,7 +284,30 @@ void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
   while(ratio > 1.0);
 }
 
+void Coil::computeTurns(uint16_t turns, uint16_t *nbPass, uint16_t *stepsPerTr)
+{
+  *nbPass = 1;
+  float tmp_newDistance = turns;
+  float ratio = 0;
 
+  do
+    {
+      // If number of steps will exceed the max value of uint16_t
+      // ratio will be superior to 1 and a pass will be added
+      ratio = ((tmp_newDistance / LEAD_SCREW_PITCH) * STEPS_PER_TR) / MAX_INTEGER;
+
+      if(ratio > 1.0)
+	{
+	  *nbPass += 1;
+	 // tmp_newDistance = distance / *nbPass ;
+	}
+      else
+	{
+	  *stepsPerTr = ratio * MAX_INTEGER;
+	}
+    }
+  while(ratio > 1.0);
+}
 
 
 
@@ -326,7 +362,7 @@ bool Coil::runMultiLayer(bool isNewCoil)
       isSuspend = runOneLayer();
 
       // refresh turn by layer on lcd.
-      _Display->windingTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
+      _Display->windingGetTurns(_coilTurns, StepsToTurns(_totalStepsCounter));
     }
 
   if( !isSuspend && isbackHome)
@@ -397,6 +433,7 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 {
   uint16_t nbPass = 0;
   uint16_t steps = 0;
+  int8_t old_speedPercent = 0;
 
   _Display->clear();
 
@@ -405,19 +442,19 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
   computeTravel(distance, &nbPass, &steps);
   M_setDisplacement(TRAVELING, nbPass, steps);
 
-  motorsStart();
+  M_start();
 
-  while(!getWindingStatus())
+  while(!M_getWindingStatus())
     {
       if( suspend() == true)
 	{
-	  motorsStop();
+	  M_stop();
 	  return true;
 	}
       else
 	{
-	  updateSpeed();
-	  _Display->windingSetSpeed(_speed);
+	  updateSpeed(old_speedPercent);
+	  _Display->windingGetDisplacement(distance, M_getDisplacement());
 	}
     }
 
@@ -425,47 +462,32 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 }
 
 
-bool Coil::runOnlyCoil(bool dir, uint32_t turns)
+bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 {
-  // Set "_stepsTravel" for start deceleration.
-  computeStepsTravel(TurnToSteps(turns));
+  int8_t old_speedPercent = 0;
 
-  uint16_t delayMotor = _minSpeed;
-  uint32_t lastMicrosMotor = 0;
-  uint32_t lastMicrosAcc = 0;
+  _Display->clear();
 
-  uint32_t stepsCounter = 0;
-  bool isStop = false;
+  M_setMotors(COIL, dir, 0, 0, _speed);
 
-  while( !isStop && stepsCounter < TurnToSteps(turns))
+  M_setDisplacement(ROTATION, turns, STEPS_PER_TR);
+
+  M_start();
+
+  while(!M_getWindingStatus())
     {
-      // If user click on encoder, isSuspend become true and break the loop.
-      if( suspend() == true) return true;
+      if( suspend() == true)
+	{
+	  M_stop();
+	  return true;
+	}
       else
 	{
-	  unsigned long currentMicros = micros();
-
-	  if(timer(currentMicros, &lastMicrosAcc, _accDelay))
-	    {
-	      if(stepsCounter < _stepsTravel)
-		{
-		  // Acceleration
-		  acceleration(ACCELERATION, &delayMotor, _speed);
-		}
-	      else
-		{
-		  // Deceleration
-		  acceleration(DECELERATION, &delayMotor, _minSpeed);
-		}
-	    }
-
-	  if(timer(currentMicros, &lastMicrosMotor, delayMotor))
-	    {
-	      //stepper.coil_oneStep(!dir);
-	      stepsCounter ++;
-	    }
+	  updateSpeed(old_speedPercent);
+	  _Display->windingGetTurns(turns, M_getCoilTr());
 	}
     }
+
   return false;
 }
 

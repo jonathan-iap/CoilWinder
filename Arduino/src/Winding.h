@@ -21,14 +21,14 @@ public:
   ~Coil();
 
   void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
-  void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed);
+  void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
   void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
-  void updateSpeed();
+  bool updateSpeed(int8_t oldPercent);
 
   bool runMultiLayer(bool isNewCoil);
   bool runOneLayer();
   bool runOnlyCarriage(bool dir, float distance);
-  bool runOnlyCoil(bool dir, uint32_t turns);
+  bool runOnlyCoil(bool dir, uint16_t turns);
 
   bool suspend();
   void disableMotors();
@@ -49,6 +49,7 @@ private:
   void homing(bool dir);
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
+  void computeTurns(uint16_t turns, uint16_t *nbPass, uint16_t *stepsPerTr);
 
 private:
 
@@ -71,6 +72,7 @@ private:
   uint16_t _maxSpeed;
   uint16_t _minSpeed;
   uint16_t _speed;
+  int8_t _speedPercent;
   // Reduction ratio for motor.
   float _ratio;
   bool _direction;

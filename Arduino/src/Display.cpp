@@ -287,17 +287,26 @@ const void Display::engineValueLimit()
   _lcd.print(MSG_VALUE_TO_HIGH);
 }
 
-const void Display::windingTurns(uint32_t coilTurns, uint32_t counter)
+const void Display::windingGetTurns(uint16_t target, uint16_t counter)
 {
   _lcd.setCursor(0,1);
-  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(" ");
+  _lcd.print("Tr:"), _lcd.print(target),_lcd.print("/");
+  _lcd.print(counter), _lcd.print(" ");
 }
 
 
-const void Display::windingSetSpeed(uint16_t speed)
+const void Display::windingGetSpeedPercent(uint16_t speed)
 {
   _lcd.setCursor(0,0);
-  _lcd.print(speed), _lcd.print(UNIT_RPM), _lcd.print("  ");
+  _lcd.print(MSG_CURRENT_SPEED),_lcd.print(speed), _lcd.print("%  ");
+}
+
+
+const void Display::windingGetDisplacement(float target, float counter)
+{
+  _lcd.setCursor(0,LCD_LINES);
+  _lcd.print(target), _lcd.print("/");
+  _lcd.print(counter), _lcd.print(UNIT_MM), _lcd.print(" ");
 }
 
 const void Display::print(uint8_t x, uint8_t y, uint32_t value)
