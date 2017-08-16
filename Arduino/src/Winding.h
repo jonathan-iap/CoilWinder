@@ -25,31 +25,31 @@ public:
   void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
   void updateSpeed(int8_t *oldPercent, uint16_t *speedSet);
 
-  bool runMultiLayer(bool isNewCoil);
-  bool runOneLayer();
+//  bool runMultiLayer(bool isNewCoil);
+//  bool runOneLayer();
   bool runOnlyCarriage(bool dir, float distance);
   bool runOnlyCoil(bool dir, uint16_t turns);
 
   bool suspend();
-  void disableMotors();
+//  void disableMotors();
 
-  uint32_t getTurns();
-  uint32_t getCurrentTurns();
-  uint32_t getTotalStepsCounter();
-  uint32_t getLayerStepsCounter();
-  uint32_t getLayerCoilStepsCounter();
+//  uint32_t getTurns();
+//  uint32_t getCurrentTurns();
+//  uint32_t getTotalStepsCounter();
+//  uint32_t getLayerStepsCounter();
+//  uint32_t getLayerCoilStepsCounter();
 
 private:
 
-  void computeStepPerLayer(float length);
-  void computeRatio();
-  void computeStepsTravel(float totalSteps);
-  void computeAll();
-
-  void homing(bool dir);
+//  void computeStepPerLayer(float length);
+//  void computeRatio();
+//  void computeStepsTravel(float totalSteps);
+//  void computeAll();
+//
+//  void homing(bool dir);
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
-  void _acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
+  void acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
 
 private:
 

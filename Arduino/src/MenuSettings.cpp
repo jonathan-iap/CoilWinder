@@ -282,7 +282,7 @@ void Setting::displaying()
   switch(_idValue)
   {
     case id_NEW         : {_Display->engineNewWinding(Turns); break;}
-    case id_RESUME      : {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
+    case id_RESUME      : {/*_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns());*/ break;}
     case id_RESUME_SAVE:
       {
 	uint32_t tmp_totalSteps = 0;
@@ -607,11 +607,11 @@ void Setting::set_AB_Save()
     }
   else
     {
-      TotalSteps     = _Coil->getTotalStepsCounter();
-      LayerSteps     = _Coil->getLayerStepsCounter();
-      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
-      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
-      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+//      TotalSteps     = _Coil->getTotalStepsCounter();
+//      LayerSteps     = _Coil->getLayerStepsCounter();
+//      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
+//      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+//      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
 }
 
@@ -687,7 +687,7 @@ void Setting::moving(bool direction)
       _Coil->runOnlyCoil(direction, *p_floatingValue);
     }
 
-  _Coil->disableMotors();
+  //_Coil->disableMotors();
   displaying();
 }
 
@@ -703,9 +703,9 @@ bool Setting::runWinding(bool isFirstLunch, bool isNewCoil)
   setWinding(isFirstLunch);
 
   // Start winding with "runMultiLayer()"
-  if( _Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
+  if(1)//_Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
     {
-      _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
+     // _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
       return EXIT;
     }
   else
@@ -778,5 +778,5 @@ void Setting::set_AB_SuspendMenu()
   _tmp_id = id_SUSPEND; // For execute menuSuspend();
 
   setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
-  _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+ // _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
 }
