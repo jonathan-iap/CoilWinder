@@ -77,11 +77,11 @@ protected :
 
   float WireSize;
   float CoilLength;
-  float Turns;
-  float MaxSpeed;
-  float MinSpeed;
-  float AccDelay;
-  float AccIncr;
+  uint16_t Turns;
+  uint16_t MaxSpeed;
+  uint16_t MinSpeed;
+  uint16_t AccDelay;
+  uint16_t AccIncr;
 
   bool WinSense;
   bool CarSense;

@@ -12,6 +12,7 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
    p_arrayValue(0),
    _sizeBuffValue(0),
    p_floatingValue(0),
+   p_intValue(0),
    _speedPercent(100),
    _positionAB(0),
    _index(0),
@@ -45,11 +46,23 @@ void Setting::actionMenu(const uint8_t id, char tmp_buffValue[], float *tmp_valF
 
   p_arrayValue     = tmp_buffValue;
   p_floatingValue  = tmp_valFromBuff;
+  p_intValue       = NULL;
 
   setValueFromId();
   navigationEngine();
 }
 
+void Setting::actionMenu(const uint8_t id, char tmp_buffValue[], uint16_t *tmp_valFromBuff)
+{
+  _idValue = id;
+
+  p_arrayValue     = tmp_buffValue;
+  p_intValue       = tmp_valFromBuff;
+  p_floatingValue  = NULL;
+
+  setValueFromId();
+  navigationEngine();
+}
 
 /******************************************************************************
  * brief   : Assign value and action
@@ -194,6 +207,22 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
 #endif
 }
 
+
+void Setting::setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
+			uint16_t *value, const char unit[], const char actionBar[],
+			const uint8_t sizeActionBar, uint8_t AB_LinePosition)
+{
+  // Displayed on left top.
+  strcpy(_label, label);
+  // Pass values saved from memory.
+  p_arrayValue   = arrayValue;
+  _sizeBuffValue = sizeOfArrayValue;
+  p_intValue     = value;
+  strcpy(_unit, unit);
+  // Action bar
+  setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
+
+}
 
 void Setting::setValues(const char label[], const uint8_t sizeOfArrayValue,
 			const char unit[], const char actionBar[],
@@ -514,7 +543,6 @@ bool Setting::selectedAction(uint8_t wordSize)
 	// RIGHT _______________________________________________________________
 	case ICONRIGHT[0] :
 	{
-	  Serial.println("Icon Right");
 	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL)
 	    {
 	      moving(CLOCK); return CONTINU;
@@ -583,7 +611,9 @@ bool Setting::selectedAction(uint8_t wordSize)
 void Setting::update()
 {
   bufferCopy(_actionBar, p_arrayValue, 0, _sizeBuffValue);
-  *p_floatingValue = atof(p_arrayValue);
+
+  if(p_floatingValue != NULL) *p_floatingValue = atof(p_arrayValue);
+  else*p_intValue = atoi(p_arrayValue);
 }
 
 
@@ -594,7 +624,6 @@ void Setting::retry()
 {
   setValueFromId();
   displaying();
-  Serial.print("_idValue : "), Serial.print(_idValue);
 }
 
 
@@ -722,9 +751,6 @@ void Setting::moving(bool direction)
   // set speed.
   adjustSpeed();
 
-  // Message displacement.
-  _Display->engineMoving(*p_floatingValue, _unit, direction);
-
   // Start
   if(_idValue == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_CARRIAGE)
     {
@@ -732,10 +758,10 @@ void Setting::moving(bool direction)
     }
   else
     {
-      _Coil->runOnlyCoil(direction, *p_floatingValue);
+      _Coil->runOnlyCoil(direction, *p_intValue);
     }
 
-  //_Coil->disableMotors();
+  // Update display for new displacement
   displaying();
 }
 

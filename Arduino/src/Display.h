@@ -197,7 +197,6 @@ public:
   const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
   const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
-  const void engineMoving(float value, char unit[], bool dir);
   const void engineSense(bool dir);
   const void engineNewWinding(uint16_t coilTurns);
   const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);

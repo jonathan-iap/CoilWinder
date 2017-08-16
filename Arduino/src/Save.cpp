@@ -189,11 +189,11 @@ void Memory::readAll()
   // Convert value within array in a float or numeric value.
   WireSize 	= atof(_buff_WireSize);
   CoilLength 	= atof(_buff_CoilLength);
-  Turns 	= atof(_buff_Turns);
-  MaxSpeed 	= atof(_buff_MaxSpeed);
-  MinSpeed 	= atof(_buff_MinSpeed);
-  AccDelay 	= atof(_buff_AccDelay);
-  AccIncr 	= atof(_buff_AccIncr);
+  Turns 	= atoi(_buff_Turns);
+  MaxSpeed 	= atoi(_buff_MaxSpeed);
+  MinSpeed 	= atoi(_buff_MinSpeed);
+  AccDelay 	= atoi(_buff_AccDelay);
+  AccIncr 	= atoi(_buff_AccIncr);
 }
 
 void Memory::reset()

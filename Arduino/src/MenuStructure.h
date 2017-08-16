@@ -198,7 +198,7 @@ bool menuMovCoil(const Menu::Action_t a)
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
       char tmp_buffDistance[] = INIT_MOV_COIL;
-      float tmp_distance = 0.00;
+      uint16_t tmp_distance = 0;
 
       setting.actionMenu(id_MOVE_COIL, tmp_buffDistance, &tmp_distance);
     }

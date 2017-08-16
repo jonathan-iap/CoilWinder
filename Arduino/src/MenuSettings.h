@@ -57,6 +57,7 @@ private:
   char *p_arrayValue;
   uint8_t _sizeBuffValue;
   float *p_floatingValue;
+  uint16_t *p_intValue;
   int8_t _speedPercent;
   char _unit[3];
 
@@ -72,6 +73,7 @@ public:
 
   void actionMenu(const uint8_t id);
   void actionMenu(const uint8_t id, char tmp_buffValue[], float *tmp_valFromBuff);
+  void actionMenu(const uint8_t id, char tmp_buffValue[], uint16_t *tmp_valFromBuff);
   bool runWinding(bool isFirstLunch, bool isNewCoil);
 
 private:
@@ -80,6 +82,9 @@ private:
   void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
 		 float *value, const char unit[], const char actionBar[],
 		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
+  void setValues(const char label[], char arrayValue[], const uint8_t sizeOfArrayValue,
+  		 uint16_t *value, const char unit[], const char actionBar[],
+  		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);
   void setValues(const char label[], const uint8_t sizeOfArrayValue,
 		 const char unit[], const char actionBar[],
 		 const uint8_t sizeActionBar, uint8_t AB_LinePosition);

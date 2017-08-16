@@ -230,19 +230,6 @@ const void Display::engineSetValue(char label[], char actionBar[], uint8_t posit
   _lcd.print(actionBar);
 }
 
-/******************************************************************************
- * brief   : Message for moving menu.
- ******************************************************************************/
-const void Display::engineMoving(float value, char unit[], bool dir)
-{
-  _lcd.clear();
-  _lcd.setCursor(0, 0);
-  _lcd.print(value); _lcd.print(unit); _lcd.print(" in ");
-  dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
-  _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(MSG_FOR_STOP);
-}
-
 const void Display::engineSense(bool dir)
 {
   _lcd.setCursor(0, 0);
