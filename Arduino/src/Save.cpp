@@ -34,13 +34,12 @@ Memory::Memory()
   _addr_MinSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
   _addr_AccDelay	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
   _addr_AccIncr		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_INCR);
-  _addr_WinSense	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_SENSE);
-  _addr_CarSense	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_SENSE);
   _addr_DefaultSettings	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
   _addr_TotalSteps	= EEPROM.getAddress(sizeof(uint32_t));
   _addr_LayerSteps	= EEPROM.getAddress(sizeof(uint32_t));
   _addr_LayerCoilSteps	= EEPROM.getAddress(sizeof(uint32_t));
-
+  _addr_WinSense	= EEPROM.getAddress(1);
+  _addr_CarSense	= EEPROM.getAddress(1);
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
 
@@ -89,21 +88,21 @@ void Memory::save(char buffer[], const uint8_t id)
 	EEPROM.updateBlock<char>(_addr_AccIncr, buffer, BUFFSIZE_ACC_INCR);
 	break;
       }
-    case id_W_SENSE :
-      {
-	EEPROM.updateBlock<char>(_addr_WinSense, buffer, BUFFSIZE_SENSE);
-	break;
-      }
-    case id_C_SENSE :
-      {
-	EEPROM.updateBlock<char>(_addr_CarSense, buffer, BUFFSIZE_SENSE);
-	break;
-      }
     case id_RESUME_SAVE :
       {
 	EEPROM.updateLong(_addr_TotalSteps, TotalSteps);
 	EEPROM.updateLong(_addr_LayerSteps, LayerSteps);
 	EEPROM.updateLong(_addr_LayerCoilSteps, LayerCoilSteps);
+	break;
+      }
+    case id_W_SENSE :
+      {
+	EEPROM.updateBit(_addr_WinSense, 1, WinSense);
+	break;
+      }
+    case id_C_SENSE :
+      {
+	EEPROM.updateBit(_addr_CarSense, 1, CarSense);
 	break;
       }
   }
@@ -148,21 +147,21 @@ void Memory::read(char buffer[], const uint8_t id)
 	EEPROM.readBlock<char>(_addr_AccIncr, buffer, BUFFSIZE_ACC_INCR);
 	break;
       }
-    case id_W_SENSE :
-      {
-	EEPROM.readBlock<char>(_addr_WinSense, buffer, BUFFSIZE_SENSE);
-	break;
-      }
-    case id_C_SENSE :
-      {
-	EEPROM.readBlock<char>(_addr_CarSense, buffer, BUFFSIZE_SENSE);
-	break;
-      }
     case id_RESUME_SAVE :
       {
 	TotalSteps = EEPROM.readLong(_addr_TotalSteps);
 	LayerSteps = EEPROM.readLong(_addr_LayerSteps);
 	LayerCoilSteps= EEPROM.readLong(_addr_LayerCoilSteps);
+	break;
+      }
+    case id_W_SENSE :
+      {
+	EEPROM.readBit(_addr_WinSense, 1);
+	break;
+      }
+    case id_C_SENSE :
+      {
+	EEPROM.readBit(_addr_CarSense, 1);
 	break;
       }
   }
@@ -183,8 +182,9 @@ void Memory::readAll()
   read(_buff_MinSpeed   , id_MIN_SPEED);
   read(_buff_AccDelay   , id_ACC_DELAY);
   read(_buff_AccIncr    , id_ACC_INCR);
-  read(_buff_WinSense   , id_W_SENSE);
-  read(_buff_CarSense   , id_C_SENSE);
+  read(0                , id_W_SENSE);
+  read(0                , id_C_SENSE);
+
 
   // Convert value within array in a float or numeric value.
   WireSize 	= atof(_buff_WireSize);
@@ -194,8 +194,6 @@ void Memory::readAll()
   MinSpeed 	= atof(_buff_MinSpeed);
   AccDelay 	= atof(_buff_AccDelay);
   AccIncr 	= atof(_buff_AccIncr);
-  buffercmp((char*)MSG_CLOCK, _buff_WinSense, BUFFSIZE_SENSE)? WinSense = CLOCK : WinSense = C_CLOCK;
-  buffercmp((char*)MSG_CLOCK, _buff_CarSense, BUFFSIZE_SENSE)? CarSense = CLOCK : CarSense = C_CLOCK;
 }
 
 void Memory::reset()
@@ -207,14 +205,15 @@ void Memory::reset()
   EEPROM.writeBlock<char>(_addr_MinSpeed, INIT_MINSPEED, BUFFSIZE_MIN_SPEED);
   EEPROM.writeBlock<char>(_addr_AccDelay, INIT_ACC_DELAY, BUFFSIZE_ACC_DELAY);
   EEPROM.writeBlock<char>(_addr_AccIncr, INIT_ACC_INCR, BUFFSIZE_ACC_INCR);
-  EEPROM.writeBlock<char>(_addr_WinSense, MSG_C_CLOCK, BUFFSIZE_SENSE);
-  EEPROM.writeBlock<char>(_addr_CarSense, MSG_CLOCK, BUFFSIZE_SENSE);
 
   EEPROM.writeBlock<char>(_addr_DefaultSettings, MSG_IS_SET, BUFFSIZE_DEFAULT);
 
   EEPROM.writeLong(_addr_TotalSteps, 0);
   EEPROM.writeLong(_addr_LayerSteps, 0);
   EEPROM.writeLong(_addr_LayerCoilSteps, 0);
+
+  EEPROM.writeBit(_addr_WinSense, 1, WinSense);
+  EEPROM.writeBit(_addr_CarSense, 1, CarSense);
 }
 
 bool Memory::isSet()
@@ -227,7 +226,7 @@ bool Memory::isSet()
 }
 
 /* Debug -------------------------------------------------------------------*/
-#ifdef DEBUGoff
+#ifdef DEBUG_
 void Memory::ReadAddresses()
 {
   Serial.print("adress wire: "); Serial.println(_addr_WireSize);

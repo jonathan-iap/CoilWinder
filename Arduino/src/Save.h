@@ -25,7 +25,6 @@
 #define BUFFSIZE_MIN_SPEED  (COUNTOF(INIT_MINSPEED))
 #define BUFFSIZE_ACC_DELAY  (COUNTOF(INIT_ACC_DELAY))
 #define BUFFSIZE_ACC_INCR   (COUNTOF(INIT_ACC_INCR))
-#define BUFFSIZE_SENSE      (COUNTOF(MSG_CLOCK))
 #define BUFFSIZE_DEFAULT    (COUNTOF(MSG_IS_SET))
 
 /* ID _________________________________________________________________*/
@@ -33,12 +32,13 @@
 #define id_WIRESIZE    1
 #define id_COILLENGTH  2
 #define id_TURNS       3
-#define id_MAX_SPEED   4
-#define id_MIN_SPEED   5
-#define id_ACC_DELAY   6
-#define id_ACC_INCR    7
-#define id_W_SENSE     8
-#define id_C_SENSE     9
+#define id_W_SENSE     4
+#define id_C_SENSE     5
+#define id_MAX_SPEED   6
+#define id_MIN_SPEED   7
+#define id_ACC_DELAY   8
+#define id_ACC_INCR    9
+
 // Actions
 #define id_SAVE           20
 #define id_RESET          21
@@ -97,19 +97,17 @@ protected :
   char _buff_MinSpeed[BUFFSIZE_MIN_SPEED+1];
   char _buff_AccDelay[BUFFSIZE_ACC_DELAY+1];
   char _buff_AccIncr[BUFFSIZE_ACC_INCR+1];
-  char _buff_WinSense[BUFFSIZE_SENSE+1];
-  char _buff_CarSense[BUFFSIZE_SENSE+1];
 
 private :
   uint8_t _addr_WireSize;
   uint8_t _addr_CoilLength;
   uint8_t _addr_Turns;
+  uint8_t _addr_WinSense;
+  uint8_t _addr_CarSense;
   uint8_t _addr_MaxSpeed;
   uint8_t _addr_MinSpeed;
   uint8_t _addr_AccDelay;
   uint8_t _addr_AccIncr;
-  uint8_t _addr_WinSense;
-  uint8_t _addr_CarSense;
   uint8_t _addr_DefaultSettings;
   uint8_t _addr_TotalSteps;
   uint8_t _addr_LayerSteps;

@@ -59,6 +59,7 @@
 #define MSG_SAVE_CURRENT  "Save session ?"
 #define MSG_VALUE_TO_HIGH "Value to high !"
 #define MSG_CURRENT_SPEED "Speed: "
+#define MSG_EMPTY       " "
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_MOVE        "Move"
 #define SIZE_KEYWORD_MOVE   COUNTOF(KEYWORD_MOVE)
@@ -87,6 +88,8 @@
 #define SIZE_AB_CHOICE           COUNTOF(ACTIONBAR_CHOICE)
 #define ACTIONBAR_CHOICE_SIMPLE  "Y/N"
 #define SIZE_AB_CHOICE_SIMPLE    COUNTOF(ACTIONBAR_CHOICE_SIMPLE)
+#define ACTIONBAR_SENSE_SAVE     ICONLEFT "/" ICONRIGHT "|" KEYWORD_SAVE "/" KEYWORD_EXIT
+#define SIZE_AB_SENSE_SAVE       COUNTOF(ACTIONBAR_SENSE_SAVE)
 #define ACTIONBAR_MOVE           ICONLEFT "/" ICONRIGHT "|" KEYWORD_EXIT
 #define SIZE_AB_MOVE             COUNTOF(ACTIONBAR_MOVE)
 #define ACTIONBAR_MOVE_BACK      ICONLEFT "/" ICONRIGHT "|" KEYWORD_BACK
@@ -190,10 +193,12 @@ public:
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   const void engineEditMode(uint8_t positionAB);
   const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB);
+  const void engineSave(bool dir, char actionBar[], uint8_t positionAB);
   const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
   const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
   const void engineMoving(float value, char unit[], bool dir);
+  const void engineSense(bool dir);
   const void engineNewWinding(uint16_t coilTurns);
   const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);
   const void engineAjustSpeed(bool refresh, int8_t percent);

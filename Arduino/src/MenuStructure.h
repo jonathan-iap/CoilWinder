@@ -100,6 +100,24 @@ bool editTurns(const Menu::Action_t a)
   return true;
 }
 
+bool editWindingSense(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_W_SENSE);
+    }
+  return true;
+}
+
+bool editCarrStartSense(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_C_SENSE);
+    }
+  return true;
+}
+
 bool runWinding(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
@@ -187,6 +205,14 @@ bool menuMovCoil(const Menu::Action_t a)
   return true;
 }
 
+bool menuMovHome(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+    }
+  return true;
+}
+
 bool menuReset(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
@@ -219,13 +245,13 @@ MenuItem(miMoves,      "Moves",         miSettings,     miWinding,      miHome, 
 MenuItem(miSettings,   "Settings",      Menu::NullItem, miMoves,        miHome, miMaxSpeed	, menuDummy);
 
 // Sub-menu 1.1 -> 1.7
-MenuItem(miSetHome,    "Set home",      miWireSize,     Menu::NullItem, miSetWinding, Menu::NullItem, setHome);
-MenuItem(miWireSize,   "Wire size",     miCoilLength,   miSetHome,      miSetWinding, Menu::NullItem, editWire);
-MenuItem(miCoilLength, "Coil length",   miTurns,        miWireSize,     miSetWinding, Menu::NullItem, editLength);
-MenuItem(miTurns,      "Turns",         miWinSense,     miCoilLength,   miSetWinding, Menu::NullItem, editTurns);
-MenuItem(miWinSense,   "Winding sense", miCarSense,     miTurns,        miSetWinding, Menu::NullItem, menuDummy);
-MenuItem(miCarSense,   "Start sense",   miBack1,        miWinSense,     miSetWinding, Menu::NullItem, menuDummy);
-MenuItem(miBack1,      BACK,            Menu::NullItem, miCarSense,     miSetWinding, Menu::NullItem, menuBack);
+MenuItem(miSetHome,    "Set home",         miWireSize,     Menu::NullItem, miSetWinding, Menu::NullItem, setHome);
+MenuItem(miWireSize,   "Wire size",        miCoilLength,   miSetHome,      miSetWinding, Menu::NullItem, editWire);
+MenuItem(miCoilLength, "Coil length",      miTurns,        miWireSize,     miSetWinding, Menu::NullItem, editLength);
+MenuItem(miTurns,      "Turns",            miWinSense,     miCoilLength,   miSetWinding, Menu::NullItem, editTurns);
+MenuItem(miWinSense,   "Winding sense",    miCarSense,     miTurns,        miSetWinding, Menu::NullItem, editWindingSense);
+MenuItem(miCarSense,   "Carr Start sense", miBack1,        miWinSense,     miSetWinding, Menu::NullItem, editCarrStartSense);
+MenuItem(miBack1,      BACK,               Menu::NullItem, miCarSense,     miSetWinding, Menu::NullItem, menuBack);
 
 // Sub-menu 2.1 -> 2.4
 MenuItem(miStart,  "Start new",      miResume,       Menu::NullItem, miWinding, Menu::NullItem, runWinding);
@@ -235,8 +261,9 @@ MenuItem(miBack2,  BACK,             Menu::NullItem, miSaved,        miWinding, 
 
 // Sub-menu 3.1 -> 3.3
 MenuItem(miMovCarriage, "Move carriage", miMovCoil,      Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);
-MenuItem(miMovCoil,     "Move coil",     miBack3,        miMovCarriage,  miMoves, Menu::NullItem, menuMovCoil);
-MenuItem(miBack3,       BACK,            Menu::NullItem, miMovCoil,      miMoves, Menu::NullItem, menuBack);
+MenuItem(miMovCoil,     "Move coil",     miMovHome,      miMovCarriage,  miMoves, Menu::NullItem, menuMovCoil);
+MenuItem(miMovHome,     "Move to home",  miBack3,        miMovCoil,      miMoves, Menu::NullItem, menuMovHome);
+MenuItem(miBack3,       BACK,            Menu::NullItem, miMovHome,      miMoves, Menu::NullItem, menuBack);
 
 // Sub-menu 4.1 -> 4.6
 MenuItem(miMaxSpeed, "Max speed",      miMinSpeed,     Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);

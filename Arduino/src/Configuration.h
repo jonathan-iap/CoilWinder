@@ -68,6 +68,8 @@
 #define INIT_MINSPEED	"0001"  // in RPM (tr/min)
 #define INIT_ACC_DELAY	"0400"
 #define INIT_ACC_INCR	"0020"
+#define INIT_W_SENSE	C_CLOCK
+#define INIT_C_SENSE	CLOCK
 
 // Displacement value ---------------------------------------------------------------
 #define INIT_MOV_CAR	"00.00"

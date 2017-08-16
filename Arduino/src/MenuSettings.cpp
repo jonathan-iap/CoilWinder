@@ -82,6 +82,16 @@ void Setting::setValueFromId()
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
+    case id_W_SENSE :
+      {
+	setValues(MSG_EMPTY, ACTIONBAR_SENSE_SAVE, SIZE_AB_SENSE_SAVE, LCD_LINES);
+	break;
+      }
+    case id_C_SENSE :
+      {
+	setValues(MSG_EMPTY, ACTIONBAR_SENSE_SAVE, SIZE_AB_SENSE_SAVE, LCD_LINES);
+	break;
+      }
     case id_MAX_SPEED :
       {
 	setValues(MSG_MAX_SPEED, _buff_MaxSpeed, BUFFSIZE_MAX_SPEED, &MaxSpeed, UNIT_RPM,
@@ -282,6 +292,8 @@ void Setting::displaying()
   switch(_idValue)
   {
     case id_NEW         : {_Display->engineNewWinding(Turns); break;}
+    case id_W_SENSE     : {_Display->engineSense(WinSense); break;}
+    case id_C_SENSE     : {_Display->engineSense(CarSense); break;}
     case id_RESUME      : {/*_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns());*/ break;}
     case id_RESUME_SAVE:
       {
@@ -481,22 +493,37 @@ bool Setting::selectedAction(uint8_t wordSize)
 	// LEFT ________________________________________________________________
 	case ICONLEFT[0] :
 	{
-	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL){
+	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL)
+	    {
 	      moving(C_CLOCK); return CONTINU;
-	  }
+	    }
+	  else if(_tmp_id == id_W_SENSE)
+	    {
+	      WinSense = C_CLOCK;
+	      _Display->engineSense(WinSense);
+	      return CONTINU;
+	    }
+	  else if(_tmp_id == id_C_SENSE)
+	    {
+	      CarSense = C_CLOCK;
+	      _Display->engineSense(CarSense);
+	      return CONTINU;
+	    }
 	  break;
 	}
 	// RIGHT _______________________________________________________________
 	case ICONRIGHT[0] :
 	{
 	  Serial.println("Icon Right");
-	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL){
+	  if(_tmp_id == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_COIL)
+	    {
 	      moving(CLOCK); return CONTINU;
-	  }
+	    }
 	  else if(_tmp_id == id_MAX_SPEED)
 	    {
 	      // Check value for motor interrupt
 	      update();
+
 	      if(RPM_TO_INT(MaxSpeed)<1)
 		{
 		  _Display->engineValueLimit();
@@ -507,10 +534,24 @@ bool Setting::selectedAction(uint8_t wordSize)
 		  return EXIT;
 		}
 	    }
+	  else if(_tmp_id == id_W_SENSE)
+	    {
+	      WinSense = CLOCK;
+	      _Display->engineSense(WinSense);
+	      return CONTINU;
+	    }
+	  else if(_tmp_id == id_C_SENSE)
+	    {
+	      CarSense = CLOCK;
+	      _Display->engineSense(CarSense);
+	      return CONTINU;
+	    }
 	  else
 	    {
-	      update(); return EXIT;
+	      update();
+	      return EXIT;
 	    }
+
 	  break;
 	}
 	// RESUME ______________________________________________________________
@@ -599,7 +640,13 @@ void Setting::set_AB_Save()
 {
   _tmp_id = id_SAVE;
 
-  if(_idValue != id_RESUME)
+  if(_idValue == id_W_SENSE || _idValue == id_C_SENSE )
+    {
+      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+      if(_idValue == id_W_SENSE) _Display->engineSave(WinSense, _actionBar, _positionAB);
+      else _Display->engineSave(CarSense, _actionBar, _positionAB);
+    }
+  else if(_idValue != id_RESUME)
     {
       update();
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
@@ -607,11 +654,11 @@ void Setting::set_AB_Save()
     }
   else
     {
-//      TotalSteps     = _Coil->getTotalStepsCounter();
-//      LayerSteps     = _Coil->getLayerStepsCounter();
-//      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
-//      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
-//      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+      //      TotalSteps     = _Coil->getTotalStepsCounter();
+      //      LayerSteps     = _Coil->getLayerStepsCounter();
+      //      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
+      //      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+      //      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
 }
 
@@ -705,7 +752,7 @@ bool Setting::runWinding(bool isFirstLunch, bool isNewCoil)
   // Start winding with "runMultiLayer()"
   if(1)//_Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
     {
-     // _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
+      // _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
       return EXIT;
     }
   else
@@ -778,5 +825,5 @@ void Setting::set_AB_SuspendMenu()
   _tmp_id = id_SUSPEND; // For execute menuSuspend();
 
   setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
- // _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+  // _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
 }

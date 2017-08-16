@@ -30,14 +30,7 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _speedPercent(0),
 
   _ratio(0),
-  _direction(CLOCK),
-
-  _stepsPerLayer(0),
-  _stepsCoilPerLayer(0),
-  _stepsTravel(0),
-  _totalStepsCounter(0),
-  _layerStepsCounter(0),
-  _layerCoilStepsCounter(0)
+  _direction(CLOCK)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -48,13 +41,13 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense)
+void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool carSense)
 {
   _coilLength		= coilLength;
   _wireSize   		= wireSize;
   _coilTurns  		= coilTurns;
   _windingSense		= windSense;
-  _carriageStartSense	= startSense;
+  _carriageStartSense	= carSense;
 }
 
 
@@ -71,9 +64,9 @@ void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint
 
 void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps)
 {
-  _totalStepsCounter     = totalSteps;
-  _layerStepsCounter     = layerSteps;
-  _layerCoilStepsCounter = coilSteps;
+//  _totalStepsCounter     = totalSteps;
+//  _layerStepsCounter     = layerSteps;
+//  _layerCoilStepsCounter = coilSteps;
 }
 
 // Allow to update speed during winding or displacement

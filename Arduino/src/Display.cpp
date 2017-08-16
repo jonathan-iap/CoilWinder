@@ -175,6 +175,17 @@ const void Display::engineSave(float value, char unit[], char actionBar[], uint8
   _lcd.print(actionBar);
 }
 
+const void Display::engineSave(bool dir, char actionBar[], uint8_t positionAB)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SAVE);
+  dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
+
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+}
+
 
 const void Display::engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns)
 {
@@ -232,6 +243,13 @@ const void Display::engineMoving(float value, char unit[], bool dir)
   _lcd.print(MSG_FOR_STOP);
 }
 
+const void Display::engineSense(bool dir)
+{
+  _lcd.setCursor(0, 0);
+  _lcd.print("Sense : ");
+
+  dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
+}
 
 const void Display::engineNewWinding(uint16_t coilTurns)
 {

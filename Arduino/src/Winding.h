@@ -78,12 +78,6 @@ private:
   float _ratio;
   bool _direction;
   // Steps for one layer.
-  uint32_t _stepsPerLayer;
-  uint32_t _stepsCoilPerLayer;
-  uint32_t _stepsTravel;
-  uint32_t _totalStepsCounter;
-  uint32_t _layerStepsCounter;
-  uint32_t _layerCoilStepsCounter;
 
 };
 
