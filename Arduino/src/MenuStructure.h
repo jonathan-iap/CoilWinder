@@ -209,6 +209,7 @@ bool menuMovHome(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
+      setting.actionMenu(id_GO_HOME);
     }
   return true;
 }

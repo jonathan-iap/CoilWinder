@@ -67,7 +67,7 @@ private:
   int8_t _index;
   uint8_t _minIndex;
 
-  uint32_t _homePosition;
+  float _homePosition;
 
 public:
 
@@ -112,6 +112,7 @@ private:
   void resetAll();
   void RAZ_All();
   void moving(bool direction);
+  void moveHome();
   void setWinding(bool isfirstLunch);
   void adjustSpeed();
   void set_AB_SuspendMenu();

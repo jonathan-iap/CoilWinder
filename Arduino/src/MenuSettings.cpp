@@ -143,6 +143,11 @@ void Setting::setValueFromId()
 		  LCD_LINES);
 	break;
       }
+    case id_GO_HOME :
+      {
+	setValues(MSG_EMPTY, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+	break;
+      }
     case id_RESET :
       {
 	setValues(MSG_RESET, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
@@ -316,13 +321,14 @@ void Setting::navigationEngine()
  ******************************************************************************/
 void Setting::displaying()
 {
-  _Display->engineSetValue(_label, _actionBar, _positionAB);
+  _Display->engineSetValue(_label,_actionBar, _positionAB);
 
   switch(_idValue)
   {
     case id_NEW         : {_Display->engineNewWinding(Turns); break;}
     case id_W_SENSE     : {_Display->engineSense(WinSense); break;}
     case id_C_SENSE     : {_Display->engineSense(CarSense); break;}
+    case id_GO_HOME     : {_Display->engineGoHome(_homePosition); break;}
     case id_RESUME      : {/*_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns());*/ break;}
     case id_RESUME_SAVE:
       {
@@ -331,6 +337,8 @@ void Setting::displaying()
 	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
       }
   }
+
+  Serial.print("homep"), Serial.println(_homePosition);
 }
 
 
@@ -467,6 +475,7 @@ bool Setting::selectedAction(uint8_t wordSize)
 	    case id_NEW         : {return runWinding(FIRST_LUNCH, NEW	); break;}
 	    case id_RESUME      : {return runWinding(FIRST_LUNCH, RESUME); break;}
 	    case id_RESUME_SAVE : {return runWinding(FIRST_LUNCH, RESUME); break;}
+	    case id_GO_HOME     : {moveHome(); break;}
 	  }
 	}
       // NO ___________________________________________________________________
@@ -479,10 +488,11 @@ bool Setting::selectedAction(uint8_t wordSize)
 	      else{ retry(); return CONTINU;}
 	      break;
 	    }
-	    case id_HOME  : {return EXIT; break;}
-	    case id_RESET : {return EXIT; break;}
-	    case id_RAZ   : {return EXIT; break;}
-	    case id_NEW   : {return EXIT; break;}
+	    case id_HOME    : {return EXIT; break;}
+	    case id_RESET   : {return EXIT; break;}
+	    case id_RAZ     : {return EXIT; break;}
+	    case id_NEW     : {return EXIT; break;}
+	    case id_GO_HOME : {return EXIT; break;}
 	  }
 	}
       // SPEED _________________________________________________________________
@@ -698,7 +708,7 @@ void Setting::set_AB_Save()
  ******************************************************************************/
 void Setting::setHomePosition()
 {
-  _homePosition = 0;
+  _homePosition = 0.0;
   _Display->loadBar();
 }
 
@@ -754,7 +764,8 @@ void Setting::moving(bool direction)
   // Start
   if(_idValue == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_CARRIAGE)
     {
-      _Coil->runOnlyCarriage(direction, *p_floatingValue);
+      // homing is update
+      _Coil->runOnlyCarriage(direction, *p_floatingValue, &_homePosition);
     }
   else
     {
@@ -765,6 +776,16 @@ void Setting::moving(bool direction)
   displaying();
 }
 
+void Setting::moveHome()
+{
+  bool dir = false;
+
+  _homePosition > 0 ? dir=C_CLOCK : dir=CLOCK;
+
+  adjustSpeed();
+
+  _Coil->runOnlyCarriage(dir, _homePosition, &_homePosition);
+}
 
 /******************************************************************************
  * brief   : Main winding function

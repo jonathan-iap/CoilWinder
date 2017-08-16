@@ -35,6 +35,7 @@
 #define UNIT_STEP "step"
 /* Labels _____________________________________________________________*/
 #define MSG_HOMING        "Homing : "
+#define MSG_GO_HOME       "Go to : "
 #define MSG_CONFIRM       "Confirm ?"
 #define MSG_WIRE_SIZE     "Wire size in " UNIT_MM
 #define MSG_COIL_LENGTH   "Length in " UNIT_MM
@@ -59,7 +60,7 @@
 #define MSG_SAVE_CURRENT  "Save session ?"
 #define MSG_VALUE_TO_HIGH "Value to high !"
 #define MSG_CURRENT_SPEED "Speed: "
-#define MSG_EMPTY       " "
+#define MSG_EMPTY         " "
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_MOVE        "Move"
 #define SIZE_KEYWORD_MOVE   COUNTOF(KEYWORD_MOVE)
@@ -198,6 +199,7 @@ public:
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
   const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
   const void engineSense(bool dir);
+  const void engineGoHome(float homePosition);
   const void engineNewWinding(uint16_t coilTurns);
   const void engineResumeWinding(uint16_t coilTurns, uint16_t counter);
   const void engineAjustSpeed(bool refresh, int8_t percent);

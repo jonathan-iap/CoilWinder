@@ -64,9 +64,9 @@ void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint
 
 void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps)
 {
-//  _totalStepsCounter     = totalSteps;
-//  _layerStepsCounter     = layerSteps;
-//  _layerCoilStepsCounter = coilSteps;
+  //  _totalStepsCounter     = totalSteps;
+  //  _layerStepsCounter     = layerSteps;
+  //  _layerCoilStepsCounter = coilSteps;
 }
 
 // Allow to update speed during winding or displacement
@@ -220,6 +220,15 @@ void Coil::acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime
     }
 }
 
+float Coil::getRelativeHome(float homePosition, bool dir)
+{
+  float tmp_value = M_getDisplacement();
+
+  if(!dir) tmp_value*=-1;
+
+  return tmp_value += homePosition;
+}
+
 
 //bool Coil::runMultiLayer(bool isNewCoil)
 //{
@@ -339,8 +348,10 @@ void Coil::acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime
 //}
 
 
-bool Coil::runOnlyCarriage(bool dir, float distance)
+void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
 {
+  bool run = true;
+
   uint16_t nbPass = 0;
   uint16_t steps = 0;
 
@@ -361,12 +372,12 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 
   M_start();
 
-  while(!M_getWindingStatus())
+  while( !M_getWindingStatus() && run)
     {
       if( suspend() == true)
 	{
+	  run = false;
 	  M_stop();
-	  return true;
 	}
       else
 	{
@@ -377,12 +388,14 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 	}
     }
 
-  return false;
+  *homingPosition = getRelativeHome(*homingPosition, dir);
 }
 
 
-bool Coil::runOnlyCoil(bool dir, uint16_t turns)
+void Coil::runOnlyCoil(bool dir, uint16_t turns)
 {
+  bool run = true;
+
   uint16_t speedSet = _speed;
   int8_t old_speedPercent = _speedPercent;
   uint32_t lastMicrosAcc = 0;
@@ -399,12 +412,12 @@ bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 
   M_start();
 
-  while(!M_getWindingStatus())
+  while( !M_getWindingStatus() && run )
     {
       if( suspend() == true)
 	{
+	  run = false;
 	  M_stop();
-	  return true;
 	}
       else
 	{
@@ -414,8 +427,6 @@ bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 	  _Display->windingGetTurns(turns, M_getCoilTr());
 	}
     }
-
-  return false;
 }
 
 // Check if button was pressed
@@ -431,8 +442,8 @@ bool Coil::suspend()
 
 //void Coil::disableMotors()
 //{
-  //stepper.coil_disable();
-  //stepper.carriage_disable();
+//stepper.coil_disable();
+//stepper.carriage_disable();
 //}
 
 

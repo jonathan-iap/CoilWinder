@@ -50,6 +50,7 @@
 #define id_RESUME_SAVE    27
 #define id_SUSPEND        28
 #define id_HOME           29
+#define id_GO_HOME        30
 
 
 class Memory

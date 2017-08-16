@@ -238,6 +238,12 @@ const void Display::engineSense(bool dir)
   dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
 }
 
+const void Display::engineGoHome(float homePosition)
+{
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_GO_HOME); _lcd.print(homePosition * -1); // need to re-invert value
+}
+
 const void Display::engineNewWinding(uint16_t coilTurns)
 {
   _lcd.setCursor(0, LCD_LINES);
