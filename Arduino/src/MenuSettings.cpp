@@ -445,7 +445,7 @@ bool Setting::selectedAction(uint8_t wordSize)
 	{
 	  switch (_tmp_id)
 	  {
-	    case id_SAVE	: {
+	    case id_SAVE  : {
 	      if(_idValue == id_RESUME){ set_AB_SuspendMenu(); return CONTINU;}
 	      else{ retry(); return CONTINU;}
 	      break;
@@ -497,13 +497,13 @@ bool Setting::selectedAction(uint8_t wordSize)
 	    {
 	      moving(C_CLOCK); return CONTINU;
 	    }
-	  else if(_tmp_id == id_W_SENSE)
+	  else if(_idValue == id_W_SENSE)
 	    {
 	      WinSense = C_CLOCK;
 	      _Display->engineSense(WinSense);
 	      return CONTINU;
 	    }
-	  else if(_tmp_id == id_C_SENSE)
+	  else if(_idValue == id_C_SENSE)
 	    {
 	      CarSense = C_CLOCK;
 	      _Display->engineSense(CarSense);
@@ -534,13 +534,13 @@ bool Setting::selectedAction(uint8_t wordSize)
 		  return EXIT;
 		}
 	    }
-	  else if(_tmp_id == id_W_SENSE)
+	  else if(_idValue == id_W_SENSE)
 	    {
 	      WinSense = CLOCK;
 	      _Display->engineSense(WinSense);
 	      return CONTINU;
 	    }
-	  else if(_tmp_id == id_C_SENSE)
+	  else if(_idValue == id_C_SENSE)
 	    {
 	      CarSense = CLOCK;
 	      _Display->engineSense(CarSense);
@@ -593,7 +593,8 @@ void Setting::update()
 void Setting::retry()
 {
   setValueFromId();
-  _Display->engineSetValue(_label, _actionBar,_positionAB);
+  displaying();
+  Serial.print("_idValue : "), Serial.print(_idValue);
 }
 
 

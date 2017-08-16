@@ -156,12 +156,12 @@ void Memory::read(char buffer[], const uint8_t id)
       }
     case id_W_SENSE :
       {
-	EEPROM.readBit(_addr_WinSense, 1);
+	WinSense = EEPROM.readBit(_addr_WinSense, 1);
 	break;
       }
     case id_C_SENSE :
       {
-	EEPROM.readBit(_addr_CarSense, 1);
+	CarSense = EEPROM.readBit(_addr_CarSense, 1);
 	break;
       }
   }
