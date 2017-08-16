@@ -154,6 +154,15 @@ bool editAccTime(const Menu::Action_t a)
   return true;
 }
 
+bool editAccIncr(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_ACC_INCR);
+    }
+  return true;
+}
+
 bool menuMovCarriage(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
@@ -232,8 +241,9 @@ MenuItem(miBack3,       BACK,            Menu::NullItem, miMovCoil,      miMoves
 // Sub-menu 4.1 -> 4.6
 MenuItem(miMaxSpeed, "Max speed",      miMinSpeed,     Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);
 MenuItem(miMinSpeed, "Min speed",      miAccTime,      miMaxSpeed,     miSettings, Menu::NullItem, editMinSpeed);
-MenuItem(miAccTime,  "Acc time",       miResetEEp,     miMinSpeed,     miSettings, Menu::NullItem, editAccTime);
-MenuItem(miResetEEp, "Reset EEprom",   miResetVal,     miAccTime,      miSettings, Menu::NullItem, menuReset);
+MenuItem(miAccTime,  "Acc time",       miAccIncr,      miMinSpeed,     miSettings, Menu::NullItem, editAccTime);
+MenuItem(miAccIncr,  "Acc increment",  miResetEEp,     miAccTime,      miSettings, Menu::NullItem, editAccIncr);
+MenuItem(miResetEEp, "Reset EEprom",   miResetVal,     miAccIncr,      miSettings, Menu::NullItem, menuReset);
 MenuItem(miResetVal, "Raz all Values", miBack4,        miResetEEp,     miSettings, Menu::NullItem, menuRAZ);
 MenuItem(miBack4,    BACK,             Menu::NullItem, miResetVal,     miSettings, Menu::NullItem, menuBack);
 

@@ -14,6 +14,7 @@ Memory::Memory()
   MaxSpeed(0),
   MinSpeed(0),
   AccDelay(0),
+  AccIncr(0),
 
   WinSense(0),
   CarSense(0),
@@ -32,6 +33,7 @@ Memory::Memory()
   _addr_MaxSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
   _addr_MinSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
   _addr_AccDelay	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
+  _addr_AccIncr		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_INCR);
   _addr_WinSense	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_SENSE);
   _addr_CarSense	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_SENSE);
   _addr_DefaultSettings	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
@@ -80,6 +82,11 @@ void Memory::save(char buffer[], const uint8_t id)
     case id_ACC_DELAY :
       {
 	EEPROM.updateBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
+	break;
+      }
+    case id_ACC_INCR :
+      {
+	EEPROM.updateBlock<char>(_addr_AccIncr, buffer, BUFFSIZE_ACC_INCR);
 	break;
       }
     case id_W_SENSE :
@@ -136,6 +143,11 @@ void Memory::read(char buffer[], const uint8_t id)
 	EEPROM.readBlock<char>(_addr_AccDelay, buffer, BUFFSIZE_ACC_DELAY);
 	break;
       }
+    case id_ACC_INCR :
+      {
+	EEPROM.readBlock<char>(_addr_AccIncr, buffer, BUFFSIZE_ACC_INCR);
+	break;
+      }
     case id_W_SENSE :
       {
 	EEPROM.readBlock<char>(_addr_WinSense, buffer, BUFFSIZE_SENSE);
@@ -170,6 +182,7 @@ void Memory::readAll()
   read(_buff_MaxSpeed   , id_MAX_SPEED);
   read(_buff_MinSpeed   , id_MIN_SPEED);
   read(_buff_AccDelay   , id_ACC_DELAY);
+  read(_buff_AccIncr    , id_ACC_INCR);
   read(_buff_WinSense   , id_W_SENSE);
   read(_buff_CarSense   , id_C_SENSE);
 
@@ -180,6 +193,7 @@ void Memory::readAll()
   MaxSpeed 	= atof(_buff_MaxSpeed);
   MinSpeed 	= atof(_buff_MinSpeed);
   AccDelay 	= atof(_buff_AccDelay);
+  AccIncr 	= atof(_buff_AccIncr);
   buffercmp((char*)MSG_CLOCK, _buff_WinSense, BUFFSIZE_SENSE)? WinSense = CLOCK : WinSense = C_CLOCK;
   buffercmp((char*)MSG_CLOCK, _buff_CarSense, BUFFSIZE_SENSE)? CarSense = CLOCK : CarSense = C_CLOCK;
 }
@@ -192,6 +206,7 @@ void Memory::reset()
   EEPROM.writeBlock<char>(_addr_MaxSpeed, INIT_MAXSPEED, BUFFSIZE_MAX_SPEED);
   EEPROM.writeBlock<char>(_addr_MinSpeed, INIT_MINSPEED, BUFFSIZE_MIN_SPEED);
   EEPROM.writeBlock<char>(_addr_AccDelay, INIT_ACC_DELAY, BUFFSIZE_ACC_DELAY);
+  EEPROM.writeBlock<char>(_addr_AccIncr, INIT_ACC_INCR, BUFFSIZE_ACC_INCR);
   EEPROM.writeBlock<char>(_addr_WinSense, MSG_C_CLOCK, BUFFSIZE_SENSE);
   EEPROM.writeBlock<char>(_addr_CarSense, MSG_CLOCK, BUFFSIZE_SENSE);
 

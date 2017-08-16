@@ -100,6 +100,12 @@ void Setting::setValueFromId()
 		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
 	break;
       }
+    case id_ACC_INCR :
+      {
+	setValues(MSG_ACC_INCR, _buff_AccIncr, BUFFSIZE_ACC_INCR, &AccIncr, UNIT_STEP,
+		  ACTIONBAR_SETVALUE, SIZE_AB_SETVALUE, LCD_LINES);
+	break;
+      }
     case id_MOVE_CARRIAGE :
       {
 	_tmp_id = id_MOVE_CARRIAGE;
@@ -758,7 +764,7 @@ void Setting::adjustSpeed()
 
   tmp_speed = map(_speedPercent, 0, 100, MinSpeed, MaxSpeed);
 
-  _Coil->setSpeed(AccDelay, MaxSpeed, MinSpeed, tmp_speed, _speedPercent);
+  _Coil->setSpeed(AccIncr, AccDelay, MaxSpeed, MinSpeed, tmp_speed, _speedPercent);
 }
 
 

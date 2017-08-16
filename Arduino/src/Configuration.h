@@ -67,6 +67,7 @@
 #define INIT_MAXSPEED	"0200"  // in RPM (tr/min)
 #define INIT_MINSPEED	"0001"  // in RPM (tr/min)
 #define INIT_ACC_DELAY	"0400"
+#define INIT_ACC_INCR	"0020"
 
 // Displacement value ---------------------------------------------------------------
 #define INIT_MOV_CAR	"00.00"

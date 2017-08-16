@@ -21,9 +21,9 @@ public:
   ~Coil();
 
   void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
-  void setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
+  void setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
   void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
-  bool updateSpeed(int8_t oldPercent);
+  void updateSpeed(int8_t *oldPercent, uint16_t *speedSet);
 
   bool runMultiLayer(bool isNewCoil);
   bool runOneLayer();
@@ -49,6 +49,7 @@ private:
   void homing(bool dir);
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
+  void _acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
 
 private:
 
@@ -67,6 +68,7 @@ private:
   bool _windingSense;
   bool _carriageStartSense;
   // Speed.
+  uint16_t _accIncr;
   uint16_t _accDelay;
   uint16_t _maxSpeed;
   uint16_t _minSpeed;

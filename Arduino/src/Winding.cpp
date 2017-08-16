@@ -101,9 +101,10 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
   _windingSense(0),
   _carriageStartSense(0),
 
-  _accDelay (0),
-  _maxSpeed (0),
-  _minSpeed (0),
+  _accIncr(0),
+  _accDelay(0),
+  _maxSpeed(0),
+  _minSpeed(0),
   _speed(0),
   _speedPercent(0),
 
@@ -136,8 +137,9 @@ void Coil::setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool
 }
 
 
-void Coil::setSpeed(uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent)
+void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent)
 {
+  _accIncr  = accIncr;
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
@@ -154,24 +156,26 @@ void Coil::setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps
 }
 
 // Allow to update speed during winding or displacement
-bool Coil::updateSpeed(int8_t oldPercent)
+void Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet)
 {
   _speedPercent += (_Encoder->getValue()*5);
 
-  if(oldPercent != _speedPercent)
+  if(*oldPercent != _speedPercent)
     {
-      oldPercent = _speedPercent;
+      Serial.println("pass");
+
+      *oldPercent = _speedPercent;
 
       _speedPercent = constrain(_speedPercent, 1, 100);
 
       _speed = map(_speedPercent, 0, 100, _minSpeed, _maxSpeed);
 
-      M_updateSpeed(_speed);
+      M_setSpeed(_speed);
 
       _Display->windingGetSpeedPercent(_speedPercent);
-      return true;
+      *speedSet =  _speed;
     }
-  else return false;
+  else{};
 }
 
 // Steps for motor who move carriage.
@@ -288,6 +292,17 @@ void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
 
   *nbPass = (uint16_t)tmp_nbPass;
   *stepsPerTr = (uint16_t)tmp_stepsPerTr;
+}
+
+void Coil::_acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime)
+{
+  uint32_t currentMicros = micros();
+
+  if(timer(currentMicros, oldTime, _accDelay) && *accSpeed < speedSet)
+    {
+      *accSpeed += _accIncr;
+      M_setSpeed( *accSpeed);
+    }
 }
 
 
@@ -413,13 +428,18 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 {
   uint16_t nbPass = 0;
   uint16_t steps = 0;
-  int8_t old_speedPercent = 0;
+
+  uint16_t speedSet = _speed;
+  int8_t old_speedPercent = _speedPercent;
+  uint32_t lastMicrosAcc = 0;
+
+  _speed = _minSpeed;
 
   _Display->clear();
+  _Display->windingGetSpeedPercent(_speedPercent);
+  _Display->windingGetDisplacement(distance, M_getDisplacement());
 
-  M_setMotors(0, 0, CARRIAGE, dir);
-
-  M_setSpeed(_speed, _maxSpeed, _minSpeed, _accDelay);
+  M_setMotors(0, 0, CARRIAGE, dir, _speed);
 
   computeTravel(distance, &nbPass, &steps);
   M_setDisplacement(TRAVELING, nbPass, steps);
@@ -435,7 +455,9 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 	}
       else
 	{
-	  updateSpeed(old_speedPercent);
+	  _acceleration(speedSet, &_speed, &lastMicrosAcc);
+	  updateSpeed(&old_speedPercent, &speedSet);
+
 	  _Display->windingGetDisplacement(distance, M_getDisplacement());
 	}
     }
@@ -446,13 +468,17 @@ bool Coil::runOnlyCarriage(bool dir, float distance)
 
 bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 {
-  int8_t old_speedPercent = 0;
+  uint16_t speedSet = _speed;
+  int8_t old_speedPercent = _speedPercent;
+  uint32_t lastMicrosAcc = 0;
+
+  _speed = _minSpeed;
 
   _Display->clear();
+  _Display->windingGetSpeedPercent(_speedPercent);
+  _Display->windingGetTurns(turns, M_getCoilTr());
 
-  M_setMotors(COIL, dir, 0, 0);
-
-  M_setSpeed(_speed, _maxSpeed, _minSpeed, _accDelay);
+  M_setMotors(COIL, dir, 0, 0, _speed);
 
   M_setDisplacement(ROTATION, turns, STEPS_PER_TR);
 
@@ -467,7 +493,9 @@ bool Coil::runOnlyCoil(bool dir, uint16_t turns)
 	}
       else
 	{
-	  updateSpeed(old_speedPercent);
+	  _acceleration(speedSet, &_speed, &lastMicrosAcc);
+	  updateSpeed(&old_speedPercent, &speedSet);
+
 	  _Display->windingGetTurns(turns, M_getCoilTr());
 	}
     }

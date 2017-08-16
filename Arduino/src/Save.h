@@ -24,6 +24,7 @@
 #define BUFFSIZE_MAX_SPEED  (COUNTOF(INIT_MAXSPEED))
 #define BUFFSIZE_MIN_SPEED  (COUNTOF(INIT_MINSPEED))
 #define BUFFSIZE_ACC_DELAY  (COUNTOF(INIT_ACC_DELAY))
+#define BUFFSIZE_ACC_INCR   (COUNTOF(INIT_ACC_INCR))
 #define BUFFSIZE_SENSE      (COUNTOF(MSG_CLOCK))
 #define BUFFSIZE_DEFAULT    (COUNTOF(MSG_IS_SET))
 
@@ -35,8 +36,9 @@
 #define id_MAX_SPEED   4
 #define id_MIN_SPEED   5
 #define id_ACC_DELAY   6
-#define id_W_SENSE     7
-#define id_C_SENSE     8
+#define id_ACC_INCR    7
+#define id_W_SENSE     8
+#define id_C_SENSE     9
 // Actions
 #define id_SAVE           20
 #define id_RESET          21
@@ -79,6 +81,7 @@ protected :
   float MaxSpeed;
   float MinSpeed;
   float AccDelay;
+  float AccIncr;
 
   bool WinSense;
   bool CarSense;
@@ -93,6 +96,7 @@ protected :
   char _buff_MaxSpeed[BUFFSIZE_MAX_SPEED+1];
   char _buff_MinSpeed[BUFFSIZE_MIN_SPEED+1];
   char _buff_AccDelay[BUFFSIZE_ACC_DELAY+1];
+  char _buff_AccIncr[BUFFSIZE_ACC_INCR+1];
   char _buff_WinSense[BUFFSIZE_SENSE+1];
   char _buff_CarSense[BUFFSIZE_SENSE+1];
 
@@ -103,6 +107,7 @@ private :
   uint8_t _addr_MaxSpeed;
   uint8_t _addr_MinSpeed;
   uint8_t _addr_AccDelay;
+  uint8_t _addr_AccIncr;
   uint8_t _addr_WinSense;
   uint8_t _addr_CarSense;
   uint8_t _addr_DefaultSettings;

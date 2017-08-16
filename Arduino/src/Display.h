@@ -28,10 +28,11 @@
 #define ICONBACK    "\x06"
 
 /* Units ______________________________________________________________*/
-#define UNIT_MM  "mm"
-#define UNIT_TR  "Tr"
-#define UNIT_RPM "RPM"
-#define UNIT_US  "us"
+#define UNIT_MM   "mm"
+#define UNIT_TR   "Tr"
+#define UNIT_RPM  "RPM"
+#define UNIT_US   "us"
+#define UNIT_STEP "step"
 /* Labels _____________________________________________________________*/
 #define MSG_HOMING        "Homing : "
 #define MSG_CONFIRM       "Confirm ?"
@@ -41,6 +42,7 @@
 #define MSG_MAX_SPEED     "MAX speed in " UNIT_RPM
 #define MSG_MIN_SPEED     "MIN speed in " UNIT_RPM
 #define MSG_ACC_DELAY     "Acc delay in " UNIT_US
+#define MSG_ACC_INCR      "Acc incr in " UNIT_STEP
 #define MSG_EDIT          "Edit"
 #define SIZE_MSG_EDIT     COUNTOF(MSG_EDIT)
 #define MSG_SAVE          "Save? "

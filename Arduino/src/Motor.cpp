@@ -10,19 +10,14 @@ struct motor
 };
 struct motor coil, carriage;
 
-uint8_t engineAction = 0;
+volatile uint8_t engineAction = 0;
 
 volatile uint16_t speedSet = 0;
 volatile uint16_t tic = 0;
 volatile uint16_t targetPass = 0;
 volatile uint16_t stepsPerPass = 0;
 
-uint16_t Int_maxSpeed = 0;
-uint16_t Int_minSpeed = 0;
-uint16_t Int_acc = 0;
-uint16_t accSpeed = 0;
-
-bool isFinished = false;
+volatile bool isFinished = false;
 
 void M_init()
 {
@@ -173,7 +168,7 @@ float M_getDisplacement()
 }
 
 
-void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
+void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t speed)
 {
   if(M_coil)
     {
@@ -198,14 +193,8 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir)
 
   WRITE(PIN_CARR_EN, carriage.en);
   WRITE(PIN_CARR_DIR, carriage.dir);
-}
 
-void M_setSpeed(uint16_t speed, uint16_t maxSpeed, uint16_t minSpeed, uint16_t acc)
-{
-Int_maxSpeed = maxSpeed;
-Int_minSpeed = minSpeed;
-Int_acc = acc;
-M_updateSpeed(speed);
+  M_setSpeed(speed);
 }
 
 
@@ -217,7 +206,7 @@ void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
 }
 
 
-void M_updateSpeed(uint16_t speed)
+void M_setSpeed(uint16_t speed)
 {
   speedSet = RPM_TO_INT((float)speed);
 }
