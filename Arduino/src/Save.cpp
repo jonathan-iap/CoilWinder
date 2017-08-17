@@ -69,16 +69,6 @@ void Memory::init()
 
   // Read and set all data saved in eeprom memory.
   readAll();
-
-  Serial.print("float wire: "); Serial.println(WireSize);
-  Serial.print("float coil: "); Serial.println(CoilLength);
-  Serial.print("float turns: "); Serial.println(Turns);
-  Serial.print("float max: "); Serial.println(MaxSpeed);
-  Serial.print("float min: "); Serial.println(MinSpeed);
-  Serial.print("float acc: "); Serial.println(AccDelay);
-  Serial.print("val win: "); Serial.println(WinSense);
-  Serial.print("val car: "); Serial.println(CarSense);
-  Serial.println(" ");
 }
 
 

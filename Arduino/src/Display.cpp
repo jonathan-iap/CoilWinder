@@ -175,6 +175,18 @@ const void Display::engineSave(float value, char unit[], char actionBar[], uint8
   _lcd.print(actionBar);
 }
 
+
+const void Display::engineSave(uint16_t value, char unit[], char actionBar[], uint8_t positionAB)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SAVE); _lcd.print(value); _lcd.print(unit);
+
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+}
+
+
 const void Display::engineSave(bool dir, char actionBar[], uint8_t positionAB)
 {
   _lcd.clear();

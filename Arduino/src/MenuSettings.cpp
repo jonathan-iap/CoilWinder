@@ -232,7 +232,6 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   strcpy(_unit, unit);
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
-
 }
 
 void Setting::setValues(const char label[], const uint8_t sizeOfArrayValue,
@@ -627,7 +626,7 @@ void Setting::update()
   bufferCopy(_actionBar, p_arrayValue, 0, _sizeBuffValue);
 
   if(p_floatingValue != NULL) *p_floatingValue = atof(p_arrayValue);
-  else*p_intValue = atoi(p_arrayValue);
+  else *p_intValue = atoi(p_arrayValue);
 }
 
 
@@ -687,22 +686,28 @@ void Setting::set_AB_Save()
   if(_idValue == id_W_SENSE || _idValue == id_C_SENSE )
     {
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+
       if(_idValue == id_W_SENSE) _Display->engineSave(WinSense, _actionBar, _positionAB);
       else _Display->engineSave(CarSense, _actionBar, _positionAB);
     }
-  else if(_idValue != id_RESUME)
-    {
-      update();
-      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
-      _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
-    }
-  else
+  else if(_idValue == id_RESUME)
     {
       //      TotalSteps     = _Coil->getTotalStepsCounter();
       //      LayerSteps     = _Coil->getLayerStepsCounter();
       //      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
       //      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       //      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+    }
+  else
+    {
+      update();
+
+      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+
+      if(p_floatingValue != NULL) _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
+      else _Display->engineSave(*p_intValue, _unit,_actionBar, _positionAB);
+
+
     }
 }
 

@@ -194,6 +194,7 @@ public:
   const void engineFillChar(int8_t last, int8_t index, uint8_t buffSize, const char arrayValue[], uint8_t offset);
   const void engineEditMode(uint8_t positionAB);
   const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB);
+  const void engineSave(uint16_t value, char unit[], char actionBar[], uint8_t positionAB);
   const void engineSave(bool dir, char actionBar[], uint8_t positionAB);
   const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
