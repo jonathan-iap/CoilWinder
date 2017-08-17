@@ -21,13 +21,11 @@ public:
   ~Coil();
 
   bool computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr );
-  void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
+  void setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
-  //void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
-  void updateSpeed(int8_t *oldPercent, uint16_t *speedSet);
+  void setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr ,uint16_t coilStepPerTr);
+  bool updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset);
 
-  //  bool runMultiLayer(bool isNewCoil);
-  //  bool runOneLayer();
   void winding(bool isNewCoil);
   void runOnlyCarriage(bool dir, float distance, float *homingPosition);
   void runOnlyCoil(bool dir, uint16_t turns);
@@ -52,6 +50,7 @@ private:
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
   void acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
+  void refreshDisplay(bool *run, uint32_t *oldTime);
   float getRelativeHome(float homePosition, bool dir);
 
 private:
@@ -66,7 +65,7 @@ private:
   // Wire size in mm.
   float _wireSize;
   // Coil turn in turn.
-  uint32_t _coilTurns;
+  uint16_t _coilTurns;
   // Winding sense.
   bool _windingSense;
   bool _carriageStartSense;
@@ -77,6 +76,11 @@ private:
   uint16_t _minSpeed;
   uint16_t _speed;
   int8_t _speedPercent;
+  // Steps
+  uint16_t _saveCarrPass;
+  uint16_t _saveCarrStepPerPass;
+  uint16_t _saveCoilTr;
+  uint16_t _saveCoilStepPerTr;
 };
 
 #endif

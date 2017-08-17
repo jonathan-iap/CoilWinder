@@ -210,6 +210,18 @@ const void Display::engineWindingValue(float coilLength, float wireSize, uint32_
   _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(currentTurns),  _lcd.print(" ");
 }
 
+
+const void Display::engineWindingRefresh(float coilLength, float wireSize)
+{
+  _lcd.setCursor(0,0);
+  blank(SIZE_MSG_CURRENT_SPEED + 4);
+  _lcd.setCursor(0,0);
+  _lcd.print("L:"), _lcd.print(coilLength);
+  _lcd.setCursor(LCD_CHARS-6,0);
+  _lcd.print("W:"), _lcd.print(wireSize);
+}
+
+
 const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
 {
   if(!refresh)
@@ -312,22 +324,23 @@ const void Display::engineValueLimit()
 
 const void Display::windingGetTurns(uint16_t target, uint16_t counter)
 {
-  _lcd.setCursor(0,1);
+  _lcd.setCursor(0, LCD_LINES);
   _lcd.print("Tr:"), _lcd.print(target),_lcd.print("/");
   _lcd.print(counter), _lcd.print(" ");
 }
 
 
-const void Display::windingGetSpeedPercent(uint16_t speed)
+const void Display::windingGetSpeedPercent(uint16_t percent)
 {
-  _lcd.setCursor(0,0);
-  _lcd.print(MSG_CURRENT_SPEED),_lcd.print(speed), _lcd.print("%  ");
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_CURRENT_SPEED), _lcd.print(percent), _lcd.print("%");
+  blank(SIZE_BLANK_SPEED);
 }
 
 
 const void Display::windingGetDisplacement(float target, float counter)
 {
-  _lcd.setCursor(0,LCD_LINES);
+  _lcd.setCursor(0, LCD_LINES);
   _lcd.print(target), _lcd.print("/");
   _lcd.print(counter), _lcd.print(UNIT_MM), _lcd.print(" ");
 }

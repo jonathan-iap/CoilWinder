@@ -335,7 +335,7 @@ void Setting::displaying()
     case id_C_SENSE     : {_Display->engineSense(CarSense); break;}
     case id_GO_HOME     : {_Display->engineGoHome(_homePosition); break;}
     case id_RESUME      : {/*_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns());*/ break;}
-    case id_RESUME_SAVE:
+    case id_RESUME_SAVE :
       {
 	uint32_t tmp_totalSteps = 0;
 	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
@@ -565,7 +565,7 @@ bool Setting::selectedAction(uint8_t wordSize)
 	      // Check value for motor interrupt
 	      update();
 
-	      if(RPM_TO_INT(MaxSpeed)<1)
+	      if(RPM_TO_INT((float)MaxSpeed) < 1)
 		{
 		  _Display->engineValueLimit();
 		  return CONTINU;
@@ -770,14 +770,21 @@ void Setting::moving(bool direction)
   // set speed.
   adjustSpeed();
 
+  _Display->clear();
+  _Display->windingGetSpeedPercent(_speedPercent);
+
   // Start
   if(_idValue == id_MOVE_CARRIAGE || _tmp_id == id_MOVE_CARRIAGE)
     {
       // homing is update
+      _Display->windingGetDisplacement(*p_floatingValue, 0.00);
+
       _Coil->runOnlyCarriage(direction, *p_floatingValue, &_homePosition);
     }
   else
     {
+      _Display->windingGetTurns(*p_intValue, 0);
+
       _Coil->runOnlyCoil(direction, *p_intValue);
     }
 

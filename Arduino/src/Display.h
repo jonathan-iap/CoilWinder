@@ -34,33 +34,35 @@
 #define UNIT_US   "us"
 #define UNIT_STEP "step"
 /* Labels _____________________________________________________________*/
-#define MSG_HOMING        "Homing : "
-#define MSG_GO_HOME       "Go to : "
-#define MSG_CONFIRM       "Confirm ?"
-#define MSG_WIRE_SIZE     "Wire size in " UNIT_MM
-#define MSG_COIL_LENGTH   "Length in " UNIT_MM
-#define MSG_TURNS         "Turns in " UNIT_TR
-#define MSG_MAX_SPEED     "MAX speed in " UNIT_RPM
-#define MSG_MIN_SPEED     "MIN speed in " UNIT_RPM
-#define MSG_ACC_DELAY     "Acc delay in " UNIT_US
-#define MSG_ACC_INCR      "Acc incr in " UNIT_STEP
-#define MSG_EDIT          "Edit"
-#define SIZE_MSG_EDIT     COUNTOF(MSG_EDIT)
-#define MSG_SAVE          "Save? "
-#define MSG_NEW_COIL      "Start new Coil ?"
-#define MSG_RESUME        "Resume current ?"
-#define MSG_RESUME_SAVED  "Resume saved ?"
-#define MSG_RESET         "Reset EEprom ? "
-#define MSG_RAZ           "Update values ? "
-#define MSG_MOVE          "Move in " UNIT_MM
-#define MSG_CLOCK         "Clk  "
-#define MSG_C_CLOCK       "CClk "
-#define MSG_FOR_STOP      "Click to stop"
-#define MSG_SPEED         "Winding speed :"
-#define MSG_SAVE_CURRENT  "Save session ?"
-#define MSG_VALUE_TO_HIGH "Value to high !"
-#define MSG_CURRENT_SPEED "Speed: "
-#define MSG_EMPTY         " "
+#define MSG_HOMING             "Homing : "
+#define MSG_GO_HOME            "Go to : "
+#define MSG_CONFIRM            "Confirm ?"
+#define MSG_WIRE_SIZE          "Wire size in " UNIT_MM
+#define MSG_COIL_LENGTH        "Length in " UNIT_MM
+#define MSG_TURNS              "Turns in " UNIT_TR
+#define MSG_MAX_SPEED          "MAX speed in " UNIT_RPM
+#define MSG_MIN_SPEED          "MIN speed in " UNIT_RPM
+#define MSG_ACC_DELAY          "Acc delay in " UNIT_US
+#define MSG_ACC_INCR           "Acc incr in " UNIT_STEP
+#define MSG_EDIT               "Edit"
+#define SIZE_MSG_EDIT          COUNTOF(MSG_EDIT)
+#define MSG_SAVE               "Save? "
+#define MSG_NEW_COIL           "Start new Coil ?"
+#define MSG_RESUME             "Resume current ?"
+#define MSG_RESUME_SAVED       "Resume saved ?"
+#define MSG_RESET              "Reset EEprom ? "
+#define MSG_RAZ                "Update values ? "
+#define MSG_MOVE               "Move in " UNIT_MM
+#define MSG_CLOCK              "Clk  "
+#define MSG_C_CLOCK            "CClk "
+#define MSG_FOR_STOP           "Click to stop"
+#define MSG_SPEED              "Winding speed :"
+#define MSG_SAVE_CURRENT       "Save session ?"
+#define MSG_VALUE_TO_HIGH      "Value to high !"
+#define MSG_CURRENT_SPEED      "Speed: "
+#define SIZE_MSG_CURRENT_SPEED COUNTOF(MSG_CURRENT_SPEED)
+#define SIZE_BLANK_SPEED       (LCD_CHARS - SIZE_MSG_CURRENT_SPEED)
+#define MSG_EMPTY              " "
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_MOVE        "Move"
 #define SIZE_KEYWORD_MOVE   COUNTOF(KEYWORD_MOVE)
@@ -197,6 +199,7 @@ public:
   const void engineSave(uint16_t value, char unit[], char actionBar[], uint8_t positionAB);
   const void engineSave(bool dir, char actionBar[], uint8_t positionAB);
   const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
+  const void engineWindingRefresh(float coilLength, float wireSize);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
   const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);
   const void engineSense(bool dir);
@@ -209,7 +212,7 @@ public:
   const void engineValueLimit();
   // Winding
   const void windingGetTurns(uint16_t target, uint16_t counter);
-  const void windingGetSpeedPercent(uint16_t speed);
+  const void windingGetSpeedPercent(uint16_t percent);
   const void windingGetDisplacement(float target, float counter);
 
   // Debug
