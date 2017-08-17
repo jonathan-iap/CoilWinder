@@ -337,8 +337,6 @@ void Setting::displaying()
 	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
       }
   }
-
-  Serial.print("homep"), Serial.println(_homePosition);
 }
 
 
@@ -800,6 +798,7 @@ bool Setting::runWinding(bool isFirstLunch, bool isNewCoil)
   // Start winding with "runMultiLayer()"
   if(1)//_Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
     {
+      _Coil->winding(1);
       // _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
       return EXIT;
     }
@@ -826,7 +825,7 @@ void Setting::setWinding(bool isFirstLunch)
   if(_idValue == id_RESUME_SAVE)
     {
       read(0, id_RESUME_SAVE); // Read the value of all steps in eeprom
-      _Coil->setSteps(TotalSteps, LayerSteps, LayerCoilSteps);
+      //_Coil->setSteps(TotalSteps, LayerSteps, LayerCoilSteps);
       _idValue = id_RESUME;
     }
 }

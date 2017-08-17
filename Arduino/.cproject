@@ -26,11 +26,11 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/MsTimer2_ID137"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
@@ -82,11 +82,11 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/MsTimer2_ID137"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
@@ -138,11 +138,11 @@
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/cores/arduino"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/variants/standard"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/menu"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
+									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/.platformio/packages/framework-arduinoavr/libraries/__cores__/arduino/Wire/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/NewliquidCrystal/utility"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/TimerOne"/>
-									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/MsTimer2_ID137"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/src"/>
 									<listOptionValue builtIn="false" value="${HOME}/Documents/DOCS/git/CoilWinder/Arduino/lib/EEPROMEx"/>

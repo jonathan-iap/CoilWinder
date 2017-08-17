@@ -20,13 +20,15 @@ public:
   Coil(ClickEncoder *p_Encoder, Display *p_Display);
   ~Coil();
 
+  bool computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr );
   void setWinding(float coilLength, float wireSize, uint32_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
-  void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
+  //void setSteps(uint32_t totalSteps, uint32_t layerSteps, uint32_t coilSteps);
   void updateSpeed(int8_t *oldPercent, uint16_t *speedSet);
 
   //  bool runMultiLayer(bool isNewCoil);
   //  bool runOneLayer();
+  void winding(bool isNewCoil);
   void runOnlyCarriage(bool dir, float distance, float *homingPosition);
   void runOnlyCoil(bool dir, uint16_t turns);
 
@@ -75,11 +77,6 @@ private:
   uint16_t _minSpeed;
   uint16_t _speed;
   int8_t _speedPercent;
-  // Reduction ratio for motor.
-  float _ratio;
-  bool _direction;
-  // Steps for one layer.
-
 };
 
 #endif

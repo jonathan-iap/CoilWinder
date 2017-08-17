@@ -13,10 +13,14 @@ struct motor coil, carriage;
 volatile uint8_t engineAction = 0;
 
 volatile uint16_t speedSet = 0;
-volatile uint16_t tic = 0;
+volatile uint16_t minSpeed = 0;
+
 volatile uint16_t targetPass = 0;
 volatile uint16_t stepsPerPass = 0;
+volatile uint16_t targetTr = 0;
+volatile uint16_t stepsPerTr = 0;
 
+volatile bool isCoilFastest = false;
 volatile bool isFinished = false;
 
 void M_init()
@@ -47,6 +51,8 @@ void M_start()
 
   isFinished = false;
 
+  Serial.print(""), Serial.println();
+
   Timer1.attachInterrupt(M_engine);
 }
 
@@ -60,7 +66,6 @@ void M_stop()
 
 void M_engine()
 {
-  tic++;
   coil.tic++;
   carriage.tic++;
 
@@ -68,6 +73,55 @@ void M_engine()
   {
     case WINDING :
       {
+	switch(isCoilFastest)
+	{
+	  case true :
+	    {
+	      if(coil.tr != targetTr)
+		{
+		  if(coil.tic >= speedSet)
+		    {
+		      coil.tic=0;
+		      oneStep(ENABLE , DISABLE);
+
+		      if(coil.steps != stepsPerTr)
+			{
+			  coil.steps++;
+
+			  if(carriage.steps != stepsPerPass)
+			    {
+			      carriage.steps++;
+			      oneStep(DISABLE, ENABLE);
+			    }
+			}
+		      else
+			{
+			  carriage.steps = 0;
+			  carriage.tr++;
+			  coil.steps = 0;
+			  coil.tr++;
+
+			  if(carriage.tr == targetPass)
+			    {
+			      carriage.tr = 0;
+			      M_invertSense();
+			    }
+			}
+		    }
+		}
+	      else
+		{
+		  M_stop();
+		  isFinished = true;
+		}
+
+	      break;
+	    }
+	  case false :
+	    {
+	      break;
+	    }
+	}
 	break;
       }
     case TRAVELING :
@@ -168,7 +222,7 @@ float M_getDisplacement()
 }
 
 
-void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t speed)
+void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t startSpeed)
 {
   if(M_coil)
     {
@@ -194,19 +248,36 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint1
   WRITE(PIN_CARR_EN, carriage.en);
   WRITE(PIN_CARR_DIR, carriage.dir);
 
-  M_setSpeed(speed);
+  minSpeed = M_setSpeed(startSpeed);
 }
 
-
-void M_setDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
-{
-  engineAction = action;
-  targetPass = pass;
-  stepsPerPass = steps;
-}
-
-
-void M_setSpeed(uint16_t speed)
+uint16_t M_setSpeed(uint16_t speed)
 {
   speedSet = RPM_TO_INT((float)speed);
+  return speedSet;
 }
+
+void M_invertSense()
+{
+  // speedSet = minSpeed; // reduce speed to change sense
+  WRITE(PIN_CARR_DIR, !READ(PIN_CARR_DIR));
+}
+
+void M_setSimpleDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
+{
+  engineAction  = action;
+  targetPass    = pass;
+  stepsPerPass  = steps;
+}
+
+void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
+			      uint16_t stepsTr, bool fastest)
+{
+  engineAction  = WINDING;
+  targetPass    = pass;
+  stepsPerPass  = steps;
+  targetTr      = tr;
+  stepsPerTr    = stepsTr;
+  isCoilFastest = fastest;
+}
+
