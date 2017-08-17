@@ -20,14 +20,13 @@
 
 #define BACK	"Back" ICONBACK
 
-extern ClickEncoder Encoder;
 extern Menu::Engine *engine;
 extern Display display;
+extern Setting setting;
 
 extern uint8_t systemState;
 
-Coil CoilWinding(&Encoder, &display);
-Setting setting(&Encoder, &display, &CoilWinding);
+
 
 // Item rendering --------------------------------------------------------------
 void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
@@ -49,6 +48,16 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
 bool menuDummy(const Menu::Action_t a)
 {
   // Do nothing;
+  return true;
+}
+
+bool menuInit(const Menu::Action_t a)
+{
+
+  display.version();
+
+  setting.init();
+
   return true;
 }
 
@@ -237,7 +246,7 @@ bool menuRAZ(const Menu::Action_t a)
 
 // Name, Label, Next, Previous, Parent, Child, Callback
 // Menu 0
-MenuItem(miHome, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miSetWinding, menuDummy);
+MenuItem(miHome, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miSetWinding, menuInit);
 
 // Menu 1 -> 4
 MenuItem(miSetWinding, "Set winding",   miWinding,      Menu::NullItem, miHome, miSetHome	, menuDummy);

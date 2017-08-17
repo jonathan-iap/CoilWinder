@@ -18,7 +18,8 @@
 ClickEncoder Encoder;
 Menu::Engine *engine;
 Display display;
-
+Coil CoilWinding(&Encoder, &display);
+Setting setting(&Encoder, &display, &CoilWinding);
 
 // Global Variables -----------------------------------------------------------
 uint8_t systemState = state_DEFAULT;
@@ -35,7 +36,7 @@ bool lastEncoderAccelerationState = true;
 // Functions ------------------------------------------------------------------
 void timerEncoder(void)
 {
-	Encoder.service();
+  Encoder.service();
 }
 
 
@@ -43,118 +44,109 @@ void timerEncoder(void)
 /* SETUP ---------------------------------------------------------------------*/
 void setup()
 {
-	// Debug section
+  // Debug section
 #ifdef DEBUG
-	Serial.begin(BAUDRATE);
+  Serial.begin(BAUDRATE);
 
-	Serial.print("\n\nbegin\n\n");
-	delay(1000);
+  Serial.print("\n\nbegin\n\n");
+  delay(1000);
 #endif
-	// Lcd initialization
-	display.begin();
-	// For rotary encoder
-	MsTimer2::set(1, timerEncoder); // 1ms
-	MsTimer2::start();
-	// Menu begin
-	engine = new Menu::Engine(&Menu::NullItem);
-	// Init timer for motors and pins
-	M_init();
-	// Pin initialization
-	pinMode(13, OUTPUT);
+  // Lcd initialization
+  display.begin();
+  // For rotary encoder
+  MsTimer2::set(1, timerEncoder); // 1ms
+  MsTimer2::start();
+  // Menu begin
+  engine = new Menu::Engine(&Menu::NullItem);
+  // Init timer for motors and pins
+  M_init();
+  // Pin initialization
+  pinMode(13, OUTPUT);
 
+  //start Menu -> read memory and display version
+  engine->navigate(&miHome);
 }
 
 /* LOOP ----------------------------------------------------------------------*/
 void loop()
 {
-	// Display section.
-	switch(systemState)
+  // handle encoder
+  encMovement = Encoder.getValue();
+  if (encMovement)
+    {
+      encAbsolute += encMovement;
+
+      switch(systemState)
+      {
+	case state_MOVE :
+	  {
+	    engine->navigate((encMovement > 0) ? engine->getNext() : engine->getPrev());
+	    updateMenu = true;
+	    break;
+	  }
+
+	case state_EDIT :
+	  {
+	    (encMovement > 0) ? tmpValue++ : tmpValue--;
+	    updateMenu = true;
+	    break;
+	  }
+      }
+    }
+
+  // handle button
+  switch (Encoder.getButton())
+  {
+
+    case ClickEncoder::Clicked:
+      {
+	// Enter in item
+	if(systemState == state_MOVE)
+	  {
+	    engine->invoke();
+	    updateMenu = true;
+	  }
+	else if(systemState == state_EDIT)
+	  {
+	    systemState = state_MOVE;
+	    engine->navigate(engine->getParent());
+	    updateMenu = true;
+	  }
+	else
+	  {
+	    // enter settings menu
+	    engine->navigate(&miSetWinding);
+
+	    systemState = state_MOVE;
+	    previousSystemState = systemState;
+	    updateMenu = true;
+	  }
+	break;
+      }
+    case ClickEncoder::Held:{break;}
+    case ClickEncoder::Open:{break;}
+  }
+
+  if(systemState == state_BACK)
+    {
+      systemState = state_MOVE;
+      engine->navigate(engine->getParent());
+      updateMenu = true;
+    }
+
+  // update LCD
+  if (updateMenu)
+    {
+      updateMenu = false;
+
+      if (!encMovement)
 	{
-	// First use print software version
-	case state_DEFAULT :
-	{
-		display.version();
-		break;
+	  // clear menu on child/parent navigation
+	  display.clear();
 	}
-	case state_BACK :
-	{
-		systemState = state_MOVE;
-		engine->navigate(engine->getParent());
-		updateMenu = true;
-		break;
-	}
-	}
-
-	// handle encoder
-	encMovement = Encoder.getValue();
-	if (encMovement)
-	{
-		encAbsolute += encMovement;
-
-		switch(systemState)
-		{
-		case state_MOVE :
-		{
-			engine->navigate((encMovement > 0) ? engine->getNext() : engine->getPrev());
-			updateMenu = true;
-			break;
-		}
-
-		case state_EDIT :
-		{
-			(encMovement > 0) ? tmpValue++ : tmpValue--;
-			updateMenu = true;
-			break;
-		}
-		}
-	}
-
-	// handle button
-	switch (Encoder.getButton())
-	{
-
-	case ClickEncoder::Clicked:
-	{
-		// Enter in item
-		if(systemState == state_MOVE)
-		{
-			engine->invoke();
-			updateMenu = true;
-		}
-		else if(systemState == state_EDIT)
-		{
-			systemState = state_MOVE;
-			engine->navigate(engine->getParent());
-			updateMenu = true;
-		}
-		else
-		{
-			// enter settings menu
-			engine->navigate(&miSetWinding);
-
-			systemState = state_MOVE;
-			previousSystemState = systemState;
-			updateMenu = true;
-		}
-		break;
-	}
-	case ClickEncoder::Held:{break;}
-	case ClickEncoder::Open:{break;}
-	}
-
-	// update LCD
-	if (updateMenu)
-	{
-		updateMenu = false;
-
-		if (!encMovement)
-		{
-			// clear menu on child/parent navigation
-			display.clear();
-		}
-		// render the menu
-		engine->render(renderMenuItem, menuItemsVisible);
-	}
+      // render the menu
+      engine->render(renderMenuItem, menuItemsVisible);
+    }
 }
 
 /* ( THE END ) */

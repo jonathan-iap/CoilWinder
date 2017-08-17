@@ -21,7 +21,31 @@ Memory::Memory()
 
   TotalSteps(0),
   LayerSteps(0),
-  LayerCoilSteps(0)
+  LayerCoilSteps(0),
+
+  _addr_WireSize(0),
+  _addr_CoilLength(0),
+  _addr_Turns(0),
+  _addr_WinSense(0),
+  _addr_CarSense(0),
+  _addr_MaxSpeed(0),
+  _addr_MinSpeed(0),
+  _addr_AccDelay(0),
+  _addr_AccIncr(0),
+  _addr_DefaultSettings(0),
+  _addr_TotalSteps(0),
+  _addr_LayerSteps(0),
+  _addr_LayerCoilSteps(0)
+{}
+
+
+
+
+Memory::~Memory(){}
+
+
+
+void Memory::init()
 {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
@@ -45,8 +69,18 @@ Memory::Memory()
 
   // Read and set all data saved in eeprom memory.
   readAll();
+
+  Serial.print("float wire: "); Serial.println(WireSize);
+  Serial.print("float coil: "); Serial.println(CoilLength);
+  Serial.print("float turns: "); Serial.println(Turns);
+  Serial.print("float max: "); Serial.println(MaxSpeed);
+  Serial.print("float min: "); Serial.println(MinSpeed);
+  Serial.print("float acc: "); Serial.println(AccDelay);
+  Serial.print("val win: "); Serial.println(WinSense);
+  Serial.print("val car: "); Serial.println(CarSense);
+  Serial.println(" ");
 }
-Memory::~Memory(){}
+
 
 void Memory::save(char buffer[], const uint8_t id)
 {

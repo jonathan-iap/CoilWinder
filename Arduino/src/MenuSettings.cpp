@@ -23,7 +23,13 @@ Setting::Setting(ClickEncoder *p_Encoder, Display *p_Display, Coil *p_Coil)
   _Display = p_Display;
   _Coil = p_Coil;
 }
+
+
+
+
 Setting::~Setting(){}
+
+
 
 
 /******************************************************************************
