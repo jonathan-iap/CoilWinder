@@ -31,14 +31,10 @@ public:
   void runOnlyCoil(bool dir, uint16_t turns);
 
   bool suspend();
-  //  void disableMotors();
-
 
   uint16_t getCurrentTurns();
-  uint16_t getCarrPass();
-  uint16_t getCarrStepPerPass();
-  uint16_t getsaveCoilTr();
-  uint16_t getCoilStepPerTr();
+  void getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps);
+
 
 private:
 

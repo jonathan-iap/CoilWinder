@@ -61,10 +61,10 @@ void Memory::init()
   _addr_AccDelay	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
   _addr_AccIncr		    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_INCR);
   _addr_DefaultSettings	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
-  _addr_CarrPass        = EEPROM.getAddress(sizeof(uint16_t));
-  _addr_CarrStepPerPass = EEPROM.getAddress(sizeof(uint16_t));
-  _addr_CoilTr          = EEPROM.getAddress(sizeof(uint16_t));
-  _addr_CoilStepPerTr   = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CarrPass            = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CarrStepPerPass     = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CoilTr              = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CoilStepPerTr       = EEPROM.getAddress(sizeof(uint16_t));
   _addr_WinSense	    = EEPROM.getAddress(1);
   _addr_CarSense	    = EEPROM.getAddress(1);
   // If is the first use or if data are corrupted do reset.
@@ -223,12 +223,6 @@ void Memory::readAll()
   MinSpeed 	= atoi(_buff_MinSpeed);
   AccDelay 	= atoi(_buff_AccDelay);
   AccIncr 	= atoi(_buff_AccIncr);
-
-  read(0                , id_SAVE);
-  Serial.print("CarrPass : "), Serial.println(CarrPass);
-  Serial.print("CarrStepPerPass : "), Serial.println(CarrStepPerPass);
-  Serial.print("CoilTr : "), Serial.println(CoilTr);
-  Serial.print("CoilStepPerTr : "), Serial.println(CoilStepPerTr);
 }
 
 void Memory::reset()

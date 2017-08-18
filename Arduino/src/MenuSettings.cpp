@@ -337,9 +337,9 @@ void Setting::displaying()
     case id_RESUME      : {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
     case id_RESUME_SAVE :
       {
-//	uint32_t tmp_totalSteps = 0;
-//	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
-//	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
+	//	uint32_t tmp_totalSteps = 0;
+	//	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
+	//	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
       }
   }
 }
@@ -692,11 +692,10 @@ void Setting::set_AB_Save()
     }
   else if(_idValue == id_RESUME)
     {
-      CarrPass        = _Coil->getCarrPass();
-      CarrStepPerPass = _Coil->getCarrStepPerPass();
-      CoilTr          = _Coil->getsaveCoilTr();
-      CoilStepPerTr   = _Coil->getCoilStepPerTr();
+      _Coil->getState(&CarrPass, &CarrStepPerPass, &CoilTr, &CoilStepPerTr);
 
+      Serial.println(" ");
+      Serial.println("id_RESUME");
       Serial.print("CarrPass : "), Serial.println(CarrPass);
       Serial.print("CarrStepPerPass : "), Serial.println(CarrStepPerPass);
       Serial.print("CoilTr : "), Serial.println(CoilTr);
@@ -840,7 +839,9 @@ void Setting::setWinding(bool isFirstLunch)
   if(_idValue == id_RESUME_SAVE)
     {
       read(0, id_RESUME_SAVE); // Read the value of all steps in eeprom
-      //_Coil->setSteps(TotalSteps, LayerSteps, LayerCoilSteps);
+
+      _Coil->setSteps(CarrPass, CarrStepPerPass, CoilTr, CoilStepPerTr);
+
       _idValue = id_RESUME;
     }
 }

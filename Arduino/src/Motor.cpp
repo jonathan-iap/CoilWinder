@@ -214,6 +214,7 @@ float M_getDisplacement()
 }
 
 
+
 void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint16_t startSpeed)
 {
   if(M_coil)
@@ -292,4 +293,19 @@ void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t c
 
   carriage.tic = 0;
   coil.tic = 0;
+
+  Serial.println(" ");
+  Serial.println("state : ");
+  Serial.print("CarrPass : "), Serial.println(carriage.tr);
+  Serial.print("CarrStepPerPass : "), Serial.println(carriage.steps);
+  Serial.print("CoilTr : "), Serial.println(coil.tr);
+  Serial.print("CoilStepPerTr : "), Serial.println(coil.steps);
+}
+
+void M_getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps)
+{
+  *p_carrPass  = carriage.tr;
+  *p_carrSteps = carriage.steps;
+  *p_coilTr    = coil.tr;
+  *p_coilSteps = coil.steps;
 }

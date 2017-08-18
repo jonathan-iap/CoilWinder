@@ -104,7 +104,11 @@ bool Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset)
 
 
 
-
+/******************************************************************************
+ * brief   : Winding computing
+ * details : Compute how many steps by turn we need to make one layer
+ * Values are directly returns by pointers
+ ******************************************************************************/
 bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr )
 {
   float tmp_nbTrForOneLayer = 0;
@@ -206,10 +210,6 @@ float Coil::getRelativeHome(float homePosition, bool dir)
 
 bool Coil::winding(bool isNewCoil, float *homingPosition)
 {
-  // For manage state of winding
-  bool isResume = false;
-  bool isbackHome = true;
-  bool isSuspend = false;
   // For stopping winding
   bool run = true;
   // For computing
@@ -223,28 +223,32 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
   uint32_t lastMicrosAcc = 0;
   uint32_t oldTimeRefresh = 0;
 
-
+  // Set start speed with minimal speed
   _speed = _minSpeed;
-
-  _Display->engineWindingValue(_coilLength, _wireSize, _coilTurns, M_getCoilTr());
-
+  // Compute steps by turns for one layer
   isCoilFastest = computeWinding(_coilLength, _wireSize, &nbPass, &steps);
-
+  // Set all target values
   M_setWindingDisplacement(nbPass, steps, _coilTurns, STEPS_PER_TR, isCoilFastest);
-
+  // Set start counter values
   if(isNewCoil) M_setState(false, 0, 0, 0, 0);
   else M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
-
+  // Set state of motors
   M_setMotors(COIL, _windingSense, CARRIAGE, _carriageStartSense, _minSpeed);
-
+  // Start interrupt routine
   M_start();
+
+  // Display current setting of winding
+  _Display->engineWindingValue(_coilLength, _wireSize, _coilTurns, M_getCoilTr());
 
   while( !M_getWindingStatus() && run)
     {
       if( suspend() == true)
 	{
 	  run = false;
+
 	  M_stop();
+
+	  M_getState(&_saveCarrPass, &_saveCarrStepPerPass, &_saveCoilTr, &_saveCoilStepPerTr);
 	}
       else
 	{
@@ -261,6 +265,12 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
 	  _Display->windingGetTurns(_coilTurns, M_getCoilTr());
 	}
     }
+
+
+  Serial.print("W_CarrPass : "), Serial.println(_saveCarrPass);
+  Serial.print("W_CarrStepPerPass : "), Serial.println(_saveCarrStepPerPass);
+  Serial.print("W_CoilTr : "), Serial.println(_saveCoilTr);
+  Serial.print("W_CoilStepPerTr : "), Serial.println(_saveCoilStepPerTr);
 
   if(run == false) return false;
   else return true;
@@ -363,33 +373,16 @@ bool Coil::suspend()
 }
 
 
-
-
 uint16_t Coil::getCurrentTurns()
 {
   return M_getCoilTr();
 }
 
 
-uint16_t Coil::getCarrPass()
+void Coil::getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps)
 {
-  return _saveCarrPass;
-}
-
-
-uint16_t Coil::getCarrStepPerPass()
-{
-  return _saveCarrStepPerPass;
-}
-
-
-uint16_t Coil::getsaveCoilTr()
-{
-  return _saveCoilTr;
-}
-
-
-uint16_t Coil::getCoilStepPerTr()
-{
-  return _saveCoilStepPerTr;
+  *p_carrPass  = _saveCarrPass;
+  *p_carrSteps = _saveCarrStepPerPass;
+  *p_coilTr    = _saveCoilTr;
+  *p_coilSteps = _saveCoilStepPerTr;
 }
