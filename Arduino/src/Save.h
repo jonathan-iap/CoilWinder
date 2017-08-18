@@ -63,7 +63,7 @@ public :
 void init();
   void save(char buffer[], const uint8_t id);
   void read(char buffer[], const uint8_t id);
-  void getSavedTotalSteps(uint32_t *totalSteps);
+  //void getSavedTotalSteps(uint32_t *totalSteps);
   void readAll();
   void reset();
   bool isSet();
@@ -88,9 +88,10 @@ protected :
   bool WinSense;
   bool CarSense;
 
-  uint32_t TotalSteps;
-  uint32_t LayerSteps;
-  uint32_t LayerCoilSteps;
+  uint16_t CarrPass;
+  uint16_t CarrStepPerPass;
+  uint16_t CoilTr;
+  uint16_t CoilStepPerTr;
 
   char _buff_WireSize[BUFFSIZE_WIRE+1];
   char _buff_CoilLength[BUFFSIZE_COIL+1];
@@ -111,9 +112,10 @@ private :
   uint8_t _addr_AccDelay;
   uint8_t _addr_AccIncr;
   uint8_t _addr_DefaultSettings;
-  uint8_t _addr_TotalSteps;
-  uint8_t _addr_LayerSteps;
-  uint8_t _addr_LayerCoilSteps;
+  uint8_t _addr_CarrPass;
+  uint8_t _addr_CarrStepPerPass;
+  uint8_t _addr_CoilTr;
+  uint8_t _addr_CoilStepPerTr;
 };
 
 #endif /* SRC_SAVE_H_ */

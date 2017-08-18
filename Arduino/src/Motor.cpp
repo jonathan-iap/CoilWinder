@@ -41,17 +41,9 @@ void M_init()
 
 void M_start()
 {
-  coil.steps = 0;
-  coil.tic = 0;
-  coil.tr = 0;
 
-  carriage.steps = 0;
-  carriage.tic = 0;
-  carriage.tr = 0;
 
   isFinished = false;
-
-  Serial.print(""), Serial.println();
 
   Timer1.attachInterrupt(M_engine);
 }
@@ -281,3 +273,23 @@ void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
   isCoilFastest = fastest;
 }
 
+void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t coilTr, uint16_t coilSteps)
+{
+  if(isResume)
+    {
+      carriage.tr = carrPass;
+      carriage.steps = carrSteps;
+      coil.tr = coilTr;
+      coil.steps = coilSteps;
+    }
+  else
+    {
+      coil.steps = 0;
+      coil.tr = 0;
+      carriage.steps = 0;
+      carriage.tr = 0;
+    }
+
+  carriage.tic = 0;
+  coil.tic = 0;
+}

@@ -35,5 +35,7 @@ void M_invertSense();
 void M_setSimpleDisplacement(uint8_t action, uint16_t pass, uint16_t steps);
 void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
 		       uint16_t stepsTr, bool fastest);
+void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t coilTr, uint16_t coilSteps);
+
 
 #endif

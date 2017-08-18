@@ -257,7 +257,7 @@ const void Display::engineSetValue(char label[], char actionBar[], uint8_t posit
 const void Display::engineSense(bool dir)
 {
   _lcd.setCursor(0, 0);
-  _lcd.print("Sense : ");
+  _lcd.print(MSG_SENSE);
 
   dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
 }
@@ -297,10 +297,12 @@ const void Display::engineAjustSpeed(bool refresh, int8_t percent)
 const void Display::engineSuspend(char actionBar[], uint8_t positionAB, uint16_t coilTurns, uint16_t counter)
 {
   _lcd.clear();
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_TR), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter);
   _lcd.setCursor(0,positionAB);
   _lcd.print(actionBar);
-  _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(MSG_PAUSE);
 }
 
 
@@ -325,7 +327,7 @@ const void Display::engineValueLimit()
 const void Display::windingGetTurns(uint16_t target, uint16_t counter)
 {
   _lcd.setCursor(0, LCD_LINES);
-  _lcd.print("Tr:"), _lcd.print(target),_lcd.print("/");
+  _lcd.print(MSG_TR), _lcd.print(target),_lcd.print("/");
   _lcd.print(counter), _lcd.print(" ");
 }
 

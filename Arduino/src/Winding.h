@@ -26,18 +26,19 @@ public:
   void setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr ,uint16_t coilStepPerTr);
   bool updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset);
 
-  void winding(bool isNewCoil);
+  bool winding(bool isNewCoil, float *homingPosition);
   void runOnlyCarriage(bool dir, float distance, float *homingPosition);
   void runOnlyCoil(bool dir, uint16_t turns);
 
   bool suspend();
   //  void disableMotors();
 
-  //  uint32_t getTurns();
-  //  uint32_t getCurrentTurns();
-  //  uint32_t getTotalStepsCounter();
-  //  uint32_t getLayerStepsCounter();
-  //  uint32_t getLayerCoilStepsCounter();
+
+  uint16_t getCurrentTurns();
+  uint16_t getCarrPass();
+  uint16_t getCarrStepPerPass();
+  uint16_t getsaveCoilTr();
+  uint16_t getCoilStepPerTr();
 
 private:
 

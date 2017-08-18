@@ -52,6 +52,8 @@ void Coil::setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool
 }
 
 
+
+
 void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent)
 {
   _accIncr  = accIncr;
@@ -62,6 +64,10 @@ void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint
   _speedPercent = speedPercent;
 }
 
+
+
+
+
 void Coil::setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr ,uint16_t coilStepPerTr)
 {
   _saveCarrPass = carrPass;
@@ -69,6 +75,9 @@ void Coil::setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr
   _saveCoilTr = coilTr;
   _saveCoilStepPerTr = coilStepPerTr;
 }
+
+
+
 
 // Allow to update speed during winding or displacement
 bool Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset)
@@ -93,6 +102,9 @@ bool Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset)
   else return false;
 }
 
+
+
+
 bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr )
 {
   float tmp_nbTrForOneLayer = 0;
@@ -107,6 +119,9 @@ bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOne
   if(tmp_nbTrForOneLayer < STEPS_PER_TR) return true;
   else return false;
 }
+
+
+
 
 /******************************************************************************
  * brief   : Travel computing
@@ -159,6 +174,9 @@ void Coil::acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime
     }
 }
 
+
+
+
 void Coil::refreshDisplay(bool *run, uint32_t *oldTime)
 {
   uint32_t currentMicros = millis();
@@ -169,6 +187,7 @@ void Coil::refreshDisplay(bool *run, uint32_t *oldTime)
       _Display->engineWindingRefresh(_coilLength, _wireSize);
     }
 }
+
 
 
 
@@ -185,19 +204,25 @@ float Coil::getRelativeHome(float homePosition, bool dir)
 
 
 
-void Coil::winding(bool isNewCoil)
+bool Coil::winding(bool isNewCoil, float *homingPosition)
 {
+  // For manage state of winding
+  bool isResume = false;
+  bool isbackHome = true;
+  bool isSuspend = false;
+  // For stopping winding
   bool run = true;
-  bool refresh = false;
-
+  // For computing
+  bool isCoilFastest = 0;
   uint16_t nbPass = 0;
   uint16_t steps = 0;
-  bool isCoilFastest = 0;
-
-  uint16_t speedSet = _speed;
+  // For active setting : speed and display
+  bool refresh = false;
   int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
   uint32_t lastMicrosAcc = 0;
   uint32_t oldTimeRefresh = 0;
+
 
   _speed = _minSpeed;
 
@@ -206,6 +231,9 @@ void Coil::winding(bool isNewCoil)
   isCoilFastest = computeWinding(_coilLength, _wireSize, &nbPass, &steps);
 
   M_setWindingDisplacement(nbPass, steps, _coilTurns, STEPS_PER_TR, isCoilFastest);
+
+  if(isNewCoil) M_setState(false, 0, 0, 0, 0);
+  else M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
 
   M_setMotors(COIL, _windingSense, CARRIAGE, _carriageStartSense, _minSpeed);
 
@@ -233,6 +261,9 @@ void Coil::winding(bool isNewCoil)
 	  _Display->windingGetTurns(_coilTurns, M_getCoilTr());
 	}
     }
+
+  if(run == false) return false;
+  else return true;
 }
 
 
@@ -245,8 +276,8 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
   uint16_t nbPass = 0;
   uint16_t steps = 0;
 
-  uint16_t speedSet = _speed;
   int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
   uint32_t lastMicrosAcc = 0;
 
   // Acceleration need to have current speed set to minimum.
@@ -256,6 +287,8 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
   M_setSimpleDisplacement(TRAVELING, nbPass, steps);
 
   M_setMotors(0, 0, CARRIAGE, dir, _minSpeed);
+
+  M_setState(false, 0, 0, 0, 0);
 
   M_start();
 
@@ -285,8 +318,8 @@ void Coil::runOnlyCoil(bool dir, uint16_t turns)
 {
   bool run = true;
 
-  uint16_t speedSet = _speed;
   int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
   uint32_t lastMicrosAcc = 0;
 
   _speed = _minSpeed;
@@ -294,6 +327,8 @@ void Coil::runOnlyCoil(bool dir, uint16_t turns)
   M_setSimpleDisplacement(ROTATION, turns, STEPS_PER_TR);
 
   M_setMotors(COIL, dir, 0, 0, _minSpeed);
+
+  M_setState(false, 0, 0, 0, 0);
 
   M_start();
 
@@ -328,38 +363,33 @@ bool Coil::suspend()
 }
 
 
-//void Coil::disableMotors()
-//{
-//stepper.coil_disable();
-//stepper.carriage_disable();
-//}
 
 
-//uint32_t Coil::getTurns()
-//{
-//  return _coilTurns;
-//}
-//
-//
-//uint32_t Coil::getCurrentTurns()
-//{
-//  return StepsToTurns(_totalStepsCounter);
-//}
-//
-//
-//uint32_t Coil::getTotalStepsCounter()
-//{
-//  return _totalStepsCounter;
-//}
-//
-//
-//uint32_t Coil::getLayerStepsCounter()
-//{
-//  return _layerStepsCounter;
-//}
-//
-//
-//uint32_t Coil::getLayerCoilStepsCounter()
-//{
-//  return _layerCoilStepsCounter;
-//}
+uint16_t Coil::getCurrentTurns()
+{
+  return M_getCoilTr();
+}
+
+
+uint16_t Coil::getCarrPass()
+{
+  return _saveCarrPass;
+}
+
+
+uint16_t Coil::getCarrStepPerPass()
+{
+  return _saveCarrStepPerPass;
+}
+
+
+uint16_t Coil::getsaveCoilTr()
+{
+  return _saveCoilTr;
+}
+
+
+uint16_t Coil::getCoilStepPerTr()
+{
+  return _saveCoilStepPerTr;
+}

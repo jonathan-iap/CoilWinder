@@ -19,9 +19,10 @@ Memory::Memory()
   WinSense(0),
   CarSense(0),
 
-  TotalSteps(0),
-  LayerSteps(0),
-  LayerCoilSteps(0),
+  CarrPass(0),
+  CarrStepPerPass(0),
+  CoilTr(0),
+  CoilStepPerTr(0),
 
   _addr_WireSize(0),
   _addr_CoilLength(0),
@@ -33,9 +34,10 @@ Memory::Memory()
   _addr_AccDelay(0),
   _addr_AccIncr(0),
   _addr_DefaultSettings(0),
-  _addr_TotalSteps(0),
-  _addr_LayerSteps(0),
-  _addr_LayerCoilSteps(0)
+  _addr_CarrPass(0),
+  _addr_CarrStepPerPass(0),
+  _addr_CoilTr(0),
+  _addr_CoilStepPerTr(0)
 {}
 
 
@@ -51,19 +53,20 @@ void Memory::init()
   // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
   EEPROM.setMemPool(MEN_BASE, EEPROMSizeUno);
 
-  _addr_WireSize	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
-  _addr_CoilLength	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
-  _addr_Turns		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
-  _addr_MaxSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
-  _addr_MinSpeed	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
-  _addr_AccDelay	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
-  _addr_AccIncr		= EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_INCR);
-  _addr_DefaultSettings	= EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
-  _addr_TotalSteps	= EEPROM.getAddress(sizeof(uint32_t));
-  _addr_LayerSteps	= EEPROM.getAddress(sizeof(uint32_t));
-  _addr_LayerCoilSteps	= EEPROM.getAddress(sizeof(uint32_t));
-  _addr_WinSense	= EEPROM.getAddress(1);
-  _addr_CarSense	= EEPROM.getAddress(1);
+  _addr_WireSize	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_WIRE);
+  _addr_CoilLength	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_COIL);
+  _addr_Turns		    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_TURNS);
+  _addr_MaxSpeed	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_MAX_SPEED);
+  _addr_MinSpeed	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_MIN_SPEED);
+  _addr_AccDelay	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_DELAY);
+  _addr_AccIncr		    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_ACC_INCR);
+  _addr_DefaultSettings	    = EEPROM.getAddress(sizeof(char)*BUFFSIZE_DEFAULT);
+  _addr_CarrPass        = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CarrStepPerPass = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CoilTr          = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_CoilStepPerTr   = EEPROM.getAddress(sizeof(uint16_t));
+  _addr_WinSense	    = EEPROM.getAddress(1);
+  _addr_CarSense	    = EEPROM.getAddress(1);
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
 
@@ -114,9 +117,10 @@ void Memory::save(char buffer[], const uint8_t id)
       }
     case id_RESUME_SAVE :
       {
-	EEPROM.updateLong(_addr_TotalSteps, TotalSteps);
-	EEPROM.updateLong(_addr_LayerSteps, LayerSteps);
-	EEPROM.updateLong(_addr_LayerCoilSteps, LayerCoilSteps);
+	EEPROM.updateInt(_addr_CarrPass, CarrPass);
+	EEPROM.updateInt(_addr_CarrStepPerPass, CarrStepPerPass);
+	EEPROM.updateInt(_addr_CoilTr, CoilTr);
+	EEPROM.updateInt(_addr_CoilStepPerTr, CoilStepPerTr);
 	break;
       }
     case id_W_SENSE :
@@ -173,9 +177,10 @@ void Memory::read(char buffer[], const uint8_t id)
       }
     case id_RESUME_SAVE :
       {
-	TotalSteps = EEPROM.readLong(_addr_TotalSteps);
-	LayerSteps = EEPROM.readLong(_addr_LayerSteps);
-	LayerCoilSteps= EEPROM.readLong(_addr_LayerCoilSteps);
+	CarrPass        = EEPROM.readInt(_addr_CarrPass);
+	CarrStepPerPass = EEPROM.readInt(_addr_CarrStepPerPass);
+	CoilTr          = EEPROM.readInt(_addr_CoilTr);
+	CoilStepPerTr   = EEPROM.readInt(_addr_CoilStepPerTr);
 	break;
       }
     case id_W_SENSE :
@@ -191,10 +196,10 @@ void Memory::read(char buffer[], const uint8_t id)
   }
 }
 
-void Memory::getSavedTotalSteps(uint32_t *totalSteps)
-{
-  *totalSteps = EEPROM.readLong(_addr_TotalSteps);
-}
+//void Memory::getSavedTotalSteps(uint32_t *totalSteps)
+//{
+//  *totalSteps = EEPROM.readLong(_addr_TotalSteps);
+//}
 
 void Memory::readAll()
 {
@@ -218,6 +223,12 @@ void Memory::readAll()
   MinSpeed 	= atoi(_buff_MinSpeed);
   AccDelay 	= atoi(_buff_AccDelay);
   AccIncr 	= atoi(_buff_AccIncr);
+
+  read(0                , id_SAVE);
+  Serial.print("CarrPass : "), Serial.println(CarrPass);
+  Serial.print("CarrStepPerPass : "), Serial.println(CarrStepPerPass);
+  Serial.print("CoilTr : "), Serial.println(CoilTr);
+  Serial.print("CoilStepPerTr : "), Serial.println(CoilStepPerTr);
 }
 
 void Memory::reset()
@@ -232,9 +243,10 @@ void Memory::reset()
 
   EEPROM.writeBlock<char>(_addr_DefaultSettings, MSG_IS_SET, BUFFSIZE_DEFAULT);
 
-  EEPROM.writeLong(_addr_TotalSteps, 0);
-  EEPROM.writeLong(_addr_LayerSteps, 0);
-  EEPROM.writeLong(_addr_LayerCoilSteps, 0);
+  EEPROM.writeInt(_addr_CarrPass, 0);
+  EEPROM.writeInt(_addr_CarrStepPerPass, 0);
+  EEPROM.writeInt(_addr_CoilTr, 0);
+  EEPROM.writeInt(_addr_CoilStepPerTr, 0);
 
   EEPROM.writeBit(_addr_WinSense, 1, WinSense);
   EEPROM.writeBit(_addr_CarSense, 1, CarSense);

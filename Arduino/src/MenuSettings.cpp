@@ -334,12 +334,12 @@ void Setting::displaying()
     case id_W_SENSE     : {_Display->engineSense(WinSense); break;}
     case id_C_SENSE     : {_Display->engineSense(CarSense); break;}
     case id_GO_HOME     : {_Display->engineGoHome(_homePosition); break;}
-    case id_RESUME      : {/*_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns());*/ break;}
+    case id_RESUME      : {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
     case id_RESUME_SAVE :
       {
-	uint32_t tmp_totalSteps = 0;
-	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
-	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
+//	uint32_t tmp_totalSteps = 0;
+//	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
+//	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
       }
   }
 }
@@ -692,11 +692,18 @@ void Setting::set_AB_Save()
     }
   else if(_idValue == id_RESUME)
     {
-      //      TotalSteps     = _Coil->getTotalStepsCounter();
-      //      LayerSteps     = _Coil->getLayerStepsCounter();
-      //      LayerCoilSteps = _Coil->getLayerCoilStepsCounter();
-      //      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
-      //      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+      CarrPass        = _Coil->getCarrPass();
+      CarrStepPerPass = _Coil->getCarrStepPerPass();
+      CoilTr          = _Coil->getsaveCoilTr();
+      CoilStepPerTr   = _Coil->getCoilStepPerTr();
+
+      Serial.print("CarrPass : "), Serial.println(CarrPass);
+      Serial.print("CarrStepPerPass : "), Serial.println(CarrStepPerPass);
+      Serial.print("CoilTr : "), Serial.println(CoilTr);
+      Serial.print("CoilStepPerTr : "), Serial.println(CoilStepPerTr);
+
+      setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
+      _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
   else
     {
@@ -805,26 +812,16 @@ void Setting::moveHome()
 
 /******************************************************************************
  * brief   : Main winding function
- * details : Set all value for winding
+ * details : Set all value for winding and lunch winding
  ******************************************************************************/
 bool Setting::runWinding(bool isFirstLunch, bool isNewCoil)
 {
-
   // Pass values
   setWinding(isFirstLunch);
 
-  // Start winding with "runMultiLayer()"
-  if(1)//_Coil->runMultiLayer(isNewCoil) == false) // false if all is ok
-    {
-      _Coil->winding(1);
-      // _Coil->disableMotors(); // "runMultiLayer()" return true if winding is finished.
-      return EXIT;
-    }
-  else
-    {
-      set_AB_SuspendMenu();
-      return CONTINU;
-    }
+  // Start winding and return true if winding finish correctly
+  if(_Coil->winding(isNewCoil, &_homePosition)) return EXIT;
+  else { set_AB_SuspendMenu(); return CONTINU; }
 }
 
 
@@ -889,6 +886,6 @@ void Setting::set_AB_SuspendMenu()
   _idValue = id_RESUME; // For recovery the current winding
   _tmp_id = id_SUSPEND; // For execute menuSuspend();
 
-  setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, 0); // Displaying on the top
-  // _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+  setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, LCD_LINES); // Displaying on the bottom
+  _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
 }

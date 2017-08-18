@@ -34,12 +34,14 @@
 #define UNIT_US   "us"
 #define UNIT_STEP "step"
 /* Labels _____________________________________________________________*/
+#define MSG_EMPTY              " "
 #define MSG_HOMING             "Homing : "
 #define MSG_GO_HOME            "Go to : "
 #define MSG_CONFIRM            "Confirm ?"
 #define MSG_WIRE_SIZE          "Wire size in " UNIT_MM
 #define MSG_COIL_LENGTH        "Length in " UNIT_MM
 #define MSG_TURNS              "Turns in " UNIT_TR
+#define MSG_TR                 "Tr:"
 #define MSG_MAX_SPEED          "MAX speed in " UNIT_RPM
 #define MSG_MIN_SPEED          "MIN speed in " UNIT_RPM
 #define MSG_ACC_DELAY          "Acc delay in " UNIT_US
@@ -53,6 +55,7 @@
 #define MSG_RESET              "Reset EEprom ? "
 #define MSG_RAZ                "Update values ? "
 #define MSG_MOVE               "Move in " UNIT_MM
+#define MSG_SENSE              "Sense : "
 #define MSG_CLOCK              "Clk  "
 #define MSG_C_CLOCK            "CClk "
 #define MSG_FOR_STOP           "Click to stop"
@@ -62,7 +65,8 @@
 #define MSG_CURRENT_SPEED      "Speed: "
 #define SIZE_MSG_CURRENT_SPEED COUNTOF(MSG_CURRENT_SPEED)
 #define SIZE_BLANK_SPEED       (LCD_CHARS - SIZE_MSG_CURRENT_SPEED)
-#define MSG_EMPTY              " "
+#define MSG_PAUSE              "Pause:"
+
 /* Keywords ___________________________________________________________*/
 #define KEYWORD_MOVE        "Move"
 #define SIZE_KEYWORD_MOVE   COUNTOF(KEYWORD_MOVE)
@@ -99,7 +103,7 @@
 #define SIZE_AB_MOVE_BACK        COUNTOF(ACTIONBAR_MOVE_BACK)
 #define ACTIONBAR_MOVE_NEXT      ICONLEFT "/" ICONRIGHT "|" KEYWORD_NEXT
 #define SIZE_AB_MOVE_NEXT        COUNTOF(ACTIONBAR_MOVE_NEXT)
-#define ACTIONBAR_SUSPEND        KEYWORD_SPEED "/" KEYWORD_SAVE "/" ICONSTOP "/" ICONRESUME
+#define ACTIONBAR_SUSPEND        KEYWORD_SAVE "/" ICONSTOP "/" ICONRESUME
 #define SIZE_AB_SUSPEND          COUNTOF(ACTIONBAR_SUSPEND)
 
 
