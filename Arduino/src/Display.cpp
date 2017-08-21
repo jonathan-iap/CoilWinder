@@ -199,7 +199,7 @@ const void Display::engineSave(bool dir, char actionBar[], uint8_t positionAB)
 }
 
 
-const void Display::engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns)
+const void Display::engineWindingValue(float coilLength, float wireSize, uint16_t coilTurns, uint16_t currentTurns)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);

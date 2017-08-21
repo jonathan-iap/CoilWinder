@@ -72,6 +72,7 @@ private:
 public:
 
   void actionMenu(const uint8_t id);
+  void actionMenu(const uint8_t id, bool isFloat);
   void actionMenu(const uint8_t id, char tmp_buffValue[], float *tmp_valFromBuff);
   void actionMenu(const uint8_t id, char tmp_buffValue[], uint16_t *tmp_valFromBuff);
   bool runWinding(bool isFirstLunch, bool isNewCoil);

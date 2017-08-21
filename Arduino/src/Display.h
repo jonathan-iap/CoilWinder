@@ -202,7 +202,7 @@ public:
   const void engineSave(float value, char unit[], char actionBar[], uint8_t positionAB);
   const void engineSave(uint16_t value, char unit[], char actionBar[], uint8_t positionAB);
   const void engineSave(bool dir, char actionBar[], uint8_t positionAB);
-  const void engineWindingValue(float coilLength, float wireSize, uint32_t coilTurns, uint32_t currentTurns);
+  const void engineWindingValue(float coilLength, float wireSize, uint16_t coilTurns, uint16_t currentTurns);
   const void engineWindingRefresh(float coilLength, float wireSize);
   const void engineAjustSpeed(bool refresh, bool initMSG, int8_t percent);
   const void engineSetValue(char label[], char actionBar[], uint8_t positionAB);

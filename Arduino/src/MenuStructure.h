@@ -86,7 +86,7 @@ bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_WIRESIZE);
+      setting.actionMenu(id_WIRESIZE, true);
     }
   return true;
 }
@@ -95,7 +95,7 @@ bool editLength(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_COILLENGTH);
+      setting.actionMenu(id_COILLENGTH, true);
     }
   return true;
 }
@@ -104,7 +104,7 @@ bool editTurns(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_TURNS);
+      setting.actionMenu(id_TURNS, false);
     }
   return true;
 }
@@ -158,7 +158,7 @@ bool editMaxSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_MAX_SPEED);
+      setting.actionMenu(id_MAX_SPEED, false);
     }
   return true;
 }
@@ -167,7 +167,7 @@ bool editMinSpeed(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_MIN_SPEED);
+      setting.actionMenu(id_MIN_SPEED, false);
     }
   return true;
 }
@@ -176,7 +176,7 @@ bool editAccTime(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_ACC_DELAY);
+      setting.actionMenu(id_ACC_DELAY, false);
     }
   return true;
 }
@@ -185,7 +185,7 @@ bool editAccIncr(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.actionMenu(id_ACC_INCR);
+      setting.actionMenu(id_ACC_INCR, false);
     }
   return true;
 }

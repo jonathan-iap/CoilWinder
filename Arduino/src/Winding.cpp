@@ -49,6 +49,12 @@ void Coil::setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool
   _coilTurns  		= coilTurns;
   _windingSense		= windSense;
   _carriageStartSense	= carSense;
+
+//  Serial.println(" ");
+//  Serial.println("****** SetWinding ******");
+//  Serial.print("_coilLength : "), Serial.println(_coilLength);
+//  Serial.print("_wireSize : "), Serial.println(_wireSize);
+//  Serial.print("_coilTurns : "), Serial.println(_coilTurns);
 }
 
 
@@ -267,10 +273,10 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
     }
 
 
-  Serial.print("W_CarrPass : "), Serial.println(_saveCarrPass);
-  Serial.print("W_CarrStepPerPass : "), Serial.println(_saveCarrStepPerPass);
-  Serial.print("W_CoilTr : "), Serial.println(_saveCoilTr);
-  Serial.print("W_CoilStepPerTr : "), Serial.println(_saveCoilStepPerTr);
+//  Serial.print("W_CarrPass : "), Serial.println(_saveCarrPass);
+//  Serial.print("W_CarrStepPerPass : "), Serial.println(_saveCarrStepPerPass);
+//  Serial.print("W_CoilTr : "), Serial.println(_saveCoilTr);
+//  Serial.print("W_CoilStepPerTr : "), Serial.println(_saveCoilStepPerTr);
 
   if(run == false) return false;
   else return true;

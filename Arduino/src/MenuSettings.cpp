@@ -41,6 +41,21 @@ void Setting::actionMenu(const uint8_t id)
   _idValue = id;
   _tmp_id = id;
 
+  p_intValue = NULL;
+  p_floatingValue  = NULL;
+
+  setValueFromId();
+  navigationEngine();
+}
+
+
+void Setting::actionMenu(const uint8_t id, bool isFloat)
+{
+  _idValue = id;
+  _tmp_id = id;
+
+  isFloat ? p_intValue = NULL : p_floatingValue  = NULL;
+
   setValueFromId();
   navigationEngine();
 }
@@ -205,17 +220,6 @@ void Setting::setValues(const char label[], char arrayValue[], const uint8_t siz
   strcpy(_unit, unit);
   // Action bar
   setActionBar(arrayValue, sizeOfArrayValue, actionBar, sizeActionBar, AB_LinePosition);
-
-#ifdef DEBUGoff
-  Serial.println("***********************");
-  Serial.print("_label          : "); Serial.println(_label);
-  Serial.print("p_arrayValue    : "); Serial.println(p_arrayValue);
-  Serial.print("p_floatingValue : "); Serial.println(*p_floatingValue);
-  Serial.print("_sizeBuffValue  : "); Serial.println(_sizeBuffValue);
-  Serial.print("_unit           : "); Serial.println(_unit);
-  Serial.print("_actionBar      : "); Serial.println(_actionBar);
-  Serial.println("***********************");
-#endif
 }
 
 
@@ -694,13 +698,6 @@ void Setting::set_AB_Save()
     {
       _Coil->getState(&CarrPass, &CarrStepPerPass, &CoilTr, &CoilStepPerTr);
 
-      Serial.println(" ");
-      Serial.println("id_RESUME");
-      Serial.print("CarrPass : "), Serial.println(CarrPass);
-      Serial.print("CarrStepPerPass : "), Serial.println(CarrStepPerPass);
-      Serial.print("CoilTr : "), Serial.println(CoilTr);
-      Serial.print("CoilStepPerTr : "), Serial.println(CoilStepPerTr);
-
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
     }
@@ -712,8 +709,6 @@ void Setting::set_AB_Save()
 
       if(p_floatingValue != NULL) _Display->engineSave(*p_floatingValue, _unit,_actionBar, _positionAB);
       else _Display->engineSave(*p_intValue, _unit,_actionBar, _positionAB);
-
-
     }
 }
 
@@ -834,6 +829,7 @@ void Setting::setWinding(bool isFirstLunch)
   if(isFirstLunch) adjustSpeed();
 
   _Coil->setWinding(CoilLength, WireSize, Turns, WinSense, CarSense);
+
 
   // Resume a saved session
   if(_idValue == id_RESUME_SAVE)
