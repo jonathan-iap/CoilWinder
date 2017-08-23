@@ -31,8 +31,10 @@ Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
 
   _saveCarrPass(0),
   _saveCarrStepPerPass(0),
+  _saveCarrDir(0),
   _saveCoilTr(0),
-  _saveCoilStepPerTr(0)
+  _saveCoilStepPerTr(0),
+  _saveCoilDir(0)
 {
   _Encoder = p_Encoder;
   _Display = p_Display;
@@ -50,11 +52,11 @@ void Coil::setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool
   _windingSense		= windSense;
   _carriageStartSense	= carSense;
 
-//  Serial.println(" ");
-//  Serial.println("****** SetWinding ******");
-//  Serial.print("_coilLength : "), Serial.println(_coilLength);
-//  Serial.print("_wireSize : "), Serial.println(_wireSize);
-//  Serial.print("_coilTurns : "), Serial.println(_coilTurns);
+  //  Serial.println(" ");
+  //  Serial.println("****** SetWinding ******");
+  //  Serial.print("_coilLength : "), Serial.println(_coilLength);
+  //  Serial.print("_wireSize : "), Serial.println(_wireSize);
+  //  Serial.print("_coilTurns : "), Serial.println(_coilTurns);
 }
 
 
@@ -74,12 +76,16 @@ void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint
 
 
 
-void Coil::setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr ,uint16_t coilStepPerTr)
+void Coil::setSteps(uint16_t carrPass, uint16_t carrStepPerPass, bool carrDir,
+		    uint16_t coilTr, uint16_t coilStepPerTr, bool coilDir)
 {
-  _saveCarrPass = carrPass;
+  _saveCarrPass        = carrPass;
   _saveCarrStepPerPass = carrStepPerPass;
-  _saveCoilTr = coilTr;
-  _saveCoilStepPerTr = coilStepPerTr;
+  _saveCarrDir         = carrDir;
+
+  _saveCoilTr          = coilTr;
+  _saveCoilStepPerTr   = coilStepPerTr;
+  _saveCoilDir         = coilDir;
 }
 
 
@@ -236,8 +242,16 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
   // Set all target values
   M_setWindingDisplacement(nbPass, steps, _coilTurns, STEPS_PER_TR, isCoilFastest);
   // Set start counter values
-  if(isNewCoil) M_setState(false, 0, 0, 0, 0);
-  else M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
+  if(isNewCoil)
+    {
+      M_setState(false, 0, 0, 0, 0);
+    }
+  else
+    {
+      M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
+      _windingSense       = _saveCoilDir;
+      _carriageStartSense = _saveCarrDir;
+    }
   // Set state of motors
   M_setMotors(COIL, _windingSense, CARRIAGE, _carriageStartSense, _minSpeed);
   // Start interrupt routine
@@ -254,7 +268,8 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
 
 	  M_stop();
 
-	  M_getState(&_saveCarrPass, &_saveCarrStepPerPass, &_saveCoilTr, &_saveCoilStepPerTr);
+	  M_getState(&_saveCarrPass, &_saveCarrStepPerPass, &_saveCarrDir,
+		     &_saveCoilTr, &_saveCoilStepPerTr, &_saveCoilDir);
 	}
       else
 	{
@@ -271,12 +286,6 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
 	  _Display->windingGetTurns(_coilTurns, M_getCoilTr());
 	}
     }
-
-
-//  Serial.print("W_CarrPass : "), Serial.println(_saveCarrPass);
-//  Serial.print("W_CarrStepPerPass : "), Serial.println(_saveCarrStepPerPass);
-//  Serial.print("W_CoilTr : "), Serial.println(_saveCoilTr);
-//  Serial.print("W_CoilStepPerTr : "), Serial.println(_saveCoilStepPerTr);
 
   if(run == false) return false;
   else return true;
@@ -385,10 +394,14 @@ uint16_t Coil::getCurrentTurns()
 }
 
 
-void Coil::getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps)
+void Coil::getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
+		    uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir)
 {
   *p_carrPass  = _saveCarrPass;
   *p_carrSteps = _saveCarrStepPerPass;
+  *p_carrDir   = _saveCarrDir;
+
   *p_coilTr    = _saveCoilTr;
   *p_coilSteps = _saveCoilStepPerTr;
+  *p_coilDir   = _saveCoilDir;
 }

@@ -23,7 +23,8 @@ public:
   bool computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr );
   void setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool windSense, bool startSense);
   void setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
-  void setSteps(uint16_t carrPass, uint16_t carrStepPerPass, uint16_t coilTr ,uint16_t coilStepPerTr);
+  void setSteps(uint16_t carrPass, uint16_t carrStepPerPass, bool carrDir,
+		uint16_t coilTr, uint16_t coilStepPerTr, bool coilDir);
   bool updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset);
 
   bool winding(bool isNewCoil, float *homingPosition);
@@ -33,17 +34,10 @@ public:
   bool suspend();
 
   uint16_t getCurrentTurns();
-  void getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps);
-
+  void getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
+		uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir);
 
 private:
-
-  //  void computeStepPerLayer(float length);
-  //  void computeRatio();
-  //  void computeStepsTravel(float totalSteps);
-  //  void computeAll();
-  //
-  //  void homing(bool dir);
 
   void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
   void acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
@@ -76,8 +70,10 @@ private:
   // Steps
   uint16_t _saveCarrPass;
   uint16_t _saveCarrStepPerPass;
+  bool _saveCarrDir;
   uint16_t _saveCoilTr;
   uint16_t _saveCoilStepPerTr;
+  bool _saveCoilDir;
 };
 
 #endif

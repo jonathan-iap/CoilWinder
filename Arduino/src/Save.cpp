@@ -21,8 +21,10 @@ Memory::Memory()
 
   CarrPass(0),
   CarrStepPerPass(0),
+  CarrDir(0),
   CoilTr(0),
   CoilStepPerTr(0),
+  CoilDir(0),
 
   _addr_WireSize(0),
   _addr_CoilLength(0),
@@ -36,8 +38,10 @@ Memory::Memory()
   _addr_DefaultSettings(0),
   _addr_CarrPass(0),
   _addr_CarrStepPerPass(0),
+  _addr_CarrDir(0),
   _addr_CoilTr(0),
-  _addr_CoilStepPerTr(0)
+  _addr_CoilStepPerTr(0),
+  _addr_CoilDir(0)
 {}
 
 
@@ -67,6 +71,8 @@ void Memory::init()
   _addr_CoilStepPerTr       = EEPROM.getAddress(sizeof(uint16_t));
   _addr_WinSense	    = EEPROM.getAddress(1);
   _addr_CarSense	    = EEPROM.getAddress(1);
+  _addr_CarrDir 	    = EEPROM.getAddress(1);
+  _addr_CoilDir 	    = EEPROM.getAddress(1);
   // If is the first use or if data are corrupted do reset.
   if( !isSet() ) reset();
 
@@ -121,6 +127,8 @@ void Memory::save(char buffer[], const uint8_t id)
 	EEPROM.updateInt(_addr_CarrStepPerPass, CarrStepPerPass);
 	EEPROM.updateInt(_addr_CoilTr, CoilTr);
 	EEPROM.updateInt(_addr_CoilStepPerTr, CoilStepPerTr);
+	EEPROM.updateInt(_addr_CarrDir, CarrDir);
+	EEPROM.updateInt(_addr_CoilDir, CoilDir);
 	break;
       }
     case id_W_SENSE :
@@ -181,6 +189,8 @@ void Memory::read(char buffer[], const uint8_t id)
 	CarrStepPerPass = EEPROM.readInt(_addr_CarrStepPerPass);
 	CoilTr          = EEPROM.readInt(_addr_CoilTr);
 	CoilStepPerTr   = EEPROM.readInt(_addr_CoilStepPerTr);
+	CarrDir         = EEPROM.readBit(_addr_CarrDir, 1);
+	CoilDir         = EEPROM.readBit(_addr_CoilDir, 1);
 	break;
       }
     case id_W_SENSE :
@@ -235,15 +245,18 @@ void Memory::reset()
   EEPROM.writeBlock<char>(_addr_AccDelay, INIT_ACC_DELAY, BUFFSIZE_ACC_DELAY);
   EEPROM.writeBlock<char>(_addr_AccIncr, INIT_ACC_INCR, BUFFSIZE_ACC_INCR);
 
+  EEPROM.writeBit(_addr_WinSense, 1, WinSense);
+  EEPROM.writeBit(_addr_CarSense, 1, CarSense);
+
   EEPROM.writeBlock<char>(_addr_DefaultSettings, MSG_IS_SET, BUFFSIZE_DEFAULT);
 
   EEPROM.writeInt(_addr_CarrPass, 0);
   EEPROM.writeInt(_addr_CarrStepPerPass, 0);
+  EEPROM.writeBit(_addr_CarrDir, 1, CarrDir);
+
   EEPROM.writeInt(_addr_CoilTr, 0);
   EEPROM.writeInt(_addr_CoilStepPerTr, 0);
-
-  EEPROM.writeBit(_addr_WinSense, 1, WinSense);
-  EEPROM.writeBit(_addr_CarSense, 1, CarSense);
+  EEPROM.writeBit(_addr_CoilDir, 1, CoilDir);
 }
 
 bool Memory::isSet()

@@ -696,7 +696,7 @@ void Setting::set_AB_Save()
     }
   else if(_idValue == id_RESUME)
     {
-      _Coil->getState(&CarrPass, &CarrStepPerPass, &CoilTr, &CoilStepPerTr);
+      _Coil->getState(&CarrPass, &CarrStepPerPass, &CarrDir, &CoilTr, &CoilStepPerTr, &CoilDir);
 
       setActionBar(0, 0, ACTIONBAR_CHOICE, SIZE_AB_CHOICE, LCD_LINES);
       _Display->engineSaveCurrent(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
@@ -830,13 +830,12 @@ void Setting::setWinding(bool isFirstLunch)
 
   _Coil->setWinding(CoilLength, WireSize, Turns, WinSense, CarSense);
 
-
   // Resume a saved session
   if(_idValue == id_RESUME_SAVE)
     {
       read(0, id_RESUME_SAVE); // Read the value of all steps in eeprom
 
-      _Coil->setSteps(CarrPass, CarrStepPerPass, CoilTr, CoilStepPerTr);
+      _Coil->setSteps(CarrPass, CarrStepPerPass, CarrDir,CoilTr, CoilStepPerTr, CoilDir);
 
       _idValue = id_RESUME;
     }

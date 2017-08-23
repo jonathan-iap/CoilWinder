@@ -293,19 +293,16 @@ void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t c
 
   carriage.tic = 0;
   coil.tic = 0;
-
-//  Serial.println(" ");
-//  Serial.println("state : ");
-//  Serial.print("CarrPass : "), Serial.println(carriage.tr);
-//  Serial.print("CarrStepPerPass : "), Serial.println(carriage.steps);
-//  Serial.print("CoilTr : "), Serial.println(coil.tr);
-//  Serial.print("CoilStepPerTr : "), Serial.println(coil.steps);
 }
 
-void M_getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, uint16_t *p_coilTr, uint16_t *p_coilSteps)
+void M_getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
+		uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir)
 {
   *p_carrPass  = carriage.tr;
   *p_carrSteps = carriage.steps;
+  *p_carrDir   = READ(PIN_CARR_DIR);
+
   *p_coilTr    = coil.tr;
   *p_coilSteps = coil.steps;
+  *p_coilDir   = READ(PIN_COIL_DIR);
 }

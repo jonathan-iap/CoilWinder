@@ -60,7 +60,7 @@ public :
   Memory();
   ~Memory();
 
-void init();
+  void init();
   void save(char buffer[], const uint8_t id);
   void read(char buffer[], const uint8_t id);
   //void getSavedTotalSteps(uint32_t *totalSteps);
@@ -90,8 +90,10 @@ protected :
 
   uint16_t CarrPass;
   uint16_t CarrStepPerPass;
+  bool CarrDir;
   uint16_t CoilTr;
   uint16_t CoilStepPerTr;
+  bool CoilDir;
 
   char _buff_WireSize[BUFFSIZE_WIRE+1];
   char _buff_CoilLength[BUFFSIZE_COIL+1];
@@ -114,8 +116,10 @@ private :
   uint8_t _addr_DefaultSettings;
   uint8_t _addr_CarrPass;
   uint8_t _addr_CarrStepPerPass;
+  uint8_t _addr_CarrDir;
   uint8_t _addr_CoilTr;
   uint8_t _addr_CoilStepPerTr;
+  uint8_t _addr_CoilDir;
 };
 
 #endif /* SRC_SAVE_H_ */
