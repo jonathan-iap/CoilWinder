@@ -120,6 +120,9 @@ bool Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset)
  * brief   : Winding computing
  * details : Compute how many steps by turn we need to make one layer
  * Values are directly returns by pointers
+ * If wire size if greater than lead screw pitch, we need to change how to
+ * count steps in engine "M_engine()".
+ * Because the carriage will reach the maximum speed before the coil.
  ******************************************************************************/
 bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr )
 {
@@ -132,7 +135,7 @@ bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOne
   tmp_step = (wireSize * (float)STEPS_PER_TR) / (float)LEAD_SCREW_PITCH;
   *stepsPerTr = (uint16_t)tmp_step;
 
-  if(tmp_nbTrForOneLayer < STEPS_PER_TR) return true;
+  if(wireSize < LEAD_SCREW_PITCH) return true;
   else return false;
 }
 

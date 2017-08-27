@@ -56,6 +56,84 @@ void M_stop()
   WRITE(PIN_CARR_EN, DISABLE);
 }
 
+
+/******************************************************************************
+ * brief   : Engine for motor
+ * details : Divide the timer tic to create accurate displacement.
+ *
+ * Fix timer callback each 10us :           Tic++...
+ *   _    _    _    _    _    _    _    _   v_    _    _    _    _    _    _    _
+ * _| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |__| |
+ *
+ * Step for one motor constant speed, exemple : one step at each 4 tics
+ *   _              _              _              _              _              _
+ * _| |____________| |____________| |____________| |____________| |____________| |
+ *
+ * For acceleration step per tic is decrease depending a constant delay:
+ *   _                   _              _         _         _         _         _
+ * _| |______5Tic_______| |____4Tic____| |__3Tic_| |__3Tic_| |_3Tic__| |_3Tic__| |
+ *
+ *<------delay---------><------delay---------><------delay---------><------delay--------->
+ *
+ * Attention timer have a response curve like that :
+ *
+ * | timer frequency
+ * |
+ * |
+ * |
+ * |
+ * | *
+ * |
+ * |
+ * |
+ * |
+ * |
+ * | *
+ * |
+ * |
+ * |
+ * |
+ * |   *
+ * |
+ * |      *
+ * |
+ * |           *
+ * |
+ * |                   *
+ * |                                     *
+ * |                                                                *
+ * |------------------------------------------------------------------------------------>
+ * Low value timer						high value timer
+ *  1                                                               65535
+ *
+ * This give an acceleration like this if the value is to low
+ *
+ * speed
+ *   |           |________
+ *   |          ||
+ *   |       ___||
+ *   |    __|    |
+ *   |   |       |
+ *   |  /        |
+ * __|/__________|_________
+ *               |     time
+ *            end acc
+ *
+ * A smooth acceleration look like this :
+ *
+ * speed
+ *   |           |__________
+ *   |          /|
+ *   |        /  |
+ *   |      /    |
+ *   |    /      |
+ *   |  /        |
+ *___|/__________|__________
+ *               |      time
+ *            end acc
+ *
+ *
+ ******************************************************************************/
 void M_engine()
 {
   coil.tic++;
@@ -63,7 +141,7 @@ void M_engine()
 
   switch (engineAction)
   {
-    case WINDING :
+    case WINDING : //__________________________________________________________
       {
 	switch(isCoilFastest)
 	{
@@ -111,12 +189,49 @@ void M_engine()
 	    }
 	  case false :
 	    {
+	      if(coil.tr != targetTr)
+		{
+		  if(carriage.tic >= speedSet)
+		    {
+		      carriage.tic=0;
+		      oneStep(DISABLE , ENABLE);
+
+		      if(carriage.steps != stepsPerPass)
+			{
+			  carriage.steps++;
+
+			  if(coil.steps != stepsPerTr)
+			    {
+			      coil.steps++;
+			      oneStep(ENABLE, DISABLE);
+			    }
+			}
+		      else
+			{
+			  carriage.steps = 0;
+			  carriage.tr++;
+			  coil.steps = 0;
+			  coil.tr++;
+
+			  if(carriage.tr == targetPass)
+			    {
+			      carriage.tr = 0;
+			      M_invertSense();
+			    }
+			}
+		    }
+		}
+	      else
+		{
+		  M_stop();
+		  isFinished = true;
+		}
 	      break;
 	    }
 	}
 	break;
       }
-    case TRAVELING :
+    case TRAVELING : //________________________________________________________
       {
 	if(carriage.tr != targetPass && stepsPerPass > 0)
 	  {
@@ -145,7 +260,7 @@ void M_engine()
 	  }
 	break;
       }
-    case ROTATION :
+    case ROTATION : //_________________________________________________________
       {
 	if(coil.tr != targetPass)
 	  {
@@ -272,6 +387,15 @@ void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
   targetTr      = tr;
   stepsPerTr    = stepsTr;
   isCoilFastest = fastest;
+
+  Serial.println(" ");
+  Serial.println("****** SetWinding ******");
+  Serial.print("targetPass : "), Serial.println(targetPass);
+  Serial.print("stepsPerPass : "), Serial.println(stepsPerPass);
+  Serial.print("targetTr : "), Serial.println(targetTr);
+  Serial.print("stepsPerTr : "), Serial.println(stepsPerTr);
+  Serial.print("isCoilFastest : "), Serial.println(isCoilFastest);
+  Serial.println("*****************");
 }
 
 void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t coilTr, uint16_t coilSteps)
