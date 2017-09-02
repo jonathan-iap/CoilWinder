@@ -315,10 +315,16 @@ uint16_t M_getCoilTr()
   return  coil.tr;
 }
 
+
+
+
 bool M_getWindingStatus()
 {
   return isFinished;
 }
+
+
+
 
 float M_getDisplacement()
 {
@@ -327,6 +333,18 @@ float M_getDisplacement()
 
   return displacement;
 }
+
+
+
+
+float M_getDisplacement(uint16_t carrstartSense)
+{
+  float displacement = (((((float)stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
+      / (float)STEPS_PER_TR) * (float)LEAD_SCREW_PITCH);
+
+  return displacement;
+}
+
 
 
 
@@ -387,15 +405,6 @@ void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
   targetTr      = tr;
   stepsPerTr    = stepsTr;
   isCoilFastest = fastest;
-
-  Serial.println(" ");
-  Serial.println("****** SetWinding ******");
-  Serial.print("targetPass : "), Serial.println(targetPass);
-  Serial.print("stepsPerPass : "), Serial.println(stepsPerPass);
-  Serial.print("targetTr : "), Serial.println(targetTr);
-  Serial.print("stepsPerTr : "), Serial.println(stepsPerTr);
-  Serial.print("isCoilFastest : "), Serial.println(isCoilFastest);
-  Serial.println("*****************");
 }
 
 void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t coilTr, uint16_t coilSteps)

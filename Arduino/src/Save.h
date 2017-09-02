@@ -103,7 +103,6 @@ protected :
   char _buff_AccDelay[BUFFSIZE_ACC_DELAY+1];
   char _buff_AccIncr[BUFFSIZE_ACC_INCR+1];
 
-private :
   uint8_t _addr_WireSize;
   uint8_t _addr_CoilLength;
   uint8_t _addr_Turns;

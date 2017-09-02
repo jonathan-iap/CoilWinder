@@ -214,11 +214,10 @@ float Coil::getRelativeHome(float homePosition, bool dir)
 {
   float tmp_value = M_getDisplacement();
 
-  if(!dir) tmp_value*=-1;
+  if(!dir){ tmp_value *= -1; }
 
   return tmp_value += homePosition;
 }
-
 
 
 
@@ -296,7 +295,13 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
 
 
 
-
+/******************************************************************************
+ * brief   : Travel only carriage
+ * details : Manage the travel to move only the carriage.
+ * Distance must be only positive !
+ * Function return relative position from home by setting the
+ * pointer "homingPosition".
+ ******************************************************************************/
 void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
 {
   bool run = true;
@@ -310,6 +315,15 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
 
   // Acceleration need to have current speed set to minimum.
   _speed = _minSpeed;
+
+  // For homing if displacement is negative we need to pass it in positive.
+  if(distance<0 ){ distance *=-1; }
+
+  Serial.print(" ");
+  Serial.println("********************");
+  Serial.print("dir : "), Serial.println(dir);
+  Serial.print("distance : "), Serial.println(distance);
+  Serial.print("relative position 1 : "), Serial.println(*homingPosition);
 
   computeTravel(distance, &nbPass, &steps);
   M_setSimpleDisplacement(TRAVELING, nbPass, steps);
@@ -337,6 +351,8 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
     }
 
   *homingPosition = getRelativeHome(*homingPosition, dir);
+
+  Serial.print("relative position 2 : "), Serial.println(*homingPosition);
 }
 
 

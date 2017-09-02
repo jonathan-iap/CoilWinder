@@ -127,8 +127,8 @@ void Memory::save(char buffer[], const uint8_t id)
 	EEPROM.updateInt(_addr_CarrStepPerPass, CarrStepPerPass);
 	EEPROM.updateInt(_addr_CoilTr, CoilTr);
 	EEPROM.updateInt(_addr_CoilStepPerTr, CoilStepPerTr);
-	EEPROM.updateInt(_addr_CarrDir, CarrDir);
-	EEPROM.updateInt(_addr_CoilDir, CoilDir);
+	EEPROM.updateBit(_addr_CarrDir, 1, CarrDir);
+	EEPROM.updateBit(_addr_CoilDir, 1, CoilDir);
 	break;
       }
     case id_W_SENSE :

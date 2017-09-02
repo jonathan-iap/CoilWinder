@@ -341,9 +341,8 @@ void Setting::displaying()
     case id_RESUME      : {_Display->engineResumeWinding(Turns, _Coil->getCurrentTurns()); break;}
     case id_RESUME_SAVE :
       {
-	//	uint32_t tmp_totalSteps = 0;
-	//	getSavedTotalSteps(&tmp_totalSteps); // Read the value of all steps in eeprom
-	//	_Display->engineResumeWinding(Turns, (tmp_totalSteps/STEPS_PER_TR)); break;
+	_Display->engineResumeWinding(Turns, EEPROM.readInt(_addr_CoilTr));
+	break;
       }
   }
 }
@@ -615,6 +614,8 @@ bool Setting::selectedAction(uint8_t wordSize)
     }
   return 0;
 }
+
+
 
 
 /*CallBacks __________________________________________________________________*/
