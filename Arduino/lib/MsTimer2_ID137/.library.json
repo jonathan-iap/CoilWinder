@@ -1,0 +1,35 @@
+{
+    "name": "MsTimer2", 
+    "repository": {
+        "url": "https://github.com/PaulStoffregen/MsTimer2.git", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "atmelavr", 
+        "teensy"
+    ], 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "1.1", 
+    "authors": [
+        {
+            "maintainer": false, 
+            "name": "Javier Valencia", 
+            "url": "http://www.pjrc.com/teensy/td_libs_MsTimer2.html", 
+            "email": "javiervalencia80@gmail.com"
+        }, 
+        {
+            "maintainer": true, 
+            "name": "Paul Stoffregen", 
+            "url": "https://www.pjrc.com/about/", 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "callback", 
+        "timer"
+    ], 
+    "id": 137, 
+    "description": "MsTimer2 is a small and very easy to use library to interface Timer2 with humans. It's called MsTimer2 because it \"hardcodes\" a resolution of 1 millisecond on timer2."
+}

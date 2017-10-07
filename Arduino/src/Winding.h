@@ -5,46 +5,75 @@
 #include "Motor.h"
 #include "Configuration.h"
 #include "Function.h"
+#include "Display.h"
+#include "ClickEncoder.h"
+
+#define ACCELERATION 	true
+#define DECELERATION 	false
+#define UPDATE		true
+#define MAX_INTEGER 	65535
 
 class Coil
 {
 public:
 
-  Coil();
+  Coil(ClickEncoder *p_Encoder, Display *p_Display);
   ~Coil();
 
-  void begin();
-  void setWinding(float coilLength, float wireSize, unsigned long coilTurns);
-  void setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed);
-  float getValue();
+  bool computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr );
+  void setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool windSense, bool startSense);
+  void setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent);
+  void setSteps(uint16_t carrPass, uint16_t carrStepPerPass, bool carrDir,
+		uint16_t coilTr, uint16_t coilStepPerTr, bool coilDir);
+  bool updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset);
 
-  void run();
-  void oneLayer(float _coilLength, int _dir);
-  void move(bool carriage, bool coil);
+  bool winding(bool isNewCoil, float *homingPosition);
+  void runOnlyCarriage(bool dir, float distance, float *homingPosition);
+  void runOnlyCoil(bool dir, uint16_t turns);
+
+  bool suspend();
+
+  uint16_t getCurrentTurns();
+  void getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
+		uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir);
 
 private:
 
-  Motor motorWinding, motorCarriage;
+  void computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr);
+  void acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime);
+  void refreshDisplay(bool *run, uint32_t *oldTime);
+  float getRelativeHome(float homePosition, bool dir);
+
+private:
+
+  ClickEncoder *_Encoder;
+  Display *_Display;
+
+  //  Motor stepper;
 
   // Coil length in mm.
   float _coilLength;
-  // wire size in mm.
+  // Wire size in mm.
   float _wireSize;
-  //coil turn in turn.
-  unsigned long _coilTurns;
-
-  unsigned long _accDelay = 2000;
-  unsigned long _maxSpeed = 600;
-  unsigned long _minSpeed = 1800;
-
-  // reduction ratio for motor.
-  float _ratio;
-  // steps for one layer.
-  unsigned long _stepsPerLayer;
-  unsigned long _stepsTravel;
-
-  // counter.
-  unsigned long _totalStepsCounter;
+  // Coil turn in turn.
+  uint16_t _coilTurns;
+  // Winding sense.
+  bool _windingSense;
+  bool _carriageStartSense;
+  // Speed.
+  uint16_t _accIncr;
+  uint16_t _accDelay;
+  uint16_t _maxSpeed;
+  uint16_t _minSpeed;
+  uint16_t _speed;
+  int8_t _speedPercent;
+  // Steps
+  uint16_t _saveCarrPass;
+  uint16_t _saveCarrStepPerPass;
+  bool _saveCarrDir;
+  uint16_t _saveCoilTr;
+  uint16_t _saveCoilStepPerTr;
+  bool _saveCoilDir;
 };
 
 #endif

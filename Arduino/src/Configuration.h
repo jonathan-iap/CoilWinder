@@ -15,52 +15,65 @@
 // Rotary encoder properties --------------------------------------------------
 #define ENC_PIN_A	3 // The order declaration(pin A, B) determine the direction.
 #define ENC_PIN_B	2 //
-#define ENC_PIN_SW	4 // Click switch
-#define ENC_STEP	2 // How many you increase value when you make one step
+#define ENC_PIN_BTN	4 // Click switch
+#define ENC_STEP	2 // How many you increase value, when you make one step
 
 // Motors settings ------------------------------------------------------------
 #define CLOCK		HIGH
 #define C_CLOCK		LOW
 #define ENABLE		LOW
 #define DISABLE		HIGH
-enum
-{
-  FULL_STEPS		= 1,
-  HALF_STEPS		= 2,
-  QUARTER_STEPS		= 4,
-  EIGHTH_STEPS		= 8,
-  SIXTEENTH_STEPS	= 16
-};
+
+// Steps
+//-------------------------
+#define MOTOR_STEPS 200
+// If you change micros steps you need to change MaxSpeed !
+#define FULL_STEPS	1
+#define HALF_STEPS	2
+#define QUARTER_STEPS	4
+#define EIGHTH_STEPS	8
+#define SIXTEENTH_STEPS 16
+// Setting for micros stepping (make FULL_STEP if you don't use micros stepping)
+#define STEPS_PER_TR (MOTOR_STEPS * SIXTEENTH_STEPS)
+//-------------------------
 
 // Motor for winding
-#define M1_DIR	10
-#define M1_STEP	9
-#define M1_EN	8
-#define M1_initialStepPerTr 200
-#define M1_STEPS_PER_TR (M1_initialStepPerTr * EIGHTH_STEPS)
+#define PIN_COIL_DIR	10
+#define PIN_COIL_STEP	9
+#define PIN_COIL_EN	8
 
 // Mode for carriage
-#define M2_DIR	7
-#define M2_STEP	6
-#define M2_EN	5
-#define M2_initialStepPerTr 200
-#define M2_STEPS_PER_TR (M2_initialStepPerTr * EIGHTH_STEPS)
-
-#define ACC	1	// Acceleration step increment.
-//#define DELAY_DRIVER  	20 // Activated if is needed by your stepper driver.
+#define PIN_CARR_DIR	7
+#define PIN_CARR_STEP	6
+#define PIN_CARR_EN	5
 
 
 // Machine settings ------------------------------------------------------------
-// M5 = 0.8 mm
-#define LEAD_SCREW_PITCH 0.8
+
+// Pitch in mm
+//--------------
+#define  M3 0.5
+#define  M4 0.7
+#define  M5 0.8
+#define  M6 1
+//--------------
+
+#define LEAD_SCREW_PITCH M5 // replace by your own setup.
 
 // Reset value -----------------------------------------------------------------
-#define INIT_WIRE	"0.00"
-#define INIT_COIL	"000.00"
-#define INIT_TURNS	"00000"
-#define INIT_MAXSPEED	"0600"
-#define INIT_MINSPEED	"1800"
-#define INIT_ACC_DELAY	"2000"
+#define INIT_WIRE	"0.00" 		// in mm
+#define INIT_COIL	"000.00"	// in mm
+#define INIT_TURNS	"00000"		// in Tr
+#define INIT_MAXSPEED	"0200"  // in RPM (tr/min)
+#define INIT_MINSPEED	"0001"  // in RPM (tr/min)
+#define INIT_ACC_DELAY	"0400"
+#define INIT_ACC_INCR	"0020"
+#define INIT_W_SENSE	C_CLOCK
+#define INIT_C_SENSE	CLOCK
+
+// Displacement value ---------------------------------------------------------------
+#define INIT_MOV_CAR	"00.00"
+#define INIT_MOV_COIL	"0000"
 
 // Serial Debug option ---------------------------------------------------------
 #define DEBUG // Uncomment to active serial debug.

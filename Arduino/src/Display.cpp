@@ -12,19 +12,23 @@ LiquidCrystal_I2C _lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 Display::Display(){}
 Display::~Display(){}
 
+// Initialize special characters and do a little start blink animation
 const void Display::begin()
 {
   _lcd.begin(LCD_CHARS,LCD_LINES);
 
-  _lcd.createChar(IconLeft, left);
-  _lcd.createChar(IconRight, right);
-  _lcd.createChar(IconBack, back);
-  _lcd.createChar(IconEnter, enter);
-  _lcd.createChar(IconValid, valid);
-  _lcd.createChar(IconBlock, block);
+  Wire.setClock(400000); // change i2c speed to 400Khz
+
+  _lcd.createChar(ICONBLOCK[0], block);
+  _lcd.createChar(ICONLEFT[0], left);
+  _lcd.createChar(ICONRIGHT[0], right);
+  _lcd.createChar(ICONSTOP[0], stop);
+  _lcd.createChar(ICONRESUME[0], resume);
+  _lcd.createChar(ICONBACK[0], back);
+
 
   // Quick 3 blinks of back-light
-  for(uint8_t i = 0; i < 3; i++)
+  for(uint8_t i=3; i>0; i--)
     {
       _lcd.backlight();
       delay(100);
@@ -34,6 +38,7 @@ const void Display::begin()
   _lcd.backlight();
 }
 
+// Current version
 const void Display::version()
 {
   _lcd.setCursor(0, 0);
@@ -47,44 +52,62 @@ const void Display::clear()
   _lcd.clear();
 }
 
+// Print variable size blank
 const void Display::blank(uint8_t size)
 {
-  for(int i=0; i<size; i++) _lcd.print(" ");
+  for(int i=size; i>0; i--) _lcd.print(" ");
 }
 
-// blink value on current cursor
-const void Display::blinkValue(uint8_t _index, const char value[], int _arraySize, bool _blank, uint8_t offset)
+
+/******************************************************************************
+ * brief   : Reprint char if cursor move.
+ * details : If cursor is moving on new position we need to print the
+ * character of the old index and a block on new character.
+ ******************************************************************************/
+const void Display::blinkSelection(uint8_t index, char actionBar[], uint8_t sizeAB,
+				   uint8_t positionAB, uint8_t wordSize, bool editMode)
 {
   static bool basculeSet = true;
 
-  if(basculeSet)
+  if(basculeSet) // Block ON
     {
-      if(_index > _arraySize)
+      if(editMode) // refresh only number
 	{
-	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.write((byte)IconValid);
+	  _lcd.setCursor(index, positionAB);
+	  _lcd.print(actionBar[index]);
 	}
-      else
+      else // refresh action bar
 	{
-	  _lcd.setCursor((_index+offset), LCD_LINES);
-	  _lcd.print(value[_index]);
+	  _lcd.setCursor(sizeAB, positionAB);
+	  for(uint8_t i=sizeAB; i<LCD_CHARS; i++){_lcd.write(actionBar[i]);}
 	}
       basculeSet = false;
     }
-  else{
-      _lcd.setCursor((_index+offset), LCD_LINES);
-      _blank ? _lcd.print(" ") : _lcd.write((byte)IconBlock);
+  else // Block OFF
+    {
+      if(wordSize > 1) // Word
+	{
+	  _lcd.setCursor(index, positionAB);
+	  blank(wordSize);
+	}
+      else // Number or single character
+	{
+	  _lcd.setCursor(index, positionAB);
+	  editMode ? _lcd.write(' ') : _lcd.write(ICONBLOCK);
+	}
       basculeSet = true;
-  }
+    }
 }
 
+
+// Print an animation load bar
 const void Display::loadBar()
 {
   _lcd.setCursor(0, LCD_LINES);
 
-  for(uint8_t i = 0; i<LCD_CHARS; i++)
+  for(uint8_t i=LCD_CHARS; i>0; i--)
     {
-      _lcd.write((byte)IconBlock);
+      _lcd.write(ICONBLOCK);
       delay(10);
     }
 }
@@ -94,7 +117,7 @@ const void Display::loadBar()
 const void Display::renderIconOn(uint8_t pos, bool currentItem)
 {
   _lcd.setCursor(0, pos);
-  currentItem ? _lcd.write((uint8_t)IconEnter) : _lcd.write(20);
+  currentItem ? _lcd.write(ICONRIGHT) : _lcd.write(20);
 }
 
 const void Display::renderItem(const char item[])
@@ -105,69 +128,227 @@ const void Display::renderItem(const char item[])
 const void Display::renderIconChild()
 {
   _lcd.write(20);
-  _lcd.write((uint8_t)IconRight);
-  blank(7);
+  _lcd.write(ICONRIGHT);
+  blank(LCD_CHARS);
 }
 
 // Engine menu setting ----------------------------------------------------------
-const void Display::enginePrintHome(char label[], char arrayValue[])
-{
-  _lcd.clear();
-  _lcd.setCursor(0, 0);
-  _lcd.print(label);
-  _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(arrayValue);
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID),LCD_LINES);
-  _lcd.print(MSG_VALID);
-  _lcd.write((byte)IconValid);
-}
-
-const void Display::enginePrintFillChar(int8_t last, int8_t index, uint8_t buffSize,
-				  const char arrayValue[], uint8_t offset)
+const void Display::engineFillChar(int8_t last, int8_t index, uint8_t buffSize,
+				   const char arrayValue[], uint8_t offset)
 {
   if(index>last || index<last ) // Forward , backward
     {
       _lcd.setCursor((last + offset), LCD_LINES);
+
       (index<last && index == buffSize-2) ?
-	  _lcd.write((byte)IconValid) : _lcd.print(arrayValue[last]);
+	  _lcd.write(ICONRIGHT) : _lcd.print(arrayValue[last]);
     }
 }
 
-const void Display::enginePrintEditMode(bool setMode)
+
+/******************************************************************************
+ * brief   : Print "edit" message.
+ * details : When you click on number we switch on edit mode.
+ ******************************************************************************/
+const void Display::engineEditMode( uint8_t positionAB)
 {
-  _lcd.setCursor(LCD_CHARS-(SIZE_MSG_VALID), LCD_LINES);
-  if(setMode)
-    {
-      for(uint8_t i = 0; i<SIZE_MSG_VALID; i++)
-	{
-	  _lcd.print(' ');
-	}
-      _lcd.setCursor(LCD_CHARS-3, LCD_LINES);
-      _lcd.print("set");
-    }
-  else
-    {
-      _lcd.print(MSG_VALID);
-      _lcd.write((byte)IconValid);
-    }
+  _lcd.setCursor(MAX_SIZE_VALUE, positionAB);
+
+  for(uint8_t i=0; i<LCD_CHARS; i++) _lcd.write(' ');
+
+  _lcd.setCursor((LCD_CHARS-SIZE_MSG_EDIT+1), positionAB);
+  _lcd.print(MSG_EDIT);
 }
 
-const void Display::enginePrintSave(double value)
+
+/******************************************************************************
+ * brief   : Displays the backup message
+ * details : When you click on "save"
+ ******************************************************************************/
+const void Display::engineSave(float value, char unit[], char actionBar[], uint8_t positionAB)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
-  _lcd.print("Save in eeprom ?");
+  _lcd.print(MSG_SAVE); _lcd.print(value); _lcd.print(unit);
+
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+}
+
+
+const void Display::engineSave(uint16_t value, char unit[], char actionBar[], uint8_t positionAB)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SAVE); _lcd.print(value); _lcd.print(unit);
+
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+}
+
+
+const void Display::engineSave(bool dir, char actionBar[], uint8_t positionAB)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_SAVE);
+  dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
+
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+}
+
+
+const void Display::engineWindingValue(float coilLength, float wireSize, uint16_t coilTurns, uint16_t currentTurns)
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print("L:"), _lcd.print(coilLength);
+  _lcd.setCursor(LCD_CHARS-6,0);
+  _lcd.print("W:"), _lcd.print(wireSize);
   _lcd.setCursor(0,LCD_LINES);
-  _lcd.print(value);
-  _lcd.setCursor((LCD_CHARS-SIZE_MSG_CHOICE+1), LCD_LINES);
-  _lcd.print(MSG_CHOICE);
+  _lcd.print("Tr:"), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(currentTurns),  _lcd.print(" ");
 }
 
-const void Display::enginePrintResetConfirm(bool razValues)
+
+const void Display::engineWindingRefresh(float coilLength, float wireSize)
+{
+  _lcd.setCursor(0,0);
+  blank(SIZE_MSG_CURRENT_SPEED + 4);
+  _lcd.setCursor(0,0);
+  _lcd.print("L:"), _lcd.print(coilLength);
+  _lcd.setCursor(LCD_CHARS-6,0);
+  _lcd.print("W:"), _lcd.print(wireSize);
+}
+
+
+const void Display::engineAjustSpeed(bool refresh, bool initMSG, int8_t percent)
+{
+  if(!refresh)
+    {
+      _lcd.clear();
+      _lcd.setCursor(0,0);
+      if(initMSG) _lcd.print("Start speed :");
+      else _lcd.print("Current speed :");
+    }
+
+  _lcd.setCursor(0,LCD_LINES);
+  _lcd.print(percent); _lcd.print("%"); _lcd.print("  ");
+}
+
+
+/******************************************************************************
+ * brief   : Print all informations to set current value.
+ * Exemple :
+ * ------------------  ------------------
+ * |WireSize in mm  |  |label           |
+ * |0.00      Save/>|  |     actionBar  | <- position is position of action bar.
+ * ------------------  ------------------
+ ******************************************************************************/
+const void Display::engineSetValue(char label[], char actionBar[], uint8_t positionAB)
+{
+  _lcd.clear();
+  _lcd.setCursor(0, 0);
+  _lcd.print(label);
+  _lcd.setCursor(0, positionAB);
+  _lcd.print(actionBar);
+}
+
+const void Display::engineSense(bool dir)
+{
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_SENSE);
+
+  dir ? _lcd.print(MSG_CLOCK) : _lcd.print(MSG_C_CLOCK);
+}
+
+const void Display::engineGoHome(float homePosition)
+{
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_GO_HOME); _lcd.print(homePosition * -1); // need to re-invert value
+}
+
+const void Display::engineNewWinding(uint16_t coilTurns)
+{
+  _lcd.setCursor(0, LCD_LINES);
+  _lcd.print(coilTurns);  _lcd.print(UNIT_TR);
+}
+
+const void Display::engineResumeWinding(uint16_t coilTurns, uint16_t counter)
+{
+  _lcd.setCursor(0, LCD_LINES);
+  _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+}
+
+const void Display::engineAjustSpeed(bool refresh, int8_t percent)
+{
+  if(!refresh)
+    {
+      _lcd.clear();
+      _lcd.setCursor(0,0);
+      _lcd.print(MSG_SPEED);
+    }
+
+  _lcd.setCursor(0,LCD_LINES);
+  _lcd.print(percent); _lcd.print("%"); _lcd.print("  ");
+}
+
+
+const void Display::engineSuspend(char actionBar[], uint8_t positionAB, uint16_t coilTurns, uint16_t counter)
+{
+  _lcd.clear();
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_TR), _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(MSG_PAUSE);
+}
+
+
+const void Display::engineSaveCurrent(char actionBar[], uint8_t positionAB, uint16_t coilTurns, uint16_t counter)
 {
   _lcd.clear();
   _lcd.setCursor(0,0);
-  razValues ? _lcd.print(MSG_RAZ) : _lcd.print(MSG_RESET);
+  _lcd.print(MSG_SAVE_CURRENT);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(actionBar);
+  _lcd.setCursor(0,positionAB);
+  _lcd.print(coilTurns),_lcd.print("/"),_lcd.print(counter), _lcd.print(UNIT_TR);
+}
+
+const void Display::engineValueLimit()
+{
+  _lcd.clear();
+  _lcd.setCursor(0,0);
+  _lcd.print(MSG_VALUE_TO_HIGH);
+}
+
+const void Display::windingGetTurns(uint16_t target, uint16_t counter)
+{
   _lcd.setCursor(0, LCD_LINES);
-  _lcd.print(MSG_CHOICE);
+  _lcd.print(MSG_TR), _lcd.print(target),_lcd.print("/");
+  _lcd.print(counter), _lcd.print(" ");
+}
+
+
+const void Display::windingGetSpeedPercent(uint16_t percent)
+{
+  _lcd.setCursor(0, 0);
+  _lcd.print(MSG_CURRENT_SPEED), _lcd.print(percent), _lcd.print("%");
+  blank(SIZE_BLANK_SPEED);
+}
+
+
+const void Display::windingGetDisplacement(float target, float counter)
+{
+  _lcd.setCursor(0, LCD_LINES);
+  _lcd.print(target), _lcd.print("/");
+  _lcd.print(counter), _lcd.print(UNIT_MM), _lcd.print(" ");
+}
+
+const void Display::print(uint8_t x, uint8_t y, uint32_t value)
+{
+  _lcd.setCursor(x,y);
+  _lcd.print(value);
 }

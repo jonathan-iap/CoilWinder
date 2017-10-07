@@ -8,266 +8,419 @@
  * _coilTurns, number of turns that must be winding.
  * return  : Return steps.
  ******************************************************************************/
-#define totalSteps(coilTurns) coilTurns * M1_STEPS_PER_TR
-
-/******************************************************************************
- * brief   : Convert reduction ratio into delay.
- * details : If the ration is inferior to 1 we need to convert delay
- * to keep the good reduction ratio between motors in acceleration() function.
- * ratio, value of reduction "_ratio".
- * delayMotor, delay on the motor who is the reference.
- * return  : delay value.
- ******************************************************************************/
-static unsigned long ratioToDelay(float ratio, unsigned long delayMotor)
-{
-  unsigned long result;
-
-  ratio >= 1 ? result = ratio * delayMotor : result = delayMotor / ratio;
-
-  return result;
-  //  if (ratio >= 1){ return result = ratio * delayMotor; }
-  //  else{ return result = delayMotor / ratio; }
-}
-
-
-/******************************************************************************
- * brief   : Acceleration ramp.
- * details :  Modify motors delay to Make a smooth acceleration movement.
- * Or a deceleration.
- * acc, if true acceleration, else deceleration.
- * delayMotorA, delay that will be applied on winding motor.
- * limitSpeed, delay limit for motors speed.
- * ratio, reduction ratio between motors.
- * delayMotorB, delay that will be applied on carriage motor.
- ******************************************************************************/
-static void acceleration(bool acc, unsigned long *delayMotorA, unsigned long limitSpeed,
-			 float ratio, unsigned long *delayMotorB)
-{
-  // if ratio is >= 1
-  unsigned long *delayMotor_x = delayMotorA;
-  unsigned long *delayMotor_y = delayMotorB;
-  // else invert delay motor.
-  if(ratio < 1)
-    {
-      delayMotor_x = delayMotorB;
-      delayMotor_y = delayMotorA;
-    }
-
-  //Acceleration.
-  if(acc)
-    {
-      if(*delayMotor_x > limitSpeed)
-	{
-	  *delayMotor_x -= ACC;
-	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
-
-	}
-    }
-  // Deceleration.
-  else
-    {
-      if(*delayMotor_x < limitSpeed )
-	{
-	  *delayMotor_x += ACC;
-	  *delayMotor_y = ratioToDelay(ratio, (*delayMotor_x));
-	}
-    }
-}
-
-
+#define TurnToSteps(coilTurns) coilTurns * STEPS_PER_TR
+#define StepsToTurns(coilSteps) coilSteps / STEPS_PER_TR
 
 
 /*_____ CONSTRUCTOR _____ */
 
-Coil::Coil()
-: motorWinding (M1_DIR, M1_STEP, M1_EN, M1_STEPS_PER_TR),
-  motorCarriage (M2_DIR, M2_STEP, M2_EN, M2_STEPS_PER_TR),
-
-  _coilLength(0),
+Coil::Coil(ClickEncoder *p_Encoder, Display *p_Display)
+: _coilLength(0),
   _wireSize(0),
   _coilTurns(0),
 
-  _accDelay (400),
-  _maxSpeed (30),
-  _minSpeed (1400),
+  _windingSense(0),
+  _carriageStartSense(0),
 
-  _ratio(0),
-  _stepsPerLayer(0),
-  _stepsTravel(0),
+  _accIncr(0),
+  _accDelay(0),
+  _maxSpeed(0),
+  _minSpeed(0),
+  _speed(0),
+  _speedPercent(0),
 
-  _totalStepsCounter(0)
-{}
+  _saveCarrPass(0),
+  _saveCarrStepPerPass(0),
+  _saveCarrDir(0),
+  _saveCoilTr(0),
+  _saveCoilStepPerTr(0),
+  _saveCoilDir(0)
+{
+  _Encoder = p_Encoder;
+  _Display = p_Display;
+}
+
 
 Coil::~Coil(){}
 
 /*_____  PUBLIC FUNCTIONS _____*/
-
-void Coil::begin()
+void Coil::setWinding(float coilLength, float wireSize, uint16_t coilTurns, bool windSense, bool carSense)
 {
-  motorCarriage.begin();
-  motorWinding.begin();
+  _coilLength		= coilLength;
+  _wireSize   		= wireSize;
+  _coilTurns  		= coilTurns;
+  _windingSense		= windSense;
+  _carriageStartSense	= carSense;
+
+  //  Serial.println(" ");
+  //  Serial.println("****** SetWinding ******");
+  //  Serial.print("_coilLength : "), Serial.println(_coilLength);
+  //  Serial.print("_wireSize : "), Serial.println(_wireSize);
+  //  Serial.print("_coilTurns : "), Serial.println(_coilTurns);
 }
 
-void Coil::setWinding(float coilLength, float wireSize, unsigned long coilTurns)
+
+
+
+void Coil::setSpeed(uint16_t accIncr, uint16_t accDelay, uint16_t maxSpeed, uint16_t minSpeed, uint16_t speed, int8_t speedPercent)
 {
-  _coilLength = coilLength;
-  _wireSize   = wireSize;
-  _coilTurns = coilTurns;
-
-  /*____Calculation____*/
-  // Number of steps for carriage motor advance, when coil (winding motor) make one turn.
-  float pitchToSteps = (M2_STEPS_PER_TR * _wireSize) / LEAD_SCREW_PITCH;
-  // Reduction ratio due, between motors.
-  _ratio = M1_STEPS_PER_TR / pitchToSteps;
-  // Steps for winding one layer.
-  _stepsPerLayer = (M2_STEPS_PER_TR * _coilLength) / LEAD_SCREW_PITCH;
-
-  // Determine when you need to start deceleration.
-  // 1. Compute position at final speed, in step/us
-  float Vf = (1 / (float)_minSpeed);
-  // 2. Duration of acceleration, in micros seconds.
-  unsigned long T = (_minSpeed - _maxSpeed) * _accDelay;
-  // 3. Turns during acceleration.
-  float stepsAcc = (Vf / 2) * T;
-  // 4. Determine steps travel before start deceleration.
-  _stepsTravel = _stepsPerLayer - stepsAcc;
-
-#ifdef DEBUG
-  Serial.print("Total steps : ");
-  Serial.println(totalSteps(_coilTurns));
-  delay(1000);
-#endif
-}
-
-void Coil::setSpeed(unsigned long accDelay, unsigned long maxSpeed, unsigned long minSpeed)
-{
+  _accIncr  = accIncr;
   _accDelay = accDelay;
   _maxSpeed = maxSpeed;
   _minSpeed = minSpeed;
+  _speed    = speed;
+  _speedPercent = speedPercent;
 }
 
-float Coil::getValue()
+
+
+
+
+void Coil::setSteps(uint16_t carrPass, uint16_t carrStepPerPass, bool carrDir,
+		    uint16_t coilTr, uint16_t coilStepPerTr, bool coilDir)
 {
-  return _stepsPerLayer;
+  _saveCarrPass        = carrPass;
+  _saveCarrStepPerPass = carrStepPerPass;
+  _saveCarrDir         = carrDir;
+
+  _saveCoilTr          = coilTr;
+  _saveCoilStepPerTr   = coilStepPerTr;
+  _saveCoilDir         = coilDir;
 }
 
-void Coil::run()
+
+
+
+// Allow to update speed during winding or displacement
+bool Coil::updateSpeed(int8_t *oldPercent, uint16_t *speedSet, uint8_t offset)
 {
-  unsigned long delayMotor_A = _minSpeed;
-  unsigned long delayMotor_B = _minSpeed;
-  unsigned long previousMicrosMotor_A = 0;
-  unsigned long previousMicrosMotor_B = 0;
-  unsigned long previousMicrosAcc = 0;
+  _speedPercent += (_Encoder->getValue()*5);
 
-
-  bool direction = CLOCK;
-
-  unsigned long layerStepsCounter = 0;
-  _totalStepsCounter = 0;
-
-  while(_totalStepsCounter < totalSteps(_coilTurns))
+  if(*oldPercent != _speedPercent)
     {
-      unsigned long currentMicros = micros();
+      *oldPercent = _speedPercent;
 
-      if(timer(currentMicros, &previousMicrosAcc, _accDelay))
-	{
-	  if(layerStepsCounter < _stepsTravel)
-	    {
-	      acceleration(true, &delayMotor_A, _maxSpeed, _ratio, &delayMotor_B);
-	    }
-	  else
-	    {
-	      acceleration(false, &delayMotor_A, _minSpeed, _ratio, &delayMotor_B);
-	    }
-	}
-      if(timer(currentMicros, &previousMicrosMotor_A, delayMotor_A))
-	{
-	  motorWinding.oneStep(CLOCK);
-	  _totalStepsCounter++;
-	}
-      if(timer(currentMicros, &previousMicrosMotor_B, delayMotor_B))
-	{
-	  motorCarriage.oneStep(direction);
-	  layerStepsCounter++;
-	}
+      _speedPercent = constrain(_speedPercent, 1, 100);
 
-      if(layerStepsCounter > _stepsPerLayer)
+      _speed = map(_speedPercent, 0, 100, _minSpeed, _maxSpeed);
+
+      M_setSpeed(_speed);
+
+      _Display->windingGetSpeedPercent(_speedPercent);
+
+      *speedSet =  _speed;
+      return true;
+    }
+  else return false;
+}
+
+
+
+/******************************************************************************
+ * brief   : Winding computing
+ * details : Compute how many steps by turn we need to make one layer
+ * Values are directly returns by pointers
+ * If wire size if greater than lead screw pitch, we need to change how to
+ * count steps in engine "M_engine()".
+ * Because the carriage will reach the maximum speed before the coil.
+ ******************************************************************************/
+bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOneLayer, uint16_t *stepsPerTr )
+{
+  float tmp_nbTrForOneLayer = 0;
+  float tmp_step = 0;
+
+  tmp_nbTrForOneLayer = coilLength / wireSize;
+  *nbTrForOneLayer = (uint16_t)tmp_nbTrForOneLayer;
+
+  tmp_step = (wireSize * (float)STEPS_PER_TR) / (float)LEAD_SCREW_PITCH;
+  *stepsPerTr = (uint16_t)tmp_step;
+
+  if(wireSize < LEAD_SCREW_PITCH) return true;
+  else return false;
+}
+
+
+
+
+/******************************************************************************
+ * brief   : Travel computing
+ * details : Decompose the distance in steps per pass.
+ * Allows to use more large and flexible value of displacement.
+ * Values are directly returns by pointers
+ ******************************************************************************/
+void Coil::computeTravel(float distance, uint16_t *nbPass, uint16_t *stepsPerTr)
+{
+  float tmp_newDistance = distance;
+  float tmp_nbPass = 0.00;
+  float tmp_stepsPerTr = 0.00;
+  float ratio = 0.00;
+
+  tmp_nbPass = 1;
+
+  do
+    {
+      // If number of steps will exceed the max value of uint16_t
+      // ratio will be superior to 1 and a pass will be added
+      ratio = (((tmp_newDistance / (float)LEAD_SCREW_PITCH) * (float)STEPS_PER_TR) / (float)MAX_INTEGER);
+
+      if(ratio > 1.00)
 	{
-	  delayMotor_A = _minSpeed;
-	  delayMotor_B = _minSpeed;
-	  direction = !direction;
-	  layerStepsCounter = 0;
+	  tmp_nbPass += 1;
+	  tmp_newDistance = distance / tmp_nbPass ;
+	}
+      else
+	{
+	  tmp_stepsPerTr = ratio * (float)MAX_INTEGER;
+	}
+    }
+  while(ratio > 1.00);
+
+  *nbPass = (uint16_t)tmp_nbPass;
+  *stepsPerTr = (uint16_t)tmp_stepsPerTr;
+}
+
+
+
+
+void Coil::acceleration(uint16_t speedSet, uint16_t *accSpeed, uint32_t *oldTime)
+{
+  uint32_t currentMicros = micros();
+
+  if(timer(currentMicros, oldTime, _accDelay) && *accSpeed < speedSet)
+    {
+      *accSpeed += _accIncr;
+      M_setSpeed( *accSpeed);
+    }
+}
+
+
+
+
+void Coil::refreshDisplay(bool *run, uint32_t *oldTime)
+{
+  uint32_t currentMicros = millis();
+
+  if(timer(currentMicros, oldTime, 1000) && *run)
+    {
+      *run = false;
+      _Display->engineWindingRefresh(_coilLength, _wireSize);
+    }
+}
+
+
+
+
+float Coil::getRelativeHome(float homePosition, bool dir)
+{
+  float tmp_value = M_getDisplacement();
+
+  if(!dir){ tmp_value *= -1; }
+
+  return tmp_value += homePosition;
+}
+
+
+
+
+bool Coil::winding(bool isNewCoil, float *homingPosition)
+{
+  // For stopping winding
+  bool run = true;
+  // For computing
+  bool isCoilFastest = 0;
+  uint16_t nbPass = 0;
+  uint16_t steps = 0;
+  // For active setting : speed and display
+  bool refresh = false;
+  int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
+  uint32_t lastMicrosAcc = 0;
+  uint32_t oldTimeRefresh = 0;
+
+  // Set start speed with minimal speed
+  _speed = _minSpeed;
+  // Compute steps by turns for one layer
+  isCoilFastest = computeWinding(_coilLength, _wireSize, &nbPass, &steps);
+  // Set all target values
+  M_setWindingDisplacement(nbPass, steps, _coilTurns, STEPS_PER_TR, isCoilFastest);
+  // Set start counter values
+  if(isNewCoil)
+    {
+      M_setState(false, 0, 0, 0, 0);
+    }
+  else
+    {
+      M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
+      _windingSense       = _saveCoilDir;
+      _carriageStartSense = _saveCarrDir;
+    }
+  // Set state of motors
+  M_setMotors(COIL, _windingSense, CARRIAGE, _carriageStartSense, _minSpeed);
+  // Start interrupt routine
+  M_start();
+
+  // Display current setting of winding
+  _Display->engineWindingValue(_coilLength, _wireSize, _coilTurns, M_getCoilTr());
+
+  while( !M_getWindingStatus() && run)
+    {
+      if( suspend() == true)
+	{
+	  run = false;
+
+	  M_stop();
+
+	  M_getState(&_saveCarrPass, &_saveCarrStepPerPass, &_saveCarrDir,
+		     &_saveCoilTr, &_saveCoilStepPerTr, &_saveCoilDir);
+	}
+      else
+	{
+	  acceleration(speedSet, &_speed, &lastMicrosAcc);
+
+	  if(updateSpeed(&old_speedPercent, &speedSet, 0))
+	    {
+	      oldTimeRefresh = millis();
+	      refresh = true;
+	    }
+
+	  refreshDisplay(&refresh, &oldTimeRefresh);
+
+	  _Display->windingGetTurns(_coilTurns, M_getCoilTr());
 	}
     }
 
-#ifdef DEBUG
-  Serial.print("step Tr : ");
-  Serial.println(_totalStepsCounter);
-#endif
+  if(run == false) return false;
+  else return true;
 }
 
-// Not work, just travel carriage.
-void Coil::oneLayer(float _coilLength, int _dir)
+
+
+/******************************************************************************
+ * brief   : Travel only carriage
+ * details : Manage the travel to move only the carriage.
+ * Distance must be only positive !
+ * Function return relative position from home by setting the
+ * pointer "homingPosition".
+ ******************************************************************************/
+void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
 {
-  unsigned long delayMotor_B = 600;
-  unsigned long previousMicrosMotor_B = 0;
+  bool run = true;
 
-  unsigned long layerStepsCounter = 0;
+  uint16_t nbPass = 0;
+  uint16_t steps = 0;
 
-  _stepsPerLayer = (M2_STEPS_PER_TR * _coilLength) / LEAD_SCREW_PITCH;
+  int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
+  uint32_t lastMicrosAcc = 0;
 
-  while(layerStepsCounter < _stepsPerLayer)
+  // Acceleration need to have current speed set to minimum.
+  _speed = _minSpeed;
+
+  // For homing if displacement is negative we need to pass it in positive.
+  if(distance<0 ){ distance *=-1; }
+
+  Serial.print(" ");
+  Serial.println("********************");
+  Serial.print("dir : "), Serial.println(dir);
+  Serial.print("distance : "), Serial.println(distance);
+  Serial.print("relative position 1 : "), Serial.println(*homingPosition);
+
+  computeTravel(distance, &nbPass, &steps);
+  M_setSimpleDisplacement(TRAVELING, nbPass, steps);
+
+  M_setMotors(0, 0, CARRIAGE, dir, _minSpeed);
+
+  M_setState(false, 0, 0, 0, 0);
+
+  M_start();
+
+  while( !M_getWindingStatus() && run)
     {
-      unsigned long currentMicros = micros();
-      if(timer(currentMicros, &previousMicrosMotor_B, delayMotor_B))
+      if( suspend() == true)
 	{
-	  motorCarriage.oneStep(_dir);
-	  layerStepsCounter++;
+	  run = false;
+	  M_stop();
+	}
+      else
+	{
+	  acceleration(speedSet, &_speed, &lastMicrosAcc);
+	  updateSpeed(&old_speedPercent, &speedSet, SIZE_MSG_CURRENT_SPEED);
+
+	  _Display->windingGetDisplacement(distance, M_getDisplacement());
+	}
+    }
+
+  *homingPosition = getRelativeHome(*homingPosition, dir);
+
+  Serial.print("relative position 2 : "), Serial.println(*homingPosition);
+}
+
+
+
+
+void Coil::runOnlyCoil(bool dir, uint16_t turns)
+{
+  bool run = true;
+
+  int8_t old_speedPercent = _speedPercent;
+  uint16_t speedSet = _speed;
+  uint32_t lastMicrosAcc = 0;
+
+  _speed = _minSpeed;
+
+  M_setSimpleDisplacement(ROTATION, turns, STEPS_PER_TR);
+
+  M_setMotors(COIL, dir, 0, 0, _minSpeed);
+
+  M_setState(false, 0, 0, 0, 0);
+
+  M_start();
+
+  while( !M_getWindingStatus() && run )
+    {
+      if( suspend() == true)
+	{
+	  run = false;
+	  M_stop();
+	}
+      else
+	{
+	  acceleration(speedSet, &_speed, &lastMicrosAcc);
+	  updateSpeed(&old_speedPercent, &speedSet, SIZE_MSG_CURRENT_SPEED);
+
+	  _Display->windingGetTurns(turns, M_getCoilTr());
 	}
     }
 }
 
-//void Coil::move(bool carriage, bool coil)
-//{
-//  bool run = true;
-//  bool direction = CLOCK;
-//  int8_t value = 0;
-//  unsigned long delayMotor_B = 600;
-//  unsigned long previousMicrosMotor_B = 0;
-//
-//
-//  _Encoder->setAccelerationEnabled(_Encoder->getAccelerationEnabled());
-//
-//  while(run)
-//    {
-//      ClickEncoder::Button buttonState = _Encoder->getButton();
-//      if( buttonState == ClickEncoder::Clicked ){
-//	  run=false;}
-//
-//      value += _Encoder->getValue();
-//
-//      Serial.print("Encoder value : ");
-//      Serial.println(value);
-//
-//      value > 0 ? direction = CLOCK : direction = C_CLOCK;
-//
-//      while(value != 0)
-//	{
-//	  Serial.print("while value : ");
-//	  Serial.println(value);
-//	  unsigned long currentMicros = micros();
-//	  if(timer(currentMicros, &previousMicrosMotor_B, delayMotor_B))
-//	    {
-//	      motorCarriage.oneStep(direction);
-//	      value > 0 ? value-- : value++;
-//	    }
-//	}
-//    }
-//}
 
 
 
+// Check if button was pressed
+bool Coil::suspend()
+{
+  if( _Encoder->getButton() == ClickEncoder::Clicked )
+    {
+      return true;
+    }
+  else return false;
+}
 
 
+uint16_t Coil::getCurrentTurns()
+{
+  return M_getCoilTr();
+}
 
 
+void Coil::getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
+		    uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir)
+{
+  *p_carrPass  = _saveCarrPass;
+  *p_carrSteps = _saveCarrStepPerPass;
+  *p_carrDir   = _saveCarrDir;
+
+  *p_coilTr    = _saveCoilTr;
+  *p_coilSteps = _saveCoilStepPerTr;
+  *p_coilDir   = _saveCoilDir;
+}

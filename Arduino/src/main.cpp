@@ -11,17 +11,15 @@
 #include "Display.h"
 #include "ClickEncoder.h"
 #include "TimerOne.h"
-#include "Save.h"
 #include "MenuStructure.h"
-#include "Winding.h"
-
+#include "MsTimer2.h"
 
 // Declare objects ------------------------------------------------------------
-ClickEncoder Encoder(ENC_PIN_A, ENC_PIN_B, ENC_PIN_SW, ENC_STEP);
+ClickEncoder Encoder;
 Menu::Engine *engine;
 Display display;
-Coil CoilWinding;
-
+Coil CoilWinding(&Encoder, &display);
+Setting setting(&Encoder, &display, &CoilWinding);
 
 // Global Variables -----------------------------------------------------------
 uint8_t systemState = state_DEFAULT;
@@ -29,31 +27,18 @@ uint8_t previousSystemState = state_NONE;
 uint8_t menuItemsVisible = LCD_LINES;
 int16_t encMovement;
 int16_t encAbsolute;
-int16_t encLastAbsolute = -1;
 int16_t tmpValue = 0;
 
 bool updateMenu = false;
 bool lastEncoderAccelerationState = true;
 
+
 // Functions ------------------------------------------------------------------
-void timerIsr(void)
+void timerEncoder(void)
 {
   Encoder.service();
 }
 
-void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
-{
-  bool current = false;
-  // Print icon before current item else blank.
-  engine->currentItem == mi ? current = true : current = false;
-  display.renderIconOn(pos, current);
-
-  // Print label item
-  display.renderItem(engine->getLabel(mi));
-
-  // mark items that have children
-  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(6);
-}
 
 
 /* SETUP ---------------------------------------------------------------------*/
@@ -66,48 +51,25 @@ void setup()
   Serial.print("\n\nbegin\n\n");
   delay(1000);
 #endif
-
   // Lcd initialization
   display.begin();
-
-  // Eeprom memory
-  memory.init();
-
-  // Winding function
-  CoilWinding.begin();
-
   // For rotary encoder
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(timerIsr);
-
+  MsTimer2::set(1, timerEncoder); // 1ms
+  MsTimer2::start();
   // Menu begin
   engine = new Menu::Engine(&Menu::NullItem);
-
+  // Init timer for motors and pins
+  M_init();
   // Pin initialization
   pinMode(13, OUTPUT);
+
+  //start Menu -> read memory and display version
+  engine->navigate(&miHome);
 }
 
 /* LOOP ----------------------------------------------------------------------*/
 void loop()
 {
-  // Display section.
-  switch(systemState)
-  {
-    // First use print software version
-    case state_DEFAULT :
-      {
-	display.version();
-	break;
-      }
-    case state_BACK :
-      {
-	systemState = state_MOVE;
-	engine->navigate(engine->getParent());
-	updateMenu = true;
-	break;
-      }
-  }
-
   // handle encoder
   encMovement = Encoder.getValue();
   if (encMovement)
@@ -153,7 +115,7 @@ void loop()
 	else
 	  {
 	    // enter settings menu
-	    engine->navigate(&miWinding);
+	    engine->navigate(&miSetWinding);
 
 	    systemState = state_MOVE;
 	    previousSystemState = systemState;
@@ -161,17 +123,16 @@ void loop()
 	  }
 	break;
       }
-    case ClickEncoder::DoubleClicked:
-      {
-	// Back to previous item
-	if (systemState == state_MOVE)
-	  {
-	    engine->navigate(engine->getParent());
-	    updateMenu = true;
-	  }
-	break;
-      }
+    case ClickEncoder::Held:{break;}
+    case ClickEncoder::Open:{break;}
   }
+
+  if(systemState == state_BACK)
+    {
+      systemState = state_MOVE;
+      engine->navigate(engine->getParent());
+      updateMenu = true;
+    }
 
   // update LCD
   if (updateMenu)

@@ -18,17 +18,46 @@
 #define state_EDIT	3
 #define state_BACK	4
 
-extern ClickEncoder Encoder;
+#define BACK	"Back" ICONBACK
+
 extern Menu::Engine *engine;
-extern Coil CoilWinding;
+extern Display display;
+extern Setting setting;
+
 extern uint8_t systemState;
 
-Setting setting(&Encoder);
+
+
+// Item rendering --------------------------------------------------------------
+void renderMenuItem(const Menu::Item_t *mi, uint8_t pos)
+{
+  bool current = false;
+  // Print icon before current item else blank.
+  engine->currentItem == mi ? current = true : current = false;
+  display.renderIconOn(pos, current);
+
+  // Print label item
+  display.renderItem(engine->getLabel(mi));
+
+  // mark items that have children
+  engine->getChild(mi) != &Menu::NullItem ? display.renderIconChild() : display.blank(LCD_CHARS);
+}
+
 
 // CallBacks -------------------------------------------------------------------
 bool menuDummy(const Menu::Action_t a)
 {
   // Do nothing;
+  return true;
+}
+
+bool menuInit(const Menu::Action_t a)
+{
+
+  display.version();
+
+  setting.init();
+
   return true;
 }
 
@@ -41,11 +70,23 @@ bool menuBack(const Menu::Action_t a)
   return true;
 }
 
+bool setHome(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      char tmp_buffDistance[] = INIT_MOV_CAR;
+      float tmp_distance = 0.00;
+
+      setting.actionMenu(id_HOME, tmp_buffDistance, &tmp_distance);
+    }
+  return true;
+}
+
 bool editWire(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.getId(id_WIRESIZE);
+      setting.actionMenu(id_WIRESIZE, true);
     }
   return true;
 }
@@ -54,7 +95,7 @@ bool editLength(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.getId(id_COILLENGTH);
+      setting.actionMenu(id_COILLENGTH, true);
     }
   return true;
 }
@@ -63,7 +104,88 @@ bool editTurns(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.getId(id_TURNS);
+      setting.actionMenu(id_TURNS, false);
+    }
+  return true;
+}
+
+bool editWindingSense(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_W_SENSE);
+    }
+  return true;
+}
+
+bool editCarrStartSense(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_C_SENSE);
+    }
+  return true;
+}
+
+bool runWinding(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_NEW);
+    }
+  return true;
+}
+
+bool runResume(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_RESUME);
+    }
+  return true;
+}
+
+bool runSaved(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_RESUME_SAVE);
+    }
+  return true;
+}
+
+bool editMaxSpeed(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_MAX_SPEED, false);
+    }
+  return true;
+}
+
+bool editMinSpeed(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_MIN_SPEED, false);
+    }
+  return true;
+}
+
+bool editAccTime(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_ACC_DELAY, false);
+    }
+  return true;
+}
+
+bool editAccIncr(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_ACC_INCR, false);
     }
   return true;
 }
@@ -72,7 +194,10 @@ bool menuMovCarriage(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.moveValue();
+      char tmp_buffDistance[] = INIT_MOV_CAR;
+      float tmp_distance = 0.00;
+
+      setting.actionMenu(id_MOVE_CARRIAGE, tmp_buffDistance, &tmp_distance);
     }
   return true;
 }
@@ -81,7 +206,19 @@ bool menuMovCoil(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
+      char tmp_buffDistance[] = INIT_MOV_COIL;
+      uint16_t tmp_distance = 0;
 
+      setting.actionMenu(id_MOVE_COIL, tmp_buffDistance, &tmp_distance);
+    }
+  return true;
+}
+
+bool menuMovHome(const Menu::Action_t a)
+{
+  if (a == Menu::actionTrigger || a == Menu::actionDisplay)
+    {
+      setting.actionMenu(id_GO_HOME);
     }
   return true;
 }
@@ -90,7 +227,7 @@ bool menuReset(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.resetAction(false);
+      setting.actionMenu(id_RESET);
     }
   return true;
 }
@@ -99,34 +236,53 @@ bool menuRAZ(const Menu::Action_t a)
 {
   if (a == Menu::actionTrigger || a == Menu::actionDisplay)
     {
-      setting.resetAction(true);
+      setting.actionMenu(id_RAZ);
     }
   return true;
 }
+
 
 // Framework for menu ---------------------------------------------------------
 
 // Name, Label, Next, Previous, Parent, Child, Callback
 // Menu 0
-MenuItem(miExit, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miWinding, menuDummy);
-// Menu 1 -> 3
-MenuItem(miWinding, "Winding", miMoves, Menu::NullItem, miExit, miWireSize, menuDummy);
-MenuItem(miMoves, "Moves", miSettings, miWinding, miExit, miMovCarriage, menuDummy);
-MenuItem(miSettings, "Settings", Menu::NullItem, miMoves, miExit, miResetVal, menuDummy);
-// Sub-menu 1.1 -> 1.6
-MenuItem(miWireSize, "1.Wire size", miCoilLength, Menu::NullItem, miWinding, Menu::NullItem, editWire);
-MenuItem(miCoilLength, "2.Coil length", miTurns, miWireSize, miWinding, Menu::NullItem, editLength);
-MenuItem(miTurns, "3.Turns", miStart, miCoilLength, miWinding, Menu::NullItem, editTurns);
-MenuItem(miStart, "4.Start", miBack1, miTurns, miWinding, Menu::NullItem, menuDummy);
-MenuItem(miBack1, "Back \1", Menu::NullItem, miStart, miWinding, Menu::NullItem, menuBack);
-// Sub-menu 2.1 -> 2.?
-MenuItem(miMovCarriage, "Move carriage", miMovCoil, Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);
-MenuItem(miMovCoil, "Move coil", miBack2, miMovCarriage, miMoves, Menu::NullItem, menuMovCoil);
-MenuItem(miBack2, "Back \1", Menu::NullItem, miMovCoil, miMoves, Menu::NullItem, menuBack);
-// Sub-menu 3.1 -> 3.?
-MenuItem(miResetVal, "Raz all Values", miResetEEp, Menu::NullItem, miSettings, Menu::NullItem, menuRAZ);
-MenuItem(miResetEEp, "Reset EEprom", miBack3, miResetVal, miSettings, Menu::NullItem, menuReset);
-MenuItem(miBack3, "Back \1", Menu::NullItem, miResetEEp, miSettings, Menu::NullItem, menuBack);
+MenuItem(miHome, "", Menu::NullItem, Menu::NullItem, Menu::NullItem, miSetWinding, menuInit);
+
+// Menu 1 -> 4
+MenuItem(miSetWinding, "Set winding",   miWinding,      Menu::NullItem, miHome, miSetHome	, menuDummy);
+MenuItem(miWinding,    "Start winding", miMoves,        miSetWinding,   miHome, miStart		, menuDummy);
+MenuItem(miMoves,      "Moves",         miSettings,     miWinding,      miHome, miMovCarriage	, menuDummy);
+MenuItem(miSettings,   "Settings",      Menu::NullItem, miMoves,        miHome, miMaxSpeed	, menuDummy);
+
+// Sub-menu 1.1 -> 1.7
+MenuItem(miSetHome,    "Set home",         miWireSize,     Menu::NullItem, miSetWinding, Menu::NullItem, setHome);
+MenuItem(miWireSize,   "Wire size",        miCoilLength,   miSetHome,      miSetWinding, Menu::NullItem, editWire);
+MenuItem(miCoilLength, "Coil length",      miTurns,        miWireSize,     miSetWinding, Menu::NullItem, editLength);
+MenuItem(miTurns,      "Turns",            miWinSense,     miCoilLength,   miSetWinding, Menu::NullItem, editTurns);
+MenuItem(miWinSense,   "Winding sense",    miCarSense,     miTurns,        miSetWinding, Menu::NullItem, editWindingSense);
+MenuItem(miCarSense,   "Carr Start sense", miBack1,        miWinSense,     miSetWinding, Menu::NullItem, editCarrStartSense);
+MenuItem(miBack1,      BACK,               Menu::NullItem, miCarSense,     miSetWinding, Menu::NullItem, menuBack);
+
+// Sub-menu 2.1 -> 2.4
+MenuItem(miStart,  "Start new",      miResume,       Menu::NullItem, miWinding, Menu::NullItem, runWinding);
+MenuItem(miResume, "Resume current", miSaved,        miStart,        miWinding, Menu::NullItem, runResume);
+MenuItem(miSaved,  "Resume saved",   miBack2,        miResume,       miWinding, Menu::NullItem, runSaved);
+MenuItem(miBack2,  BACK,             Menu::NullItem, miSaved,        miWinding, Menu::NullItem, menuBack);
+
+// Sub-menu 3.1 -> 3.3
+MenuItem(miMovCarriage, "Move carriage", miMovCoil,      Menu::NullItem, miMoves, Menu::NullItem, menuMovCarriage);
+MenuItem(miMovCoil,     "Move coil",     miMovHome,      miMovCarriage,  miMoves, Menu::NullItem, menuMovCoil);
+MenuItem(miMovHome,     "Move to home",  miBack3,        miMovCoil,      miMoves, Menu::NullItem, menuMovHome);
+MenuItem(miBack3,       BACK,            Menu::NullItem, miMovHome,      miMoves, Menu::NullItem, menuBack);
+
+// Sub-menu 4.1 -> 4.6
+MenuItem(miMaxSpeed, "Max speed",      miMinSpeed,     Menu::NullItem, miSettings, Menu::NullItem, editMaxSpeed);
+MenuItem(miMinSpeed, "Min speed",      miAccTime,      miMaxSpeed,     miSettings, Menu::NullItem, editMinSpeed);
+MenuItem(miAccTime,  "Acc time",       miAccIncr,      miMinSpeed,     miSettings, Menu::NullItem, editAccTime);
+MenuItem(miAccIncr,  "Acc increment",  miResetEEp,     miAccTime,      miSettings, Menu::NullItem, editAccIncr);
+MenuItem(miResetEEp, "Reset EEprom",   miResetVal,     miAccIncr,      miSettings, Menu::NullItem, menuReset);
+MenuItem(miResetVal, "Raz all Values", miBack4,        miResetEEp,     miSettings, Menu::NullItem, menuRAZ);
+MenuItem(miBack4,    BACK,             Menu::NullItem, miResetVal,     miSettings, Menu::NullItem, menuBack);
 
 // ----------------------------------------------------------------------------
 
