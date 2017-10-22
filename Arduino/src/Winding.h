@@ -44,6 +44,9 @@ private:
   void refreshDisplay(bool *run, uint32_t *oldTime);
   float getRelativeHome(float homePosition, bool dir);
 
+  bool computeCarrDistributionSteps(bool isCoilFaster, uint16_t coilStepPerPass, uint16_t charrStepPerPass,
+				     uint16_t *stepInterval, uint16_t *stepRest, uint16_t *nbAddStep);
+
 private:
 
   ClickEncoder *_Encoder;

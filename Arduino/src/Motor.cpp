@@ -10,18 +10,26 @@ struct motor
 };
 struct motor coil, carriage;
 
-volatile uint8_t engineAction = 0;
+volatile uint8_t M_engineAction = 0;
 
-volatile uint16_t speedSet = 0;
-volatile uint16_t minSpeed = 0;
+volatile uint16_t M_speedSet = 0;
+volatile uint16_t M_minSpeed = 0;
 
-volatile uint16_t targetPass = 0;
-volatile uint16_t stepsPerPass = 0;
-volatile uint16_t targetTr = 0;
-volatile uint16_t stepsPerTr = 0;
+volatile uint16_t M_targetPass = 0;
+volatile uint16_t M_stepsPerPass = 0;
+volatile uint16_t M_targetTr = 0;
+volatile uint16_t M_stepsPerTr = 0;
 
-volatile bool isCoilFastest = false;
-volatile bool isFinished = false;
+volatile uint16_t M_stepsInterval = 0;
+volatile uint16_t M_stepsRest = 0;
+volatile uint16_t M_stepsAdd = 0;
+
+volatile uint16_t M_countInterval = 0;
+
+volatile bool M_isCoilFastest = false;
+volatile bool M_isFinished = false;
+volatile bool M_isSuperior = false;
+volatile bool M_isStepAddMode = false;
 
 void M_init()
 {
@@ -41,12 +49,11 @@ void M_init()
 
 void M_start()
 {
-
-
-  isFinished = false;
+  M_isFinished = false;
 
   Timer1.attachInterrupt(M_engine);
 }
+
 
 void M_stop()
 {
@@ -139,39 +146,74 @@ void M_engine()
   coil.tic++;
   carriage.tic++;
 
-  switch (engineAction)
+  switch (M_engineAction)
   {
-    case WINDING : //__________________________________________________________
+    case WINDING : //________________________________________________________________________________________________________________________________
       {
-	switch(isCoilFastest)
+	switch(M_isCoilFastest)
 	{
-	  case true :
+	  case true : // Coil have a numbers of steps superior to carriage.
 	    {
-	      if(coil.tr != targetTr)
+	      if(coil.tr != M_targetTr)
 		{
-		  if(coil.tic >= speedSet)
+		  if(coil.tic >= M_speedSet)
 		    {
 		      coil.tic=0;
-		      oneStep(ENABLE , DISABLE);
 
-		      if(coil.steps != stepsPerTr)
+		      if(coil.steps != M_stepsPerTr)
 			{
-			  coil.steps++;
+			  oneStep(ENABLE , DISABLE); // Coil step depending tic interval.
+			  ++coil.steps;
+			  ++M_countInterval;
 
-			  if(carriage.steps != stepsPerPass)
+			  if(carriage.steps != M_stepsPerPass)
 			    {
-			      carriage.steps++;
-			      oneStep(DISABLE, ENABLE);
+			      switch(M_isSuperior)
+			      {
+				case true : // Blank steps are superiors to half steps per pass.
+				  {
+				    // Second step : normal distribution.
+				    if(carriage.steps >= M_stepsRest && !M_isStepAddMode)
+				      {
+					M_isStepAddMode = true;
+					--M_stepsInterval;
+				      }
+				    // First step : add a blank step to interval.
+				    if(M_countInterval > M_stepsInterval)
+				      {
+					oneStep(DISABLE, ENABLE);
+					++carriage.steps;
+					M_countInterval = 0;
+				      }
+				    break;
+				  }
+				case false : // Blank steps are inferiors to half steps per pass.
+				  {
+				    // Second step : add a step to interval.
+				    if(carriage.steps > M_stepsAdd && !M_isStepAddMode)
+				      {
+					M_isStepAddMode = true;
+					++M_stepsInterval;
+				      }
+				    // First step : normal distribution.
+				    if(M_countInterval <= M_stepsInterval)
+				      {
+					oneStep(DISABLE, ENABLE);
+					++carriage.steps;
+				      }
+				    else
+				      {
+					M_countInterval = 0;
+				      }
+				  }
+			      }
 			    }
 			}
-		      else
+		      else // Reset counter for next turn.
 			{
-			  carriage.steps = 0;
-			  carriage.tr++;
-			  coil.steps = 0;
-			  coil.tr++;
+			  updateCounter();
 
-			  if(carriage.tr == targetPass)
+			  if(carriage.tr == M_targetPass)
 			    {
 			      carriage.tr = 0;
 			      M_invertSense();
@@ -179,41 +221,71 @@ void M_engine()
 			}
 		    }
 		}
-	      else
+	      else // End of winding
 		{
 		  M_stop();
-		  isFinished = true;
+		  M_isFinished = true;
 		}
 
 	      break;
 	    }
-	  case false :
+	  case false : // Coil have a numbers of steps inferior to carriage.
 	    {
-	      if(coil.tr != targetTr)
+	      // Algorithm is the same that before but motors are inverted.
+	      if(coil.tr != M_targetTr)
 		{
-		  if(carriage.tic >= speedSet)
+		  if(carriage.tic >= M_speedSet)
 		    {
 		      carriage.tic=0;
-		      oneStep(DISABLE , ENABLE);
 
-		      if(carriage.steps != stepsPerPass)
+		      if(carriage.steps != M_stepsPerPass)
 			{
-			  carriage.steps++;
+			  oneStep(DISABLE , ENABLE);
+			  ++carriage.steps;
+			  ++M_countInterval;
 
-			  if(coil.steps != stepsPerTr)
+			  if(coil.steps != M_stepsPerTr)
 			    {
-			      coil.steps++;
-			      oneStep(ENABLE, DISABLE);
+			      if(M_isSuperior == true)
+				{
+				  if(coil.steps >= M_stepsRest && !M_isStepAddMode)
+				    {
+				      M_isStepAddMode = true;
+				      --M_stepsInterval;
+				    }
+
+				  if(M_countInterval > M_stepsInterval)
+				    {
+				      oneStep(ENABLE, DISABLE);
+				      ++coil.steps;
+				      M_countInterval = 0;
+				    }
+				}
+			      else
+				{
+				  if(coil.steps > M_stepsAdd && !M_isStepAddMode)
+				    {
+				      M_isStepAddMode = true;
+				      ++M_stepsInterval;
+				    }
+
+				  if(M_countInterval <= M_stepsInterval)
+				    {
+				      oneStep(ENABLE, DISABLE);
+				      ++coil.steps;
+				    }
+				  else
+				    {
+				      M_countInterval = 0;
+				    }
+				}
 			    }
 			}
 		      else
 			{
-			  carriage.steps = 0;
-			  carriage.tr++;
-			  coil.steps = 0;
-			  coil.tr++;
+			  updateCounter();
 
-			  if(carriage.tr == targetPass)
+			  if(carriage.tr == M_targetPass)
 			    {
 			      carriage.tr = 0;
 			      M_invertSense();
@@ -224,31 +296,31 @@ void M_engine()
 	      else
 		{
 		  M_stop();
-		  isFinished = true;
+		  M_isFinished = true;
 		}
 	      break;
 	    }
 	}
 	break;
       }
-    case TRAVELING : //________________________________________________________
+    case TRAVELING : //______________________________________________________________________________________________________________________________
       {
-	if(carriage.tr != targetPass && stepsPerPass > 0)
+	if(carriage.tr != M_targetPass && M_stepsPerPass > 0)
 	  {
-	    if(carriage.tic >= speedSet)
+	    if(carriage.tic >= M_speedSet)
 	      {
 		carriage.tic=0;
 
 		oneStep(coil.en, carriage.en);
 
-		if(carriage.steps != stepsPerPass)
+		if(carriage.steps != M_stepsPerPass)
 		  {
-		    carriage.steps++;
+		    ++carriage.steps;
 		  }
 		else
 		  {
 		    carriage.steps = 0;
-		    carriage.tr++;
+		    ++carriage.tr;
 		  }
 	      }
 	    else{}
@@ -256,28 +328,28 @@ void M_engine()
 	else
 	  {
 	    M_stop();
-	    isFinished = true;
+	    M_isFinished = true;
 	  }
 	break;
       }
-    case ROTATION : //_________________________________________________________
+    case ROTATION : //_______________________________________________________________________________________________________________________________
       {
-	if(coil.tr != targetPass)
+	if(coil.tr != M_targetPass)
 	  {
-	    if(coil.tic >= speedSet)
+	    if(coil.tic >= M_speedSet)
 	      {
 		coil.tic=0;
 
 		oneStep(coil.en , carriage.en);
 
-		if(coil.steps != stepsPerPass)
+		if(coil.steps != M_stepsPerPass)
 		  {
-		    coil.steps++;
+		    ++coil.steps;
 		  }
 		else
 		  {
 		    coil.steps = 0;
-		    coil.tr++;
+		    ++coil.tr;
 		  }
 	      }
 	    else{}
@@ -285,7 +357,7 @@ void M_engine()
 	else
 	  {
 	    M_stop();
-	    isFinished = true;
+	    M_isFinished = true;
 	  }
 	break;
       }
@@ -307,7 +379,32 @@ void oneStep(bool M_coil_en, bool M_carr_en)
     }
 }
 
+void updateCounter()
+{
+  M_isStepAddMode = false;
 
+  carriage.steps = 0;
+  ++carriage.tr;
+  coil.steps = 0;
+  ++coil.tr;
+
+
+  switch(M_isSuperior)
+  {
+    case true:
+      {
+	++M_stepsInterval;
+	M_countInterval = M_stepsInterval+1;
+	break;
+      }
+    case false:
+      {
+	--M_stepsInterval;
+	M_countInterval = 0;
+	break;
+      }
+  }
+}
 
 // GET and SET functions________________________________________________________
 uint16_t M_getCoilTr()
@@ -320,7 +417,7 @@ uint16_t M_getCoilTr()
 
 bool M_getWindingStatus()
 {
-  return isFinished;
+  return M_isFinished;
 }
 
 
@@ -328,7 +425,7 @@ bool M_getWindingStatus()
 
 float M_getDisplacement()
 {
-  float displacement = (((((float)stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
+  float displacement = (((((float)M_stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
       / (float)STEPS_PER_TR) * (float)LEAD_SCREW_PITCH);
 
   return displacement;
@@ -339,7 +436,7 @@ float M_getDisplacement()
 
 float M_getDisplacement(uint16_t carrstartSense)
 {
-  float displacement = (((((float)stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
+  float displacement = (((((float)M_stepsPerPass * (float)carriage.tr) + (float)carriage.steps)
       / (float)STEPS_PER_TR) * (float)LEAD_SCREW_PITCH);
 
   return displacement;
@@ -374,13 +471,13 @@ void M_setMotors(bool M_coil, bool M_coilDir, bool M_carr, bool M_carrDir, uint1
   WRITE(PIN_CARR_EN, carriage.en);
   WRITE(PIN_CARR_DIR, carriage.dir);
 
-  minSpeed = M_setSpeed(startSpeed);
+  M_minSpeed = M_setSpeed(startSpeed);
 }
 
 uint16_t M_setSpeed(uint16_t speed)
 {
-  speedSet = RPM_TO_INT((float)speed);
-  return speedSet;
+  M_speedSet = RPM_TO_INT((float)speed);
+  return M_speedSet;
 }
 
 void M_invertSense()
@@ -389,23 +486,50 @@ void M_invertSense()
   WRITE(PIN_CARR_DIR, !READ(PIN_CARR_DIR));
 }
 
+
 void M_setSimpleDisplacement(uint8_t action, uint16_t pass, uint16_t steps)
 {
-  engineAction  = action;
-  targetPass    = pass;
-  stepsPerPass  = steps;
+  M_engineAction  = action;
+  M_targetPass    = pass;
+  M_stepsPerPass  = steps;
 }
+
 
 void M_setWindingDisplacement(uint16_t pass, uint16_t steps, uint16_t tr,
 			      uint16_t stepsTr, bool fastest)
 {
-  engineAction  = WINDING;
-  targetPass    = pass;
-  stepsPerPass  = steps;
-  targetTr      = tr;
-  stepsPerTr    = stepsTr;
-  isCoilFastest = fastest;
+  M_engineAction  = WINDING;
+  M_targetPass    = pass;
+  M_stepsPerPass  = steps;
+  M_targetTr      = tr;
+  M_stepsPerTr    = stepsTr;
+  M_isCoilFastest = fastest;
 }
+
+
+void M_setWindingCounter(bool isNewCoil, bool isSuperior, uint16_t interval, uint16_t rest, uint16_t add)
+{
+  M_stepsRest     = rest;
+  M_stepsAdd      = add ;
+  M_isSuperior    = isSuperior; // nb of step to distribute > to nb of step to make
+  M_isStepAddMode = false;
+
+  // counter
+  isSuperior ? M_stepsInterval = interval+1 : M_stepsInterval = interval;
+
+  if(isNewCoil)
+    {
+      isSuperior ? M_countInterval = M_stepsInterval+1 : M_countInterval = 0; // start with one step or not
+    }
+
+  //  Serial.print("isNewCoil : "), Serial.println(isNewCoil);
+  //  Serial.print("M_countInterval : "), Serial.println(M_countInterval);
+  //  Serial.print("isSuperior : "), Serial.println(M_isSuperior);
+  //  Serial.print("stepRest : "), Serial.println(M_stepsRest);
+  //  Serial.print("stepInterval : "), Serial.println(M_stepsInterval);
+  //  Serial.print("nbAddStep : "), Serial.println(M_stepsAdd);
+}
+
 
 void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t coilTr, uint16_t coilSteps)
 {
@@ -427,6 +551,7 @@ void M_setState(bool isResume, uint16_t carrPass, uint16_t carrSteps, uint16_t c
   carriage.tic = 0;
   coil.tic = 0;
 }
+
 
 void M_getState(uint16_t *p_carrPass, uint16_t *p_carrSteps, bool *p_carrDir,
 		uint16_t *p_coilTr, uint16_t *p_coilSteps, bool *p_coilDir)
