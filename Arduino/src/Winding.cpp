@@ -135,10 +135,74 @@ bool Coil::computeWinding(float coilLength, float wireSize, uint16_t *nbTrForOne
   tmp_step = (wireSize * (float)STEPS_PER_TR) / (float)LEAD_SCREW_PITCH;
   *stepsPerTr = (uint16_t)tmp_step;
 
+  //  Serial.println(" ");
+  //  Serial.println("******** compute winding *********");
+  //  Serial.print("coilLength : "), Serial.println(coilLength);
+  //  Serial.print("wireSize : "), Serial.println(wireSize);
+  //  Serial.print("nbTrForOneLayer : "), Serial.println(*nbTrForOneLayer);
+  //  Serial.print("stepsPerTr : "), Serial.println(*stepsPerTr);
+
   if(wireSize < LEAD_SCREW_PITCH) return true;
   else return false;
 }
 
+
+/******************************************************************************
+ * brief   : Smooth displacement.
+ * details : Divide steps to simulate a linear displacement.
+ * Example  :
+ * Coil need 3200 steps for one turn
+ * Carriage need 1000 steps for one turn of coil
+ * in theories we simply divide 3200/1000 = 3,2 and make one step all 3,2
+ * step of coil.
+ * But steps can only be an integer due to the interrupt. Also interrupt impose do
+ * not calculate during the routine.
+ ******************************************************************************/
+bool Coil::computeCarrDistributionSteps(bool isCoilFaster, uint16_t coilStepPerPass, uint16_t charrStepPerPass,
+					uint16_t *stepInterval, uint16_t *stepRest, uint16_t *nbAddStep)
+{
+  uint16_t toBeDistrib = 0; // Number of steps need to be distributed
+  uint16_t stepX = 0;
+  uint16_t stepY = 0;
+  bool isSup = 0;
+
+  //  Serial.println(" ");
+  //  Serial.println("******** step distribution *********");
+  //  Serial.print("coilStepPerPass : "), Serial.println(coilStepPerPass);
+  //  Serial.print("charrStepPerPass : "), Serial.println(charrStepPerPass);
+
+  if(isCoilFaster)
+    {
+      stepX = coilStepPerPass;
+      stepY = charrStepPerPass;
+    }
+  else
+    {
+      stepX = charrStepPerPass;
+      stepY = coilStepPerPass;
+    }
+
+  toBeDistrib = stepX - stepY;
+
+  if(toBeDistrib >= stepY)
+    {
+      *stepRest = toBeDistrib % stepY;
+      *stepInterval= (toBeDistrib - *stepRest) / (stepY - 1);
+      *nbAddStep = 0;
+      isSup = true;
+    }
+  else
+    {
+      *stepRest = stepY % toBeDistrib;
+      *stepInterval= (stepY - *stepRest) / (toBeDistrib - 1);
+
+      uint16_t multi = toBeDistrib - *stepRest;
+      *nbAddStep = multi * (*stepInterval);
+      isSup = false;
+    }
+
+  return isSup;
+}
 
 
 
@@ -228,8 +292,12 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
   bool run = true;
   // For computing
   bool isCoilFastest = 0;
-  uint16_t nbPass = 0;
-  uint16_t steps = 0;
+  bool isSuperior = 0;
+  uint16_t carr_nbPass = 0;
+  uint16_t carr_StpForOnePass = 0;
+  uint16_t intervalSteps = 0;
+  uint16_t restOfSteps = 0;
+  uint16_t addSteps = 0;
   // For active setting : speed and display
   bool refresh = false;
   int8_t old_speedPercent = _speedPercent;
@@ -239,17 +307,24 @@ bool Coil::winding(bool isNewCoil, float *homingPosition)
 
   // Set start speed with minimal speed
   _speed = _minSpeed;
+
   // Compute steps by turns for one layer
-  isCoilFastest = computeWinding(_coilLength, _wireSize, &nbPass, &steps);
+  isCoilFastest = computeWinding(_coilLength, _wireSize, &carr_nbPass, &carr_StpForOnePass);
+
+  // Compute for smooth displacement.
+  isSuperior = computeCarrDistributionSteps(isCoilFastest, STEPS_PER_TR, carr_StpForOnePass, &intervalSteps, &restOfSteps, &addSteps);
+
   // Set all target values
-  M_setWindingDisplacement(nbPass, steps, _coilTurns, STEPS_PER_TR, isCoilFastest);
+  M_setWindingDisplacement(carr_nbPass, carr_StpForOnePass, _coilTurns, STEPS_PER_TR, isCoilFastest);
   // Set start counter values
   if(isNewCoil)
     {
+      M_setWindingCounter(true, isSuperior, intervalSteps, restOfSteps, addSteps);
       M_setState(false, 0, 0, 0, 0);
     }
   else
     {
+      M_setWindingCounter(false, isSuperior, intervalSteps, restOfSteps, addSteps);
       M_setState(true, _saveCarrPass, _saveCarrStepPerPass, _saveCoilTr, _saveCoilStepPerTr);
       _windingSense       = _saveCoilDir;
       _carriageStartSense = _saveCarrDir;
@@ -319,11 +394,11 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
   // For homing if displacement is negative we need to pass it in positive.
   if(distance<0 ){ distance *=-1; }
 
-  Serial.print(" ");
-  Serial.println("********************");
-  Serial.print("dir : "), Serial.println(dir);
-  Serial.print("distance : "), Serial.println(distance);
-  Serial.print("relative position 1 : "), Serial.println(*homingPosition);
+  //  Serial.print(" ");
+  //  Serial.println("********************");
+  //  Serial.print("dir : "), Serial.println(dir);
+  //  Serial.print("distance : "), Serial.println(distance);
+  //  Serial.print("relative position 1 : "), Serial.println(*homingPosition);
 
   computeTravel(distance, &nbPass, &steps);
   M_setSimpleDisplacement(TRAVELING, nbPass, steps);
@@ -352,7 +427,7 @@ void Coil::runOnlyCarriage(bool dir, float distance, float *homingPosition)
 
   *homingPosition = getRelativeHome(*homingPosition, dir);
 
-  Serial.print("relative position 2 : "), Serial.println(*homingPosition);
+  //Serial.print("relative position 2 : "), Serial.println(*homingPosition);
 }
 
 
