@@ -117,6 +117,7 @@ private:
   void setWinding(bool isfirstLunch);
   void adjustSpeed();
   void set_AB_SuspendMenu();
+  void RAZ_editValue();
 };
 
 #endif /* SRC_MENUSETTINGS_H_ */

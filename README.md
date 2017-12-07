@@ -1,18 +1,21 @@
 # CoilWinder
 
-## Version : 0.1
+## Version : 1
 
 ### Abstract :
- 
-A Reprap coil winder machine based on *Arduino*.
-The format of this machine can be easily adapted and upgraded for any coil.
+
+An evolutive coil winder machine based on *Arduino*.
+The format of this machine can easily be adapted and upgraded for any coils.
 
 ---
 
 ### State of development :
 
   * Hardware -> v0.4 : functional
-  * Software -> v0.20 : menu implement, winding function is present but not used.
+  * Software -> v1.0 : ok for coils production. Homing not working properly.
 
 Software is write with the help of *platformIO* and *Eclipse*.
 If you want to compile with *Arduino IDE* you need to create _*.ino_ file and add librairies in your path.
+
+
+![alttext](https://github.com/jonathan-iap/CoilWinder/blob/master/img/presentation_v0.4 "carriage v0.4")

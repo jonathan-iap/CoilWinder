@@ -25,6 +25,7 @@ const void Display::begin()
   _lcd.createChar(ICONSTOP[0], stop);
   _lcd.createChar(ICONRESUME[0], resume);
   _lcd.createChar(ICONBACK[0], back);
+  _lcd.createChar(ICONRAZ[0], RAZ);
 
 
   // Quick 3 blinks of back-light

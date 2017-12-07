@@ -610,6 +610,13 @@ bool Setting::selectedAction(uint8_t wordSize)
 	  return EXIT;
 	  break;
 	}
+	// RAZ _________________________________________________________________
+	case ICONRAZ[0] :
+	{
+	  RAZ_editValue();
+	  return CONTINU;
+	  break;
+	}
       }
     }
   return 0;
@@ -885,4 +892,24 @@ void Setting::set_AB_SuspendMenu()
 
   setActionBar(0, 0, ACTIONBAR_SUSPEND, SIZE_AB_SUSPEND, LCD_LINES); // Displaying on the bottom
   _Display->engineSuspend(_actionBar, _positionAB, Turns, _Coil->getCurrentTurns());
+}
+
+
+/******************************************************************************
+ * brief   : reset the editing value
+ * details : set value to 0000 or 0.00 etc...
+ ******************************************************************************/
+void Setting::RAZ_editValue()
+{
+  int8_t i = 0;
+
+  while(isNumber(_actionBar, i) || _actionBar[i] == '.')
+    {
+      if(_actionBar[i] != '.')
+	{
+	  _actionBar[i] = '0';
+	  i++;
+	}
+      else i++;
+    }
 }

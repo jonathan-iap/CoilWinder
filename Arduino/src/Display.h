@@ -26,7 +26,7 @@
 #define ICONSTOP    "\x04"
 #define ICONRESUME  "\x05"
 #define ICONBACK    "\x06"
-
+#define ICONRAZ     "\x07"
 /* Units ______________________________________________________________*/
 #define UNIT_MM   "mm"
 #define UNIT_TR   "Tr"
@@ -89,12 +89,10 @@
 /* Actions bar ________________________________________________________*/
 #define ACTIONBAR_SETHOME        KEYWORD_MOVE "/" KEYWORD_SET "|" KEYWORD_EXIT
 #define SIZE_AB_SETHOME          COUNTOF(ACTIONBAR_SETHOME)
-#define ACTIONBAR_SETVALUE       KEYWORD_SAVE "/" ICONRIGHT
+#define ACTIONBAR_SETVALUE       ICONRAZ "/" KEYWORD_SAVE "/" ICONRIGHT
 #define SIZE_AB_SETVALUE         COUNTOF(ACTIONBAR_SETVALUE)
 #define ACTIONBAR_CHOICE         KEYWORD_YES "/" KEYWORD_NO
 #define SIZE_AB_CHOICE           COUNTOF(ACTIONBAR_CHOICE)
-#define ACTIONBAR_CHOICE_SIMPLE  "Y/N"
-#define SIZE_AB_CHOICE_SIMPLE    COUNTOF(ACTIONBAR_CHOICE_SIMPLE)
 #define ACTIONBAR_SENSE_SAVE     ICONLEFT "/" ICONRIGHT "|" KEYWORD_SAVE "/" KEYWORD_EXIT
 #define SIZE_AB_SENSE_SAVE       COUNTOF(ACTIONBAR_SENSE_SAVE)
 #define ACTIONBAR_MOVE           ICONLEFT "/" ICONRIGHT "|" KEYWORD_EXIT
@@ -176,6 +174,17 @@ public :
       0b11111,
       0b01100,
       0b00100
+  };
+
+  byte RAZ[8] = {
+      0b01110,
+      0b01110,
+      0b11111,
+      0b01110,
+      0b00100,
+      0b00000,
+      0b10101,
+      0b00000
   };
 
   // Public functions -----------------------------------------------------------
