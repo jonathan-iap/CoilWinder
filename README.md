@@ -18,4 +18,4 @@ Software is write with the help of *platformIO* and *Eclipse*.
 If you want to compile with *Arduino IDE* you need to create _*.ino_ file and add librairies in your path.
 
 
-![alttext](https://github.com/jonathan-iap/CoilWinder/blob/master/img/presentation_v0.4 "carriage v0.4")
+![alt           text](https://github.com/jonathan-iap/CoilWinder/blob/master/img/presentation_v0.4.png "carriage v0.4")
